@@ -1,0 +1,104 @@
+############################
+# .NET / C# (api/)
+############################
+
+# Build artifacts
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+*.tmp
+*.bak
+*.swp
+*.lock
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# EF Core / Database
+Migrations/
+*.db
+*.sqlite
+StoryDatabase.db
+StoryDbContext.db
+__EFMigrationsHistory*
+*.db-wal
+*.db-shm
+*.db-journal
+
+# Logs
+/logs/
+/APILogs/
+*.log
+
+# App settings
+appsettings.Development.json
+appsettings.Production.json
+secrets.json
+# keep base config
+!appsettings.json
+
+# Publish outputs
+/api/net*/ 
+/api/Debug/
+/api/Release/
+/api/publish/
+/api/wwwroot/lib/
+
+############################
+# React / Frontend (jamreact/)
+############################
+
+# Node dependencies
+jamreact/node_modules/
+jamreact/.pnp/
+jamreact/.pnp.js
+
+# Build outputs
+jamreact/build/
+jamreact/dist/
+
+# Local environment files
+jamreact/.env
+jamreact/.env.local
+jamreact/.env.development.local
+jamreact/.env.test.local
+jamreact/.env.production.local
+
+# Logs
+jamreact/npm-debug.log*
+jamreact/yarn-debug.log*
+jamreact/yarn-error.log*
+jamreact/pnpm-debug.log*
+
+# Editor files
+jamreact/.vscode/
+jamreact/.idea/
+
+# Misc
+jamreact/coverage/
+jamreact/.DS_Store
+
+############################
+# OS / General
+############################
+
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+############################
+# Optional: VS Code settings
+############################
+
+.vscode/
+*.code-workspace

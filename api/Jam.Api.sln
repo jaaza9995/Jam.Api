@@ -1,0 +1,36 @@
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jam.Api", "Jam.Api.csproj", "{A23BAED8-BC05-4A67-80A7-B6E6A842C449}"
+EndProject
+Global
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C77241C2-4896-4148-8601-11EEC1CDCE87}
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A23BAED8-BC05-4A67-80A7-B6E6A842C449}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A23BAED8-BC05-4A67-80A7-B6E6A842C449}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A23BAED8-BC05-4A67-80A7-B6E6A842C449}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A23BAED8-BC05-4A67-80A7-B6E6A842C449}.Debug|x64.Build.0 = Debug|Any CPU
+		{A23BAED8-BC05-4A67-80A7-B6E6A842C449}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A23BAED8-BC05-4A67-80A7-B6E6A842C449}.Debug|x86.Build.0 = Debug|Any CPU
+		{A23BAED8-BC05-4A67-80A7-B6E6A842C449}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A23BAED8-BC05-4A67-80A7-B6E6A842C449}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A23BAED8-BC05-4A67-80A7-B6E6A842C449}.Release|x64.ActiveCfg = Release|Any CPU
+		{A23BAED8-BC05-4A67-80A7-B6E6A842C449}.Release|x64.Build.0 = Release|Any CPU
+		{A23BAED8-BC05-4A67-80A7-B6E6A842C449}.Release|x86.ActiveCfg = Release|Any CPU
+		{A23BAED8-BC05-4A67-80A7-B6E6A842C449}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

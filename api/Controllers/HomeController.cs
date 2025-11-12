@@ -1,0 +1,84 @@
+using Jam.DAL.StoryDAL;
+using Jam.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Jam.Api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class HomeController : ControllerBase
+{
+    private readonly IStoryRepository _storyRepository;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly ILogger<HomeController> _logger;
+
+    public HomeController(
+        IStoryRepository storyRepository,
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager,
+        ILogger<HomeController> logger
+    )
+    {
+        _storyRepository = storyRepository;
+        _userManager = userManager;
+        _signInManager = signInManager;
+        _logger = logger;
+    }
+
+    // GET: api/home/dashboard
+    [HttpGet("dashboard")]
+    public async Task<IActionResult> GetDashboard()
+    {
+        try
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                _logger.LogWarning("Invalid or expired authentication token.");
+                await _signInManager.SignOutAsync();
+                return Unauthorized(new { message = "User session expired. Please log in again." });
+            }
+
+            var userStories = await _storyRepository.GetStoriesByUserId(user.Id);
+            var recentlyPlayed = await _storyRepository.GetMostRecentPlayedStories(user.Id, 5);
+
+            var questionCounts = new Dictionary<int, int>();
+            foreach (var s in userStories.Concat(recentlyPlayed))
+            {
+                questionCounts[s.StoryId] = await _storyRepository.GetAmountOfQuestionsForStory(s.StoryId) ?? 0;
+            }
+
+            // Returner kun rene data (ingen ViewModels)
+            return Ok(new
+            {
+                FirstName = user.Firstname,
+                YourStories = userStories.Select(s => new
+                {
+                    s.StoryId,
+                    s.Title,
+                    s.Description,
+                    s.DifficultyLevel,
+                    s.Accessible
+                }),
+                RecentlyPlayed = recentlyPlayed.Select(s => new
+                {
+                    s.StoryId,
+                    s.Title,
+                    s.Description,
+                    s.DifficultyLevel,
+                    s.Accessible
+                }),
+                QuestionCounts = questionCounts
+            });
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error while loading dashboard");
+            return StatusCode(500, new { message = "Unexpected error while loading dashboard" });
+        }
+    }
+}
