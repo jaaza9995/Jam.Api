@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --open",
+    "start-frontend": "vite --open",
+    "start-backend": "dotnet run --project ../api/JamApi/JamApi.csproj",
+    "dev": "concurrently \"npm run start-backend\" \"npm run start-frontend\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
