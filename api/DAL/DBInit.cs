@@ -9,18 +9,26 @@ public static class DBInit
 {
     public static async Task SeedAsync(IApplicationBuilder app)
     {
-        using var scope = app.ApplicationServices.CreateAsyncScope();
-        var context = scope.ServiceProvider.GetRequiredService<StoryDbContext>();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
+
+
+        using var scope = app.ApplicationServices.CreateAsyncScope();
+
+        var storyContext = scope.ServiceProvider.GetRequiredService<StoryDbContext>();
+        var authContext = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AuthUser>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        
         //await context.Database.EnsureCreatedAsync();
 
         // For development only
         //await context.Database.EnsureDeletedAsync();
 
-        await context.Database.MigrateAsync();
-        if (!context.Database.CanConnect())
+        await authContext.Database.MigrateAsync();   // Identity tables
+        await storyContext.Database.MigrateAsync();  // Story tables
+
+        if (!storyContext.Database.CanConnect() || !authContext.Database.CanConnect())
         {
             Console.WriteLine("⚠️ Database not ready yet!");
             return;
@@ -37,33 +45,33 @@ public static class DBInit
         // Seed users (normal and admin)
         if (!userManager.Users.Any())
         {
-            var users = new List<ApplicationUser>
+            var users = new List<AuthUser>
             {
                 new() {
-                    Firstname = "Barry",
-                    Lastname = "Allen",
+                    /*Firstname = "Barry",
+                    Lastname = "Allen", */
                     UserName = "TheFlash",
                     Email = "flash@example.com",
                     EmailConfirmed = true
                 },
                 new() {
-                    Firstname = "Emily",
-                    Lastname = "Smith",
+                    /*Firstname = "Emily",
+                    Lastname = "Smith",*/
                     UserName = "Smithy",
                     Email = "emily_smith@gmail.com",
                     EmailConfirmed = true
                 },
                 new() {
-                    Firstname = "Bob",
-                    Lastname = "Luthor",
+                    /*Firstname = "Bob",
+                    Lastname = "Luthor",*/
                     UserName = "LexLuthor",
                     Email = "bob@gmail.com",
                     EmailConfirmed = true
                 },
                 new()
                 {
-                    Firstname = "Admin",
-                    Lastname = "User",
+                    /*Firstname = "Admin",
+                    Lastname = "User",*/
                     UserName = "AdminUser",
                     Email = "admin@jamapp.com",
                     EmailConfirmed = true
@@ -102,7 +110,7 @@ public static class DBInit
         }
 
         // Seed stories, different scenes, answer options, and playing sessions
-        if (!context.Stories.Any())
+        if (!storyContext.Stories.Any())
         {
             var barry = await userManager.FindByEmailAsync("flash@example.com");
             var emily = await userManager.FindByEmailAsync("emily_smith@gmail.com");
@@ -148,7 +156,7 @@ public static class DBInit
                     User = bob,
                 },
             };
-            context.Stories.AddRange(stories);
+            storyContext.Stories.AddRange(stories);
 
             var intro = new IntroScene
             {
@@ -331,11 +339,11 @@ public static class DBInit
                 Story = stories[0]
             };
 
-            context.IntroScenes.Add(intro);
-            context.QuestionScenes.AddRange(questionScene1, questionScene2, questionScene3, questionScene4);
-            context.EndingScenes.AddRange(goodEnding, neutralEnding, badEnding);
-            context.AnswerOptions.AddRange(answerOptions1.Concat(answerOptions2).Concat(answerOptions3).Concat(answerOptions4));
-            await context.SaveChangesAsync();
+            storyContext.IntroScenes.Add(intro);
+            storyContext.QuestionScenes.AddRange(questionScene1, questionScene2, questionScene3, questionScene4);
+            storyContext.EndingScenes.AddRange(goodEnding, neutralEnding, badEnding);
+            storyContext.AnswerOptions.AddRange(answerOptions1.Concat(answerOptions2).Concat(answerOptions3).Concat(answerOptions4));
+            await storyContext.SaveChangesAsync();
 
             var theFlashPlayingSession = new PlayingSession
             {
@@ -362,8 +370,8 @@ public static class DBInit
                 User = emily,
             };
 
-            context.PlayingSessions.AddRange(theFlashPlayingSession, smithyPlayingSession);
-            await context.SaveChangesAsync();
+            storyContext.PlayingSessions.AddRange(theFlashPlayingSession, smithyPlayingSession);
+            await storyContext.SaveChangesAsync();
         }
     }
 }

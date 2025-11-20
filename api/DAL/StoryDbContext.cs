@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Jam.DAL;
 
-public class StoryDbContext : IdentityDbContext<ApplicationUser>
+public class StoryDbContext : IdentityDbContext<AuthUser>
 {
     public StoryDbContext(DbContextOptions<StoryDbContext> options) : base(options)
     {

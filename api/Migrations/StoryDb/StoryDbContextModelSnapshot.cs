@@ -3,19 +3,16 @@ using System;
 using Jam.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Jam.Api.Migrations
+namespace Jam.Api.Migrations.StoryDb
 {
     [DbContext(typeof(StoryDbContext))]
-    [Migration("20251112122203_InitialCreate")]
-    partial class InitialCreate
+    partial class StoryDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
@@ -47,7 +44,7 @@ namespace Jam.Api.Migrations
                     b.ToTable("AnswerOptions");
                 });
 
-            modelBuilder.Entity("Jam.Models.ApplicationUser", b =>
+            modelBuilder.Entity("Jam.Models.AuthUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
@@ -65,16 +62,6 @@ namespace Jam.Api.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Firstname")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Lastname")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("INTEGER");
@@ -451,7 +438,7 @@ namespace Jam.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Jam.Models.ApplicationUser", "User")
+                    b.HasOne("Jam.Models.AuthUser", "User")
                         .WithMany("PlayingSessions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -481,7 +468,7 @@ namespace Jam.Api.Migrations
 
             modelBuilder.Entity("Jam.Models.Story", b =>
                 {
-                    b.HasOne("Jam.Models.ApplicationUser", "User")
+                    b.HasOne("Jam.Models.AuthUser", "User")
                         .WithMany("Stories")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -500,7 +487,7 @@ namespace Jam.Api.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Jam.Models.ApplicationUser", null)
+                    b.HasOne("Jam.Models.AuthUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -509,7 +496,7 @@ namespace Jam.Api.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Jam.Models.ApplicationUser", null)
+                    b.HasOne("Jam.Models.AuthUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -524,7 +511,7 @@ namespace Jam.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Jam.Models.ApplicationUser", null)
+                    b.HasOne("Jam.Models.AuthUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -533,14 +520,14 @@ namespace Jam.Api.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Jam.Models.ApplicationUser", null)
+                    b.HasOne("Jam.Models.AuthUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Jam.Models.ApplicationUser", b =>
+            modelBuilder.Entity("Jam.Models.AuthUser", b =>
                 {
                     b.Navigation("PlayingSessions");
 

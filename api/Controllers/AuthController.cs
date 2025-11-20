@@ -15,14 +15,14 @@ namespace Jam.Api.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<AuthUser> _userManager;
+        private readonly SignInManager<AuthUser> _signInManager;
         private readonly IConfiguration _config;
         private readonly ILogger<AuthController> _logger;
 
         public AuthController(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
+            UserManager<AuthUser> userManager,
+            SignInManager<AuthUser> signInManager,
             IConfiguration config,
             ILogger<AuthController> logger)
         {
@@ -33,10 +33,11 @@ namespace Jam.Api.Controllers
         }
 
         // ---------------- REGISTER ----------------
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
-            var user = new ApplicationUser
+            var user = new AuthUser
             {
                 UserName = registerDto.Username,
                 Email = registerDto.Email,
@@ -55,6 +56,7 @@ namespace Jam.Api.Controllers
         }
 
         // ---------------- LOGIN ----------------
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
@@ -72,7 +74,6 @@ namespace Jam.Api.Controllers
         }
 
         // ---------------- LOGOUT ----------------
-        [Authorize]
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
@@ -82,8 +83,8 @@ namespace Jam.Api.Controllers
         }
 
         // ---------------- JWT GENERATION ----------------
-
-        private string GenerateJwtToken(ApplicationUser user)
+        [AllowAnonymous]
+        private string GenerateJwtToken(AuthUser user)
         {
             var jwtKey = _config["Jwt:Key"]; // The secret key used for the signature
             if (string.IsNullOrEmpty(jwtKey)) // Ensure the key is not null or empty

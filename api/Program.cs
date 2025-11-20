@@ -5,7 +5,7 @@ using Jam.Models;
 using Microsoft.AspNetCore.Identity;
 using Jam.DAL;
 using Jam.DAL.AnswerOptionDAL;
-using Jam.DAL.ApplicationUserDAL;
+//using Jam.DAL.ApplicationUserDAL;
 using Jam.DAL.PlayingSessionDAL;
 using Jam.DAL.SceneDAL;
 using Jam.DAL.StoryDAL;
@@ -22,11 +22,20 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 
 var connectionString = builder.Configuration.GetConnectionString("StoryDbContextConnection") ?? throw new InvalidOperationException("Connection string 'StoryDbContextConnection' not found.");
 
-builder.Services.AddControllers().AddNewtonsoftJson(options =>
+builder.Services.AddControllers(config =>
+{
+    // Made a global policy that requires authentication for everything
+    // This can be overridden with [AllowAnonymous] on individual controllers or actions
+    var policy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+                     .RequireAuthenticatedUser()
+                     .Build();
+    config.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter(policy));
+})
+.AddNewtonsoftJson(options =>
 {
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-    // options.SerializerSettings.ContractResolver = new DefaultContractResolver();
 });
+
 
 builder.Services.AddEndpointsApiExplorer();
 // for debugging:
@@ -58,15 +67,13 @@ builder.Services.AddDbContext<StoryDbContext>(options =>
 
 builder.Services.AddDbContext<AuthDbContext>(options =>
 {
-    options.UseSqlite(builder.Configuration["ConnectionStrings:AuthDbContextConnection"]);
+    options.UseSqlite(
+        builder.Configuration["ConnectionStrings:AuthDbContextConnection"]);
 });
 
 builder.Services.AddIdentity<AuthUser, IdentityRole>()
     .AddEntityFrameworkStores<AuthDbContext>()
     .AddDefaultTokenProviders();
-
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<StoryDbContext>();
 
 builder.Services.AddCors(options =>
     {
@@ -80,12 +87,18 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddScoped<IAnswerOptionRepository, AnswerOptionRepository>();
-builder.Services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
+builder.Services.AddScoped<UserService>();
+//builder.Services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
 builder.Services.AddScoped<IPlayingSessionRepository, PlayingSessionRepository>();
 builder.Services.AddScoped<ISceneRepository, SceneRepository>();
 builder.Services.AddScoped<IStoryRepository, StoryRepository>();
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    // Policy for admin
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+});
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
