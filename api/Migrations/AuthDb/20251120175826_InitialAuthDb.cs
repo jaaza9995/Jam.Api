@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Jam.Api.Migrations
+namespace Jam.Api.Migrations.AuthDb
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialAuthDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,8 +30,6 @@ namespace Jam.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "TEXT", nullable: false),
-                    Firstname = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    Lastname = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
@@ -159,7 +157,7 @@ namespace Jam.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Stories",
+                name: "Story",
                 columns: table => new
                 {
                     StoryId = table.Column<int>(type: "INTEGER", nullable: false)
@@ -177,17 +175,16 @@ namespace Jam.Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Stories", x => x.StoryId);
+                    table.PrimaryKey("PK_Story", x => x.StoryId);
                     table.ForeignKey(
-                        name: "FK_Stories_AspNetUsers_UserId",
+                        name: "FK_Story_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "EndingScenes",
+                name: "EndingScene",
                 columns: table => new
                 {
                     EndingSceneId = table.Column<int>(type: "INTEGER", nullable: false)
@@ -198,17 +195,17 @@ namespace Jam.Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EndingScenes", x => x.EndingSceneId);
+                    table.PrimaryKey("PK_EndingScene", x => x.EndingSceneId);
                     table.ForeignKey(
-                        name: "FK_EndingScenes_Stories_StoryId",
+                        name: "FK_EndingScene_Story_StoryId",
                         column: x => x.StoryId,
-                        principalTable: "Stories",
+                        principalTable: "Story",
                         principalColumn: "StoryId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "IntroScenes",
+                name: "IntroScene",
                 columns: table => new
                 {
                     IntroSceneId = table.Column<int>(type: "INTEGER", nullable: false)
@@ -218,17 +215,17 @@ namespace Jam.Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_IntroScenes", x => x.IntroSceneId);
+                    table.PrimaryKey("PK_IntroScene", x => x.IntroSceneId);
                     table.ForeignKey(
-                        name: "FK_IntroScenes_Stories_StoryId",
+                        name: "FK_IntroScene_Story_StoryId",
                         column: x => x.StoryId,
-                        principalTable: "Stories",
+                        principalTable: "Story",
                         principalColumn: "StoryId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlayingSessions",
+                name: "PlayingSession",
                 columns: table => new
                 {
                     PlayingSessionId = table.Column<int>(type: "INTEGER", nullable: false)
@@ -245,23 +242,22 @@ namespace Jam.Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlayingSessions", x => x.PlayingSessionId);
+                    table.PrimaryKey("PK_PlayingSession", x => x.PlayingSessionId);
                     table.ForeignKey(
-                        name: "FK_PlayingSessions_AspNetUsers_UserId",
+                        name: "FK_PlayingSession_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_PlayingSessions_Stories_StoryId",
+                        name: "FK_PlayingSession_Story_StoryId",
                         column: x => x.StoryId,
-                        principalTable: "Stories",
+                        principalTable: "Story",
                         principalColumn: "StoryId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "QuestionScenes",
+                name: "QuestionScene",
                 columns: table => new
                 {
                     QuestionSceneId = table.Column<int>(type: "INTEGER", nullable: false)
@@ -273,23 +269,22 @@ namespace Jam.Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_QuestionScenes", x => x.QuestionSceneId);
+                    table.PrimaryKey("PK_QuestionScene", x => x.QuestionSceneId);
                     table.ForeignKey(
-                        name: "FK_QuestionScenes_QuestionScenes_NextQuestionSceneId",
+                        name: "FK_QuestionScene_QuestionScene_NextQuestionSceneId",
                         column: x => x.NextQuestionSceneId,
-                        principalTable: "QuestionScenes",
-                        principalColumn: "QuestionSceneId",
-                        onDelete: ReferentialAction.SetNull);
+                        principalTable: "QuestionScene",
+                        principalColumn: "QuestionSceneId");
                     table.ForeignKey(
-                        name: "FK_QuestionScenes_Stories_StoryId",
+                        name: "FK_QuestionScene_Story_StoryId",
                         column: x => x.StoryId,
-                        principalTable: "Stories",
+                        principalTable: "Story",
                         principalColumn: "StoryId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AnswerOptions",
+                name: "AnswerOption",
                 columns: table => new
                 {
                     AnswerOptionId = table.Column<int>(type: "INTEGER", nullable: false)
@@ -301,18 +296,18 @@ namespace Jam.Api.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AnswerOptions", x => x.AnswerOptionId);
+                    table.PrimaryKey("PK_AnswerOption", x => x.AnswerOptionId);
                     table.ForeignKey(
-                        name: "FK_AnswerOptions_QuestionScenes_QuestionSceneId",
+                        name: "FK_AnswerOption_QuestionScene_QuestionSceneId",
                         column: x => x.QuestionSceneId,
-                        principalTable: "QuestionScenes",
+                        principalTable: "QuestionScene",
                         principalColumn: "QuestionSceneId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AnswerOptions_QuestionSceneId",
-                table: "AnswerOptions",
+                name: "IX_AnswerOption_QuestionSceneId",
+                table: "AnswerOption",
                 column: "QuestionSceneId");
 
             migrationBuilder.CreateIndex(
@@ -353,40 +348,39 @@ namespace Jam.Api.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_EndingScenes_StoryId",
-                table: "EndingScenes",
+                name: "IX_EndingScene_StoryId",
+                table: "EndingScene",
                 column: "StoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_IntroScenes_StoryId",
-                table: "IntroScenes",
+                name: "IX_IntroScene_StoryId",
+                table: "IntroScene",
                 column: "StoryId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlayingSessions_StoryId",
-                table: "PlayingSessions",
+                name: "IX_PlayingSession_StoryId",
+                table: "PlayingSession",
                 column: "StoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlayingSessions_UserId",
-                table: "PlayingSessions",
+                name: "IX_PlayingSession_UserId",
+                table: "PlayingSession",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_QuestionScenes_NextQuestionSceneId",
-                table: "QuestionScenes",
-                column: "NextQuestionSceneId",
-                unique: true);
+                name: "IX_QuestionScene_NextQuestionSceneId",
+                table: "QuestionScene",
+                column: "NextQuestionSceneId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_QuestionScenes_StoryId",
-                table: "QuestionScenes",
+                name: "IX_QuestionScene_StoryId",
+                table: "QuestionScene",
                 column: "StoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Stories_UserId",
-                table: "Stories",
+                name: "IX_Story_UserId",
+                table: "Story",
                 column: "UserId");
         }
 
@@ -394,7 +388,7 @@ namespace Jam.Api.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AnswerOptions");
+                name: "AnswerOption");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
@@ -412,22 +406,22 @@ namespace Jam.Api.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "EndingScenes");
+                name: "EndingScene");
 
             migrationBuilder.DropTable(
-                name: "IntroScenes");
+                name: "IntroScene");
 
             migrationBuilder.DropTable(
-                name: "PlayingSessions");
+                name: "PlayingSession");
 
             migrationBuilder.DropTable(
-                name: "QuestionScenes");
+                name: "QuestionScene");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Stories");
+                name: "Story");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

@@ -13,18 +13,17 @@ namespace Jam.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class HomeController : ControllerBase
 {
     private readonly IStoryRepository _storyRepository;
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly UserManager<AuthUser> _userManager;
+    private readonly SignInManager<AuthUser> _signInManager;
     private readonly ILogger<HomeController> _logger;
 
     public HomeController(
         IStoryRepository storyRepository,
-        UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager,
+        UserManager<AuthUser> userManager,
+        SignInManager<AuthUser> signInManager,
         ILogger<HomeController> logger
     )
     {
@@ -60,7 +59,7 @@ public class HomeController : ControllerBase
             // Returner kun rene data (ingen ViewModels)
             return Ok(new
             {
-                FirstName = user.Firstname,
+                FirstName = user.UserName,
                 YourStories = userStories.Select(s => new
                 {
                     s.StoryId,

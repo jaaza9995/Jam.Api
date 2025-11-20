@@ -14,7 +14,6 @@ namespace Jam.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class StoryEditingController : ControllerBase
 {
     private readonly IStoryRepository _storyRepository;

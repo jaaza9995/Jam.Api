@@ -14,20 +14,19 @@ namespace Jam.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class StoryCreationController : ControllerBase
 {
     private readonly IStoryRepository _storyRepository;
     private readonly ISceneRepository _sceneRepository;
     private readonly IAnswerOptionRepository _answerOptionRepository;
-    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly UserManager<AuthUser> _userManager;
     private readonly ILogger<StoryCreationController> _logger;
 
     public StoryCreationController(
         IStoryRepository storyRepository,
         ISceneRepository sceneRepository,
         IAnswerOptionRepository answerOptionRepository,
-        UserManager<ApplicationUser> userManager,
+        UserManager<AuthUser> userManager,
         ILogger<StoryCreationController> logger)
     {
         _storyRepository = storyRepository;

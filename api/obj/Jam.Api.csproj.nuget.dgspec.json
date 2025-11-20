@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/Users/jaraazad/Desktop/Jam.Api/api/Jam.Api.csproj": {}
+    "/Users/siggy/Desktop/skole/Webapplikasjoner/Jam-react-versjon/Jam.Api/api/Jam.Api.csproj": {}
   },
   "projects": {
-    "/Users/jaraazad/Desktop/Jam.Api/api/Jam.Api.csproj": {
+    "/Users/siggy/Desktop/skole/Webapplikasjoner/Jam-react-versjon/Jam.Api/api/Jam.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/jaraazad/Desktop/Jam.Api/api/Jam.Api.csproj",
+        "projectUniqueName": "/Users/siggy/Desktop/skole/Webapplikasjoner/Jam-react-versjon/Jam.Api/api/Jam.Api.csproj",
         "projectName": "Jam.Api",
-        "projectPath": "/Users/jaraazad/Desktop/Jam.Api/api/Jam.Api.csproj",
-        "packagesPath": "/Users/jaraazad/.nuget/packages/",
-        "outputPath": "/Users/jaraazad/Desktop/Jam.Api/api/obj/",
+        "projectPath": "/Users/siggy/Desktop/skole/Webapplikasjoner/Jam-react-versjon/Jam.Api/api/Jam.Api.csproj",
+        "packagesPath": "/Users/siggy/.nuget/packages/",
+        "outputPath": "/Users/siggy/Desktop/skole/Webapplikasjoner/Jam-react-versjon/Jam.Api/api/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/jaraazad/.nuget/NuGet/NuGet.Config"
+          "/Users/siggy/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
