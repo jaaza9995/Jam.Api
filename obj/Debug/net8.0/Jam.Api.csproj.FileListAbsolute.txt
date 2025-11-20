@@ -1,0 +1,7 @@
+/Users/jaraazad/Desktop/Jam.Api/obj/Debug/net8.0/Jam.Api.csproj.AssemblyReference.cache
+/Users/jaraazad/Desktop/Jam.Api/obj/Debug/net8.0/Jam.Api.GeneratedMSBuildEditorConfig.editorconfig
+/Users/jaraazad/Desktop/Jam.Api/obj/Debug/net8.0/Jam.Api.AssemblyInfoInputs.cache
+/Users/jaraazad/Desktop/Jam.Api/obj/Debug/net8.0/Jam.Api.AssemblyInfo.cs
+/Users/jaraazad/Desktop/Jam.Api/obj/Debug/net8.0/Jam.Api.csproj.CoreCompileInputs.cache
+/Users/jaraazad/Desktop/Jam.Api/obj/Debug/net8.0/Jam.Api.MvcApplicationPartsAssemblyInfo.cs
+/Users/jaraazad/Desktop/Jam.Api/obj/Debug/net8.0/Jam.Api.MvcApplicationPartsAssemblyInfo.cache

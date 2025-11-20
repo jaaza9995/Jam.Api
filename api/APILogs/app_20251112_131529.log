@@ -1,0 +1,7 @@
+2025-11-12 13:15:29.391 +01:00 [INF] User profile is available. Using '/Users/jaraazad/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-11-12 13:15:29.717 +01:00 [INF] No migrations were applied. The database is already up to date.
+2025-11-12 13:15:29.934 +01:00 [INF] Now listening on: http://localhost:5217
+2025-11-12 13:15:29.936 +01:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-11-12 13:15:29.936 +01:00 [INF] Hosting environment: Development
+2025-11-12 13:15:29.936 +01:00 [INF] Content root path: /Users/jaraazad/Desktop/Jam.Api/api
+2025-11-12 13:15:31.527 +01:00 [INF] Application is shutting down...

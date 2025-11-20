@@ -1,0 +1,4 @@
+2025-11-11 17:46:58.283 +01:00 [INF] Applying migration '20251111164650_InitialCreate'.
+2025-11-11 17:46:58.316 +01:00 [ERR] Failed executing DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20251111164650_InitialCreate', '8.0.8');

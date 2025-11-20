@@ -1,0 +1,16 @@
+2025-11-12 13:07:37.302 +01:00 [INF] User profile is available. Using '/Users/jaraazad/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-11-12 13:07:37.714 +01:00 [INF] Applying migration '20251111172624_InitialCreate'.
+2025-11-12 13:07:38.396 +01:00 [INF] Now listening on: http://localhost:5217
+2025-11-12 13:07:38.397 +01:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-11-12 13:07:38.397 +01:00 [INF] Hosting environment: Development
+2025-11-12 13:07:38.397 +01:00 [INF] Content root path: /Users/jaraazad/Desktop/Jam.Api/api
+2025-11-12 13:07:40.410 +01:00 [INF] Request starting HTTP/1.1 GET http://localhost:5217/ - null null
+2025-11-12 13:07:40.451 +01:00 [INF] Request finished HTTP/1.1 GET http://localhost:5217/ - 404 0 null 52.9287ms
+2025-11-12 13:07:40.453 +01:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5217/, Response status code: 404
+2025-11-12 13:09:33.057 +01:00 [INF] Request starting HTTP/1.1 GET http://localhost:5217/swagger/index.html - null null
+2025-11-12 13:09:33.120 +01:00 [INF] Request finished HTTP/1.1 GET http://localhost:5217/swagger/index.html - 200 null text/html;charset=utf-8 62.9709ms
+2025-11-12 13:09:33.511 +01:00 [INF] Request starting HTTP/1.1 GET http://localhost:5217/swagger/v1/swagger.json - null null
+2025-11-12 13:09:33.609 +01:00 [INF] Request finished HTTP/1.1 GET http://localhost:5217/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 97.4309ms
+2025-11-12 13:09:59.950 +01:00 [INF] Request starting HTTP/1.1 GET http://localhost:5217/ - null null
+2025-11-12 13:09:59.961 +01:00 [INF] Request finished HTTP/1.1 GET http://localhost:5217/ - 404 0 null 14.3601ms
+2025-11-12 13:09:59.961 +01:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5217/, Response status code: 404

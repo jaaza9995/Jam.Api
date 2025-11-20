@@ -1,0 +1,9 @@
+2025-11-12 13:00:12.360 +01:00 [INF] User profile is available. Using '/Users/jaraazad/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-11-12 13:00:12.860 +01:00 [INF] Applying migration '20251111172624_InitialCreate'.
+2025-11-12 13:00:13.637 +01:00 [INF] Now listening on: http://localhost:5217
+2025-11-12 13:00:13.638 +01:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-11-12 13:00:13.638 +01:00 [INF] Hosting environment: Development
+2025-11-12 13:00:13.638 +01:00 [INF] Content root path: /Users/jaraazad/Desktop/Jam.Api/api
+2025-11-12 13:01:28.830 +01:00 [INF] Request starting HTTP/1.1 GET http://localhost:5217/ - null null
+2025-11-12 13:01:28.883 +01:00 [INF] Request finished HTTP/1.1 GET http://localhost:5217/ - 404 0 null 55.485ms
+2025-11-12 13:01:28.886 +01:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5217/, Response status code: 404

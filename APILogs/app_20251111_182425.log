@@ -1,0 +1,5 @@
+2025-11-11 18:24:26.096 +01:00 [INF] User profile is available. Using '/Users/jaraazad/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-11-11 18:24:26.528 +01:00 [INF] Applying migration '20251111171808_InitialCreate'.
+2025-11-11 18:24:26.609 +01:00 [ERR] Failed executing DbCommand (3ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20251111171808_InitialCreate', '8.0.8');

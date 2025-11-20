@@ -1,0 +1,21 @@
+2025-11-13 12:58:53.013 +01:00 [INF] No migrations were applied. The database is already up to date.
+2025-11-13 12:58:53.269 +01:00 [INF] User profile is available. Using '/Users/jaraazad/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-11-13 12:58:53.317 +01:00 [INF] Now listening on: http://localhost:5000
+2025-11-13 12:58:53.321 +01:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-11-13 12:58:53.322 +01:00 [INF] Hosting environment: Development
+2025-11-13 12:58:53.323 +01:00 [INF] Content root path: /Users/jaraazad/Desktop/Jam.Api/api/bin/Debug/net8.0/
+2025-11-13 12:58:53.948 +01:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/index.html - null null
+2025-11-13 12:58:54.079 +01:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/index.html - 200 null text/html;charset=utf-8 131.2313ms
+2025-11-13 12:58:54.737 +01:00 [INF] Request starting HTTP/1.1 GET http://localhost:5000/swagger/v1/swagger.json - null null
+2025-11-13 12:58:54.916 +01:00 [INF] Request finished HTTP/1.1 GET http://localhost:5000/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 179.3298ms
+2025-11-13 12:59:53.235 +01:00 [INF] Request starting HTTP/1.1 OPTIONS http://localhost:5000/api/auth/login - null null
+2025-11-13 12:59:53.286 +01:00 [INF] CORS policy execution successful.
+2025-11-13 12:59:53.288 +01:00 [INF] Request finished HTTP/1.1 OPTIONS http://localhost:5000/api/auth/login - 204 null null 53.6318ms
+2025-11-13 12:59:53.340 +01:00 [INF] Request starting HTTP/1.1 POST http://localhost:5000/api/auth/login - application/json 49
+2025-11-13 12:59:53.342 +01:00 [INF] CORS policy execution successful.
+2025-11-13 12:59:53.398 +01:00 [INF] Executing endpoint 'Jam.Api.Controllers.AuthController.Login (Jam.Api)'
+2025-11-13 12:59:53.414 +01:00 [INF] Route matched with {action = "Login", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] Login(Jam.DTOs.LoginDto) on controller Jam.Api.Controllers.AuthController (Jam.Api).
+2025-11-13 12:59:53.583 +01:00 [INF] Executing OkObjectResult, writing value of type '<>f__AnonymousType3`4[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Threading.Tasks.Task`1[[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]], System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+2025-11-13 12:59:53.607 +01:00 [INF] Executed action Jam.Api.Controllers.AuthController.Login (Jam.Api) in 190.686ms
+2025-11-13 12:59:53.607 +01:00 [INF] Executed endpoint 'Jam.Api.Controllers.AuthController.Login (Jam.Api)'
+2025-11-13 12:59:53.609 +01:00 [INF] Request finished HTTP/1.1 POST http://localhost:5000/api/auth/login - 200 795 application/json; charset=utf-8 269.1318ms
