@@ -6,4 +6,8 @@
 **/build
 **/Logs
 **/APILogs
+<<<<<<< HEAD
 api/obj/Debug/net8.0/Jam.Api.GeneratedMSBuildEditorConfig.editorconfig
+=======
+api/obj/Debug/net8.0/Jam.Api.GeneratedMSBuildEditorConfig.editorconfig
+>>>>>>> c5f8ddc (.gitignore + merge)
