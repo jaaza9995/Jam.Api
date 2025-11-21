@@ -332,4 +332,22 @@ public class StoryEditingController : ControllerBase
             return StatusCode(500, new ErrorDto { ErrorTitle = "Unexpected error while updating ending scenes." });
         }
     }
+    [HttpDelete("{storyId:int}")]
+    public async Task<IActionResult> DeleteStory(int storyId)
+    {
+        try
+        {
+            var success = await _storyRepository.DeleteStory(storyId);
+
+            if (!success)
+                return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to delete story." });
+
+            return Ok(new { message = "Story deleted successfully." });
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error deleting story");
+            return StatusCode(500, new ErrorDto { ErrorTitle = "Unexpected error while deleting story." });
+        }
+    }
 }

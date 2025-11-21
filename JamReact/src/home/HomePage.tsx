@@ -94,7 +94,7 @@ useEffect(() => {
 
                   <button
                     className="pixel-btn pink"
-                    onClick={() => navigate(`/create/intro?storyId=${s.storyId}`)}
+                    onClick={() => navigate(`/edit/${s.storyId}/intro`)}
                   >
                     EDIT
                   </button>
