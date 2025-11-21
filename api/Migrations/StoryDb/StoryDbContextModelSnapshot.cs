@@ -230,7 +230,7 @@ namespace Jam.Api.Migrations.StoryDb
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Accessible")
+                    b.Property<int>("Accessibility")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Code")

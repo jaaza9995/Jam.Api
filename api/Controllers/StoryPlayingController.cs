@@ -14,6 +14,11 @@ namespace Jam.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+<<<<<<< HEAD
+=======
+//[Authorize]
+[AllowAnonymous]
+>>>>>>> 34f4b1e (CreationMode)
 public class StoryPlayingController : ControllerBase
 {
     private readonly IPlayingSessionRepository _playingSessionRepository;
@@ -105,7 +110,7 @@ public class StoryPlayingController : ControllerBase
             if (story == null)
                 return NotFound(new ErrorDto { ErrorTitle = "Story not found" });
 
-            if (story.Accessible == Accessibility.Private)
+            if (story.Accessibility == Accessibility.Private)
             {
                 if (model == null || model.Code != story.Code)
                     return BadRequest(new ErrorDto { ErrorTitle = "Invalid code" });

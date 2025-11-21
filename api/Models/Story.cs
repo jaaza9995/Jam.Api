@@ -9,8 +9,8 @@ public class Story
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public DifficultyLevel DifficultyLevel { get; set; } // Easy || Medium || Hard
-    public Accessibility Accessible { get; set; } // Public || Private
-    public string? Code { get; set; } // if Accessible == Private -> Code is required
+    public Accessibility Accessibility { get; set; } // Public || Private
+    public string? Code { get; set; } // if Accessibility == Private -> Code is required
     public int Played { get; set; } // how many times the story has been played
     public int Finished { get; set; } // how many times the story has been finished
     public int Failed { get; set; } // how many times the story has been failed

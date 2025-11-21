@@ -52,7 +52,7 @@ public class StoryEditingController : ControllerBase
                 Title = story.Title,
                 Description = story.Description,
                 DifficultyLevel = story.DifficultyLevel,
-                Accessibility = story.Accessible
+                Accessibility = story.Accessibility
             };
             return Ok(dto);
         }
@@ -79,7 +79,7 @@ public class StoryEditingController : ControllerBase
             story.Description = model.Description;
             story.DifficultyLevel = model.DifficultyLevel;
 
-            if (story.Accessible != model.Accessibility)
+            if (story.Accessibility!= model.Accessibility)
             {
                 if (model.Accessibility == Accessibility.Private)
                     story.Code = await GenerateUniqueStoryCodeAsync();
@@ -87,7 +87,7 @@ public class StoryEditingController : ControllerBase
                     story.Code = null;
             }
 
-            story.Accessible = model.Accessibility;
+            story.Accessibility = model.Accessibility;
 
             var updated = await _storyRepository.UpdateStory(story);
             if (!updated)

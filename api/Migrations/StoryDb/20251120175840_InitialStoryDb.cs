@@ -165,7 +165,7 @@ namespace Jam.Api.Migrations.StoryDb
                     Title = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: false),
                     DifficultyLevel = table.Column<int>(type: "INTEGER", nullable: false),
-                    Accessible = table.Column<int>(type: "INTEGER", nullable: false),
+                    Accessibility = table.Column<int>(type: "INTEGER", nullable: false),
                     Code = table.Column<string>(type: "TEXT", nullable: true),
                     Played = table.Column<int>(type: "INTEGER", nullable: false),
                     Finished = table.Column<int>(type: "INTEGER", nullable: false),

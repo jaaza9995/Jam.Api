@@ -44,7 +44,7 @@ public class StoryRepository : IStoryRepository
         try
         {
             return await _db.Stories
-                .Where(s => s.Accessible == Accessibility.Public)
+                .Where(s => s.Accessibility == Accessibility.Public)
                 .ToListAsync();
         }
         catch (Exception e)
@@ -59,7 +59,7 @@ public class StoryRepository : IStoryRepository
         try
         {
             return await _db.Stories
-                .Where(s => s.Accessible == Accessibility.Private)
+                .Where(s => s.Accessibility == Accessibility.Private)
                 .ToListAsync();
         }
         catch (Exception e)
@@ -155,7 +155,7 @@ public class StoryRepository : IStoryRepository
         try
         {
             var story = await _db.Stories
-                .FirstOrDefaultAsync(s => s.StoryId == storyId && s.Accessible == Accessibility.Public);
+                .FirstOrDefaultAsync(s => s.StoryId == storyId && s.Accessibility == Accessibility.Public);
 
             if (story == null)
             {
@@ -184,7 +184,7 @@ public class StoryRepository : IStoryRepository
         try
         {
             var story = await _db.Stories
-                .SingleOrDefaultAsync(s => s.Code == code && s.Accessible == Accessibility.Private);
+                .SingleOrDefaultAsync(s => s.Code == code && s.Accessibility == Accessibility.Private);
 
             if (story == null)
             {
@@ -234,7 +234,7 @@ public class StoryRepository : IStoryRepository
         try
         {
             var code = await _db.Stories
-                .Where(s => s.StoryId == storyId && s.Accessible == Accessibility.Private)
+                .Where(s => s.StoryId == storyId && s.Accessibility == Accessibility.Private)
                 .Select(s => s.Code)
                 .SingleOrDefaultAsync();
 

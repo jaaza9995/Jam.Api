@@ -1,16 +1,22 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import LoginPage from "./admin/LoginPage";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./home/HomePage";
-import React from "react";
+import CreateIntro from "./create/CreateIntro";
+import CreateQuestions from "./create/CreateQuestions";
+import CreateEndings from "./create/CreateEndings";
+import { StoryCreationProvider } from "./storyCreation/StoryCreationContext";
 
-const App: React.FC = () => {
+function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/home" element={<HomePage />} />
-      </Routes>
-    </BrowserRouter>
+    <StoryCreationProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/create/intro" element={<CreateIntro />} />
+          <Route path="/create/questions" element={<CreateQuestions />} />
+          <Route path="/create/endings" element={<CreateEndings />} />
+        </Routes>
+      </Router>
+    </StoryCreationProvider>
   );
 }
 

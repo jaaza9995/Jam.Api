@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./HomePage.css";
 
 interface Story {
@@ -6,42 +7,43 @@ interface Story {
   title: string;
   description: string;
   difficultyLevel: string;
-  accessible: boolean;
-  questionCount?: number;
+  accessibility: string;
+  questionCount: number;
 }
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 const HomePage = () => {
+  
+const navigate = useNavigate();
+
   const [stories, setStories] = useState<Story[]>([]);
+  const [recentlyPlayed, setRecentlyPlayed] = useState<Story[]>([]);
+  const [firstName, setFirstName] = useState("");
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchHomePage = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/home/homepage`);
 
-useEffect(() => {
-  const fetchStories = async () => {
-    try {
-      const token = localStorage.getItem("token");
+        if (!response.ok) throw new Error("Failed to fetch homepage");
 
-      const response = await fetch(`${API_URL}/api/home/dashboard`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+        const data = await response.json();
+        console.log("homepage:", data);
 
-      console.log("Response status:", response.status);
+        setFirstName(data.firstName || "");
+        setStories(data.yourStories || []);
+        setRecentlyPlayed(data.recentlyPlayed || []);
+      } catch (error) {
+        console.error("Error fetching homepage:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      if (!response.ok) throw new Error("Failed to fetch stories");
-
-      const data = await response.json();
-      console.log("Parsed data:", data);
-
-      setStories(data.YourStories || []);
-    } catch (error) {
-      console.error("Error fetching stories:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchStories();
-}, []);
+    fetchHomePage();
+  }, []);
 
   if (loading)
     return (
@@ -52,14 +54,22 @@ useEffect(() => {
 
   return (
     <div className="pixel-bg">
-      <div className="home-container">
-        <h1 className="game-title">WELCOME BACK, PLAYER!</h1>
+      <div className="home-wrapper">
 
+        {/* TITLE */}
+        <h1 className="game-title">
+          WELCOME BACK, {firstName.toUpperCase()}!
+        </h1>
+
+        {/* BUTTONS */}
         <div className="button-row">
-          <button className="pixel-btn teal">MAKE NEW GAME</button>
+          <button className="pixel-btn teal" onClick={() => navigate("/create/intro")}>
+            MAKE NEW GAME
+          </button>
           <button className="pixel-btn pink">ADD NEW GAME</button>
         </div>
 
+        {/* YOUR GAMES */}
         <h2 className="section-title">YOUR GAMES:</h2>
         <div className="story-grid">
           {stories.length === 0 ? (
@@ -69,21 +79,48 @@ useEffect(() => {
               <div className="story-card" key={story.storyId}>
                 <h3 className="story-title">{story.title}</h3>
                 <p className="story-desc">{story.description}</p>
+
                 <p className="story-meta">
-                  <strong>Questions:</strong> {story.questionCount ?? 0}
+                  <strong>Questions:</strong> {story.questionCount}
                 </p>
                 <p className="story-meta">
                   <strong>Difficulty:</strong> {story.difficultyLevel}
                 </p>
+                <p className="story-meta">
+                  <strong>Access:</strong> {story.accessibility}
+                </p>
 
-                <div className="button-row">
-                  <button className="pixel-btn brown">EDIT</button>
+                <div className="button-row card-buttons">
+                  <button className="pixel-btn blue">EDIT</button>
                   <button className="pixel-btn yellow">PLAY</button>
                 </div>
               </div>
             ))
           )}
         </div>
+
+        {/* RECENTLY PLAYED */}
+        <h2 className="section-title">RECENTLY PLAYED:</h2>
+        <div className="story-grid">
+          {recentlyPlayed.length === 0 ? (
+            <p className="no-stories">No recently played games.</p>
+          ) : (
+            recentlyPlayed.map((story) => (
+              <div className="story-card" key={story.storyId}>
+                <h3 className="story-title">{story.title}</h3>
+                <p className="story-desc">{story.description}</p>
+
+                <p className="story-meta">
+                  <strong>Questions:</strong> {story.questionCount}
+                </p>
+                <div className="button-row card-buttons">
+                  <button className="pixel-btn yellow">PLAY AGAIN</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
       </div>
     </div>
   );
