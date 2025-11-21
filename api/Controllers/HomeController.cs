@@ -13,7 +13,6 @@ namespace Jam.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-<<<<<<< HEAD
 public class HomeController : ControllerBase
 {
     private readonly IStoryRepository _storyRepository;
@@ -26,46 +25,28 @@ public class HomeController : ControllerBase
         UserManager<AuthUser> userManager,
         SignInManager<AuthUser> signInManager,
         ILogger<HomeController> logger
-=======
-//[Authorize]
-public class HomeController : ControllerBase
-{
-    private readonly IStoryRepository _storyRepository;
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly SignInManager<ApplicationUser> _signInManager;
-
-    public HomeController(
-        IStoryRepository storyRepository,
-        UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager
->>>>>>> 34f4b1e (CreationMode)
     )
     {
         _storyRepository = storyRepository;
         _userManager = userManager;
         _signInManager = signInManager;
+        _logger = logger;
     }
-
 
     // GET: api/home/homepage
     [HttpGet("homepage")]
-    [AllowAnonymous]
     public async Task<IActionResult> GetHomePage()
     {
-        // Bruk samme testbruker som story-creation logger på
-        var user = await _userManager.FindByNameAsync("TheFlash");
-        if (user == null)
+        try
         {
-            user = new ApplicationUser
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
             {
-                UserName = "TheFlash",
-                Firstname = "Flash",
-                Lastname = "Allen",
-                Email = "flash@test.com",
-                EmailConfirmed = true
-            };
+                _logger.LogWarning("Invalid or expired authentication token.");
+                await _signInManager.SignOutAsync();
+                return Unauthorized(new { message = "User session expired. Please log in again." });
+            }
 
-<<<<<<< HEAD
             var userStories = await _storyRepository.GetStoriesByUserId(user.Id);
             var recentlyPlayed = await _storyRepository.GetMostRecentPlayedStories(user.Id, 5);
 
@@ -85,7 +66,7 @@ public class HomeController : ControllerBase
                     s.Title,
                     s.Description,
                     s.DifficultyLevel,
-                    s.Accessible
+                    s.Accessibility
                 }),
                 RecentlyPlayed = recentlyPlayed.Select(s => new
                 {
@@ -93,51 +74,15 @@ public class HomeController : ControllerBase
                     s.Title,
                     s.Description,
                     s.DifficultyLevel,
-                    s.Accessible
+                    s.Accessibility
                 }),
                 QuestionCounts = questionCounts
             });
-=======
-            var createRes = await _userManager.CreateAsync(user, "Test123!");
-            if (!createRes.Succeeded)
-                return StatusCode(500, new { message = "Failed to provision test user.", errors = createRes.Errors });
->>>>>>> 34f4b1e (CreationMode)
         }
-
-        var userId = user.Id;
-
-        var userStories = await _storyRepository.GetStoriesByUserId(userId);
-        var recentlyPlayed = await _storyRepository.GetMostRecentPlayedStories(userId, 5);
-
-        // Beregn spørsmålsantall
-        var questionCounts = new Dictionary<int, int>();
-        foreach (var s in userStories.Concat(recentlyPlayed))
+        catch (Exception e)
         {
-            questionCounts[s.StoryId] =
-                await _storyRepository.GetAmountOfQuestionsForStory(s.StoryId) ?? 0;
+            _logger.LogError(e, "Error while loading dashboard");
+            return StatusCode(500, new { message = "Unexpected error while loading dashboard" });
         }
-
-        return Ok(new
-        {
-            firstName = user.Firstname,  
-            yourStories = userStories.Select(s => new
-            {
-                storyId = s.StoryId,
-                title = s.Title,
-                description = s.Description,
-                difficultyLevel = s.DifficultyLevel.ToString(),
-                accessibility = s.Accessibility.ToString(),
-                questionCount = questionCounts[s.StoryId]
-            }),
-            recentlyPlayed = recentlyPlayed.Select(s => new
-            {
-                storyId = s.StoryId,
-                title = s.Title,
-                description = s.Description,
-                difficultyLevel = s.DifficultyLevel.ToString(),
-                accessibility = s.Accessibility.ToString(),
-                questionCount = questionCounts[s.StoryId]
-            })
-        });
     }
 }

@@ -14,11 +14,6 @@ namespace Jam.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-<<<<<<< HEAD
-=======
-//[Authorize]
-[AllowAnonymous]
->>>>>>> 34f4b1e (CreationMode)
 public class StoryPlayingController : ControllerBase
 {
     private readonly IPlayingSessionRepository _playingSessionRepository;

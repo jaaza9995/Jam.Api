@@ -5,7 +5,6 @@ using Jam.Models;
 using Microsoft.AspNetCore.Identity;
 using Jam.DAL;
 using Jam.DAL.AnswerOptionDAL;
-//using Jam.DAL.ApplicationUserDAL;
 using Jam.DAL.PlayingSessionDAL;
 using Jam.DAL.SceneDAL;
 using Jam.DAL.StoryDAL;
@@ -34,10 +33,7 @@ builder.Services.AddControllers(config =>
 .AddNewtonsoftJson(options =>
 {
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-<<<<<<< HEAD
-=======
     options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver();
->>>>>>> 34f4b1e (CreationMode)
 });
 
 
@@ -45,7 +41,7 @@ builder.Services.AddEndpointsApiExplorer();
 // for debugging:
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "My Shop API", Version = "v1" }); // Basic info for the API
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "JamReact API", Version = "v1" }); // Basic info for the API
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme // Define the Bearer auth scheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
@@ -68,7 +64,6 @@ builder.Services.AddDbContext<StoryDbContext>(options =>
     options.UseSqlite(
         builder.Configuration["ConnectionStrings:StoryDbContextConnection"]);
 });
-<<<<<<< HEAD
 
 builder.Services.AddDbContext<AuthDbContext>(options =>
 {
@@ -93,7 +88,6 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<IAnswerOptionRepository, AnswerOptionRepository>();
 builder.Services.AddScoped<UserService>();
-//builder.Services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
 builder.Services.AddScoped<IPlayingSessionRepository, PlayingSessionRepository>();
 builder.Services.AddScoped<ISceneRepository, SceneRepository>();
 builder.Services.AddScoped<IStoryRepository, StoryRepository>();
@@ -103,12 +97,7 @@ builder.Services.AddAuthorization(options =>
     // Policy for admin
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
 });
-
-=======
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<StoryDbContext>();
     
->>>>>>> 34f4b1e (CreationMode)
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -132,15 +121,6 @@ builder.Services.AddAuthentication(options =>
         ))
     };
 });
-<<<<<<< HEAD
-=======
- 
-builder.Services.AddScoped<IAnswerOptionRepository, AnswerOptionRepository>();
-builder.Services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
-builder.Services.AddScoped<IPlayingSessionRepository, PlayingSessionRepository>();
-builder.Services.AddScoped<ISceneRepository, SceneRepository>();
-builder.Services.AddScoped<IStoryRepository, StoryRepository>();
->>>>>>> 34f4b1e (CreationMode)
 
 var loggerConfiguration = new LoggerConfiguration()
     .MinimumLevel.Information() // levels: Trace< Information < Warning < Erorr < Fatal
@@ -158,18 +138,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowReact",
-        policy => policy
-            .WithOrigins("http://localhost:5173")   // React dev server
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials());
-});
-
 var app = builder.Build();
-// Add CORS
 
 if (app.Environment.IsDevelopment())
 {
@@ -178,15 +147,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-<<<<<<< HEAD
+
 app.UseStaticFiles();
-=======
 
-
->>>>>>> 34f4b1e (CreationMode)
 app.UseRouting();
 app.UseSession();
-app.UseCors("AllowReact");
+app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

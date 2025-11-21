@@ -14,10 +14,6 @@ namespace Jam.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-<<<<<<< HEAD
-=======
-[AllowAnonymous]
->>>>>>> 34f4b1e (CreationMode)
 public class StoryCreationController : ControllerBase
 {
     private readonly IStoryRepository _storyRepository;
@@ -50,7 +46,7 @@ public class StoryCreationController : ControllerBase
     {
         try
         {
-            var sessionDto = HttpContext.Session.GetObject<StoryCreationDto>("StoryCreationSession");
+            var sessionDto = HttpContext.Session.GetObject<StoryCreationDto>("StoryCreation");
 
             if (sessionDto == null)
             {
@@ -89,7 +85,7 @@ public class StoryCreationController : ControllerBase
 
         try
         {
-            var sessionDto = HttpContext.Session.GetObject<StoryCreationDto>("StoryCreationSession")
+            var sessionDto = HttpContext.Session.GetObject<StoryCreationDto>("StoryCreation")
                               ?? new StoryCreationDto();
 
             sessionDto.Title = model.Title;
@@ -98,7 +94,7 @@ public class StoryCreationController : ControllerBase
             sessionDto.Accessibility = model.Accessibility;
             sessionDto.IntroText = model.IntroText;
 
-            HttpContext.Session.SetObject("StoryCreationSession", sessionDto);
+            HttpContext.Session.SetObject("StoryCreation", sessionDto);
 
             return Ok(new { message = "Intro step saved successfully." });
         }
@@ -117,7 +113,7 @@ public class StoryCreationController : ControllerBase
     [HttpPost("intro/cancel")]
     public IActionResult CancelStoryCreation()
     {
-        HttpContext.Session.Remove("StoryCreationSession");
+        HttpContext.Session.Remove("StoryCreation");
         return Ok(new { message = "Story creation cancelled and session cleared." });
     }
 
@@ -130,7 +126,7 @@ public class StoryCreationController : ControllerBase
     {
         try
         {
-            var sessionDto = HttpContext.Session.GetObject<StoryCreationDto>("StoryCreationSession");
+            var sessionDto = HttpContext.Session.GetObject<StoryCreationDto>("StoryCreation");
             if (sessionDto == null)
             {
                 return BadRequest(new ErrorDto
@@ -178,7 +174,7 @@ public class StoryCreationController : ControllerBase
 
         try
         {
-            var sessionDto = HttpContext.Session.GetObject<StoryCreationDto>("StoryCreationSession")
+            var sessionDto = HttpContext.Session.GetObject<StoryCreationDto>("StoryCreation")
                               ?? new StoryCreationDto();
 
             sessionDto.QuestionScenes = model.QuestionScenes.Select(q => new QuestionSceneDto
@@ -193,7 +189,7 @@ public class StoryCreationController : ControllerBase
                 CorrectAnswerIndex = q.CorrectAnswerIndex
             }).ToList();
 
-            HttpContext.Session.SetObject("StoryCreationSession", sessionDto);
+            HttpContext.Session.SetObject("StoryCreation", sessionDto); //skjekk den ut etterpå
 
             return Ok(new { message = "Question scenes saved successfully." });
         }
@@ -221,7 +217,7 @@ public class StoryCreationController : ControllerBase
     {
         try
             {
-                var sessionDto = HttpContext.Session.GetObject<StoryCreationDto>("StoryCreationSession");
+                var sessionDto = HttpContext.Session.GetObject<StoryCreationDto>("StoryCreation");//skjekk den ut etterpå
                 if (sessionDto == null)
                 {
                     return BadRequest(new ErrorDto
@@ -253,90 +249,121 @@ public class StoryCreationController : ControllerBase
     }
 
     [HttpPost("endings")]
-    public IActionResult SaveEndingScenes([FromBody] EndingScenesDto model)
+    public async Task<IActionResult> SaveEndingScenesAndCreateStory([FromBody] EndingScenesDto model)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var sessionDto = HttpContext.Session.GetObject<StoryCreationDto>("StoryCreationSession")
-                        ?? new StoryCreationDto();
-
-        sessionDto.GoodEnding = model.GoodEnding;
-        sessionDto.NeutralEnding = model.NeutralEnding;
-        sessionDto.BadEnding = model.BadEnding;
-
-        HttpContext.Session.SetObject("StoryCreationSession", sessionDto);
-
-        return Ok(new { message = "Endings saved to session" });
-    }
-
-    [HttpPost("complete")]
-    public async Task<IActionResult> CompleteStory()
-    {
-        var sessionDto = HttpContext.Session.GetObject<StoryCreationDto>("StoryCreationSession");
-
-        if (sessionDto == null)
+        try
         {
-            return BadRequest(new ErrorDto
+            var sessionDto = HttpContext.Session.GetObject<StoryCreationDto>("StoryCreation");
+            if (sessionDto == null)
             {
-                ErrorTitle = "Session expired",
-                ErrorMessage = "Your session has expired. Please start creating your story again."
+                return BadRequest(new ErrorDto
+                {
+                    ErrorTitle = "Session expired",
+                    ErrorMessage = "Your session has expired. Please start creating your story again."
+                });
+            }
+
+            // Oppdater endings i session
+            sessionDto.GoodEnding = model.GoodEnding;
+            sessionDto.NeutralEnding = model.NeutralEnding;
+            sessionDto.BadEnding = model.BadEnding;
+            HttpContext.Session.SetObject("StoryCreation", sessionDto);
+
+            // Hent innlogget bruker
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Unauthorized(new ErrorDto
+                {
+                    ErrorTitle = "Not logged in",
+                    ErrorMessage = "You must be logged in to save a story."
+                });
+            }
+
+            // Map QuestionScenes fra session til entities
+            var questionScenes = sessionDto.QuestionScenes.Select(q => new QuestionScene
+            {
+                SceneText = q.StoryText,
+                Question = q.QuestionText,
+                AnswerOptions = q.Answers.Select((a, i) => new AnswerOption
+                {
+                    Answer = a.AnswerText,
+                    FeedbackText = a.ContextText,
+                    IsCorrect = i == q.CorrectAnswerIndex
+                }).ToList()
+            }).ToList();
+
+            // Kjed sammen QuestionScenes i rekkefølge
+            for (int i = 0; i < questionScenes.Count; i++)
+            {
+                questionScenes[i].NextQuestionScene = i < questionScenes.Count - 1
+                    ? questionScenes[i + 1]
+                    : null;
+            }
+
+            // Opprett Story
+            var story = new Story
+            {
+                Title = sessionDto.Title,
+                Description = sessionDto.Description,
+                DifficultyLevel = sessionDto.DifficultyLevel!.Value,
+                Accessibility = sessionDto.Accessibility!.Value,
+                UserId = user.Id,
+                Played = 0,
+                Finished = 0,
+                Failed = 0,
+                Dnf = 0,
+                IntroScene = new IntroScene
+                {
+                    IntroText = sessionDto.IntroText
+                },
+                QuestionScenes = questionScenes,
+                EndingScenes = new List<EndingScene>
+                {
+                    new EndingScene { EndingType = EndingType.Good, EndingText = sessionDto.GoodEnding },
+                    new EndingScene { EndingType = EndingType.Neutral, EndingText = sessionDto.NeutralEnding },
+                    new EndingScene { EndingType = EndingType.Bad, EndingText = sessionDto.BadEnding }
+                }
+            };
+
+            // Generer kode hvis privat
+            if (sessionDto.Accessibility == Accessibility.Private)
+            {
+                story.Code = await GenerateUniqueStoryCodeAsync();
+            }
+
+            var success = await _storyRepository.AddFullStory(story);
+
+            if (!success)
+            {
+                return StatusCode(500, new ErrorDto
+                {
+                    ErrorTitle = "Failed to save story",
+                    ErrorMessage = "Something went wrong while saving your story."
+                });
+            }
+
+            HttpContext.Session.Remove("StoryCreation");
+
+            return Ok(new
+            {
+                message = "Your story has been successfully created.",
+                storyId = story.StoryId
             });
         }
-
-        var user = await _userManager.FindByNameAsync("TheFlash"); // midlertidig testbruker
-        if (user == null)
-            return Unauthorized();
-
-        // Map QuestionScenes
-        var questionScenes = sessionDto.QuestionScenes.Select(q => new QuestionScene
+        catch (Exception e)
         {
-            SceneText = q.StoryText,
-            Question = q.QuestionText,
-            AnswerOptions = q.Answers.Select((a, i) => new AnswerOption
+            _logger.LogError(e, "[StoryCreationController -> SaveEndingScenesAndCreateStory] Failed to create story");
+            return StatusCode(500, new ErrorDto
             {
-                Answer = a.AnswerText,
-                FeedbackText = a.ContextText,
-                IsCorrect = i == q.CorrectAnswerIndex
-            }).ToList()
-        }).ToList();
-
-        // Chain
-        for (int i = 0; i < questionScenes.Count; i++)
-        {
-            questionScenes[i].NextQuestionScene = i < questionScenes.Count - 1
-                ? questionScenes[i + 1]
-                : null;
+                ErrorTitle = "Could not create story",
+                ErrorMessage = "An unexpected error occurred while saving your story. Please try again."
+            });
         }
-
-        // Create Story
-        var story = new Story
-        {
-            Title = sessionDto.Title,
-            Description = sessionDto.Description,
-            DifficultyLevel = sessionDto.DifficultyLevel!.Value,
-            Accessibility = sessionDto.Accessibility!.Value,
-            UserId = user.Id,
-            IntroScene = new IntroScene { IntroText = sessionDto.IntroText },
-            QuestionScenes = questionScenes,
-            EndingScenes = new List<EndingScene>
-            {
-                new EndingScene { EndingType = EndingType.Good, EndingText = sessionDto.GoodEnding },
-                new EndingScene { EndingType = EndingType.Neutral, EndingText = sessionDto.NeutralEnding },
-                new EndingScene { EndingType = EndingType.Bad, EndingText = sessionDto.BadEnding }
-            }
-        };
-
-        var success = await _storyRepository.AddFullStory(story);
-
-        if (!success)
-            return StatusCode(500, "Failed to save story");
-
-        HttpContext.Session.Remove("StoryCreationSession");
-
-        return Ok(new { message = "Story created", storyId = story.StoryId });
     }
-
 
     // =====================================================================
     // Helper: Unique story code for private stories

@@ -1,11 +1,5 @@
-<<<<<<< HEAD
 using System.Threading.Tasks;
 using Jam.DAL;
-//using Jam.DAL.ApplicationUserDAL;
-=======
-/*using System.Threading.Tasks;*/
-using Jam.DAL.ApplicationUserDAL;
->>>>>>> 34f4b1e (CreationMode)
 using Jam.DAL.PlayingSessionDAL;
 using Jam.DAL.StoryDAL;
 using Microsoft.AspNetCore.Authorization;
@@ -18,7 +12,6 @@ namespace Jam.Api.Controllers;
 [Authorize(Policy = "AdminOnly")] // Only admins can access
 public class AdminController : ControllerBase
 {
-    //private readonly IApplicationUserRepository _applicationUserRepository;
     private readonly UserService _userService;
     private readonly IStoryRepository _storyRepository;
     
