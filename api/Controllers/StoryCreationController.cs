@@ -46,9 +46,17 @@ public class StoryCreationController : ControllerBase
     {
         try
         {
-            var sessionDto = HttpContext.Session.GetObject<StoryCreationDto>("StoryCreation");
+            var sessionDto = HttpContext.Session.GetObject<StoryCreationDto>("StoryCreation")
+                  ?? new StoryCreationDto();
 
-            if (sessionDto == null)
+                // Hent bruker og lagre UserId i session
+                var user = _userManager.GetUserAsync(User).Result;
+                if (user == null)
+                    return Unauthorized(new { message = "You must be logged in." });
+
+                sessionDto.UserId = user.Id;
+                if (sessionDto == null)
+
             {
                 // Tomt utgangspunkt til frontend
                 return Ok(new CreateStoryAndIntroDto());
@@ -76,8 +84,7 @@ public class StoryCreationController : ControllerBase
         }
     }
 
-    // Lagre steg 1 i session
-    [HttpPost("intro")]
+   [HttpPost("intro")]
     public IActionResult SaveStoryAndIntro([FromBody] CreateStoryAndIntroDto model)
     {
         if (!ModelState.IsValid)
@@ -86,7 +93,15 @@ public class StoryCreationController : ControllerBase
         try
         {
             var sessionDto = HttpContext.Session.GetObject<StoryCreationDto>("StoryCreation")
-                              ?? new StoryCreationDto();
+                            ?? new StoryCreationDto();
+
+            // Hent innlogget bruker
+            var user = _userManager.GetUserAsync(User).Result;
+            if (user == null)
+                return Unauthorized(new { message = "You must be logged in." });
+
+            // Lagre userId i session
+            sessionDto.UserId = user.Id;
 
             sessionDto.Title = model.Title;
             sessionDto.Description = model.Description;
@@ -100,14 +115,11 @@ public class StoryCreationController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "[StoryCreationController -> SaveStoryAndIntro] Failed to save intro to session");
-            return StatusCode(500, new ErrorDto
-            {
-                ErrorTitle = "Failed to save story intro",
-                ErrorMessage = "An unexpected error occurred while saving your story intro."
-            });
+            _logger.LogError(e, "[StoryCreation -> SaveStoryAndIntro] Failed");
+            return StatusCode(500, new { message = "Error saving intro" });
         }
     }
+
 
     // Avbryt: tøm session
     [HttpPost("intro/cancel")]

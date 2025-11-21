@@ -3,16 +3,19 @@ using System;
 using Jam.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Jam.Api.Migrations.AuthDb
+namespace Jam.Api.Migrations.StoryDb
 {
-    [DbContext(typeof(AuthDbContext))]
-    partial class AuthDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(StoryDbContext))]
+    [Migration("20251121155334_StoryInit")]
+    partial class StoryInit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
@@ -41,7 +44,7 @@ namespace Jam.Api.Migrations.AuthDb
 
                     b.HasIndex("QuestionSceneId");
 
-                    b.ToTable("AnswerOption");
+                    b.ToTable("AnswerOptions");
                 });
 
             modelBuilder.Entity("Jam.Models.AuthUser", b =>
@@ -128,7 +131,7 @@ namespace Jam.Api.Migrations.AuthDb
 
                     b.HasIndex("StoryId");
 
-                    b.ToTable("EndingScene");
+                    b.ToTable("EndingScenes");
                 });
 
             modelBuilder.Entity("Jam.Models.IntroScene", b =>
@@ -149,7 +152,7 @@ namespace Jam.Api.Migrations.AuthDb
                     b.HasIndex("StoryId")
                         .IsUnique();
 
-                    b.ToTable("IntroScene");
+                    b.ToTable("IntroScenes");
                 });
 
             modelBuilder.Entity("Jam.Models.PlayingSession", b =>
@@ -191,7 +194,7 @@ namespace Jam.Api.Migrations.AuthDb
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PlayingSession");
+                    b.ToTable("PlayingSessions");
                 });
 
             modelBuilder.Entity("Jam.Models.QuestionScene", b =>
@@ -216,11 +219,12 @@ namespace Jam.Api.Migrations.AuthDb
 
                     b.HasKey("QuestionSceneId");
 
-                    b.HasIndex("NextQuestionSceneId");
+                    b.HasIndex("NextQuestionSceneId")
+                        .IsUnique();
 
                     b.HasIndex("StoryId");
 
-                    b.ToTable("QuestionScene");
+                    b.ToTable("QuestionScenes");
                 });
 
             modelBuilder.Entity("Jam.Models.Story", b =>
@@ -265,7 +269,7 @@ namespace Jam.Api.Migrations.AuthDb
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Story");
+                    b.ToTable("Stories");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -439,7 +443,8 @@ namespace Jam.Api.Migrations.AuthDb
 
                     b.HasOne("Jam.Models.AuthUser", "User")
                         .WithMany("PlayingSessions")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Story");
 
@@ -450,7 +455,8 @@ namespace Jam.Api.Migrations.AuthDb
                 {
                     b.HasOne("Jam.Models.QuestionScene", "NextQuestionScene")
                         .WithMany()
-                        .HasForeignKey("NextQuestionSceneId");
+                        .HasForeignKey("NextQuestionSceneId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("Jam.Models.Story", "Story")
                         .WithMany("QuestionScenes")
@@ -467,7 +473,8 @@ namespace Jam.Api.Migrations.AuthDb
                 {
                     b.HasOne("Jam.Models.AuthUser", "User")
                         .WithMany("Stories")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("User");
                 });

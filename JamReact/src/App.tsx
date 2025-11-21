@@ -28,7 +28,14 @@ const App: React.FC = () => {
 
             {/* Protected */}
             <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<HomePage />} />
+              <Route
+                path="/"
+                element={
+                  !localStorage.getItem("token")
+                    ? <Navigate to="/login" replace />
+                    : <HomePage />
+                }
+              />
 
               <Route
                 path="/create/*"

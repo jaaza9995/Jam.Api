@@ -1,127 +1,129 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 import "./HomePage.css";
-
-interface Story {
-  storyId: number;
-  title: string;
-  description: string;
-  difficultyLevel: string;
-  accessibility: string;
-  questionCount: number;
-}
+import { useNavigate } from "react-router-dom";
+import { Story } from "../types/story";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const HomePage = () => {
-  
-const navigate = useNavigate();
+const HomePage: React.FC = () => {
+  const { token } = useAuth();
+  const navigate = useNavigate();
 
   const [stories, setStories] = useState<Story[]>([]);
   const [recentlyPlayed, setRecentlyPlayed] = useState<Story[]>([]);
-  const [firstName, setFirstName] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [firstName, setFirstName] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const fetchHomePage = async () => {
-      try {
-        const response = await fetch(`${API_URL}/api/home/homepage`);
+useEffect(() => {
+  const fetchHomePage = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/home/homepage`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-        if (!response.ok) throw new Error("Failed to fetch homepage");
-
-        const data = await response.json();
-        console.log("homepage:", data);
-
-        setFirstName(data.firstName || "");
-        setStories(data.yourStories || []);
-        setRecentlyPlayed(data.recentlyPlayed || []);
-      } catch (error) {
-        console.error("Error fetching homepage:", error);
-      } finally {
-        setLoading(false);
+      if (!response.ok) {
+        console.error("Home API error:", response.status);
+        return;
       }
-    };
 
-    fetchHomePage();
-  }, []);
+      const data = await response.json();
+      console.log("Home API data:", data);
 
-  if (loading)
-    return (
-      <div className="pixel-bg">
-        <p className="loading">Loading...</p>
-      </div>
-    );
+      setFirstName(data.firstName || "Player");
+      setStories(data.yourStories || []);
+      setRecentlyPlayed(data.recentlyPlayed || []);
+
+    } catch (error) {
+      console.error("Error loading homepage:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchHomePage();
+}, [token]);
+
 
   return (
-    <div className="pixel-bg">
-      <div className="home-wrapper">
+    <div className="homepage-container">
 
-        {/* TITLE */}
-        <h1 className="game-title">
-          WELCOME BACK, {firstName.toUpperCase()}!
-        </h1>
+      <h1 className="homepage-title">WELCOME TO MATH UNIVERSE</h1>
 
-        {/* BUTTONS */}
-        <div className="button-row">
-          <button className="pixel-btn teal" onClick={() => navigate("/create/intro")}>
-            MAKE NEW GAME
-          </button>
-          <button className="pixel-btn pink">ADD NEW GAME</button>
-        </div>
-
-        {/* YOUR GAMES */}
-        <h2 className="section-title">YOUR GAMES:</h2>
-        <div className="story-grid">
-          {stories.length === 0 ? (
-            <p className="no-stories">No stories found.</p>
-          ) : (
-            stories.map((story) => (
-              <div className="story-card" key={story.storyId}>
-                <h3 className="story-title">{story.title}</h3>
-                <p className="story-desc">{story.description}</p>
-
-                <p className="story-meta">
-                  <strong>Questions:</strong> {story.questionCount}
-                </p>
-                <p className="story-meta">
-                  <strong>Difficulty:</strong> {story.difficultyLevel}
-                </p>
-                <p className="story-meta">
-                  <strong>Access:</strong> {story.accessibility}
-                </p>
-
-                <div className="button-row card-buttons">
-                  <button className="pixel-btn blue">EDIT</button>
-                  <button className="pixel-btn yellow">PLAY</button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        {/* RECENTLY PLAYED */}
-        <h2 className="section-title">RECENTLY PLAYED:</h2>
-        <div className="story-grid">
-          {recentlyPlayed.length === 0 ? (
-            <p className="no-stories">No recently played games.</p>
-          ) : (
-            recentlyPlayed.map((story) => (
-              <div className="story-card" key={story.storyId}>
-                <h3 className="story-title">{story.title}</h3>
-                <p className="story-desc">{story.description}</p>
-
-                <p className="story-meta">
-                  <strong>Questions:</strong> {story.questionCount}
-                </p>
-                <div className="button-row card-buttons">
-                  <button className="pixel-btn yellow">PLAY AGAIN</button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
+      <div className="homepage-buttons">
+        <button
+          className="btn-green"
+          onClick={() => navigate("/create/intro")}
+        >
+          MAKE NEW GAME
+        </button>
+        <button className="btn-pink">ADD NEW GAME</button>
       </div>
+
+      {/* ================= YOUR GAMES ================ */}
+      <section className="section-block">
+        <h2 className="section-title">YOUR GAMES:</h2>
+
+        {stories.length === 0 ? (
+          <p className="empty-text">No stories found.</p>
+        ) : (
+          <ul className="story-list">
+            {stories.map((s) => (
+              <li key={s.storyId} className="story-card">
+
+                <h3>{s.title}</h3>
+                <p>{s.description}</p>
+                <p>Questions: {s.questionCount}</p>
+
+                {/* PRIVATE CODE */}
+                {(s.accessibility === "Private" || s.accessibility === 1) && (
+                  <p className="private-code">Game Code: {s.code}</p>
+                )}
+
+                {/* Buttons */}
+                <div className="story-buttons">
+                  <button
+                    className="pixel-btn teal"
+                    onClick={() => navigate(`/play/${s.storyId}`)}
+                  >
+                    PLAY
+                  </button>
+
+                  <button
+                    className="pixel-btn pink"
+                    onClick={() => navigate(`/create/intro?storyId=${s.storyId}`)}
+                  >
+                    EDIT
+                  </button>
+                </div>
+
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* ================= RECENTLY PLAYED ================ */}
+      <section className="section-block">
+        <h2 className="section-title">RECENTLY PLAYED:</h2>
+
+        {recentlyPlayed.length === 0 ? (
+          <p className="empty-text">No recently played games.</p>
+        ) : (
+          <ul className="story-list">
+            {recentlyPlayed.map((s) => (
+              <li key={s.storyId} className="story-card">
+                <h3>{s.title}</h3>
+                <p>{s.description}</p>
+                <p>Questions: {s.questionCount}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 };

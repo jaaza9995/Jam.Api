@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Jam.Api.Migrations.AuthDb
+namespace Jam.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialAuthDb : Migration
+    public partial class AuthInit : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
