@@ -1,27 +1,59 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Container } from 'react-bootstrap'
+
 import HomePage from "./home/HomePage";
 import CreateIntro from "./create/CreateIntro";
 import CreateQuestions from "./create/CreateQuestions";
 import CreateEndings from "./create/CreateEndings";
+
 import { StoryCreationProvider } from "./storyCreation/StoryCreationContext";
-import { StoryPlayer } from "./StoryPlaying/StoryPlayer";
 
-function App() {
+import NavMenu from './shared/NavMenu'
+import LoginPage from './auth/LoginPage'
+import RegisterPage from './auth/RegisterPage'
+import ProtectedRoute from './auth/ProtectedRoute'
+import { AuthProvider } from './auth/AuthContext'
+
+const App: React.FC = () => {
   return (
-    <StoryCreationProvider>
+    <AuthProvider>
       <Router>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/create/intro" element={<CreateIntro />} />
-          <Route path="/create/questions" element={<CreateQuestions />} />
-          <Route path="/create/endings" element={<CreateEndings />} />
+        <NavMenu />
+        <Container className="mt-4">
 
-          <Route path="/play/:storyId" element={<StoryPlayerWrapper />} />
-        </Routes>
+          <Routes>
+            {/* Public */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+
+            {/* Protected */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/" element={<HomePage />} />
+
+              <Route
+                path="/create/*"
+                element={
+                  <StoryCreationProvider>
+                    <Routes>
+                      <Route path="intro" element={<CreateIntro />} />
+                      <Route path="questions" element={<CreateQuestions />} />
+                      <Route path="endings" element={<CreateEndings />} />
+                    </Routes>
+                  </StoryCreationProvider>
+                }
+              />
+            </Route>
+
+            {/* Catch-all */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+
+        </Container>
       </Router>
-    </StoryCreationProvider>
+    </AuthProvider>
   );
-}
+};
+
 
 // 💡 VIKTIG: Hjelpekomponent for å hente storyId fra URL
 // Dette er nødvendig for å fange opp ID-en fra URL-en og sende den som en number prop.
