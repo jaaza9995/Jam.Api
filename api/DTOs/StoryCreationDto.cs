@@ -5,6 +5,9 @@ namespace Jam.DTOs;
 
 public class StoryCreationDto
 {
+    // Who owns the story (set when the intro step is saved)
+    public string? UserId { get; set; }
+
     // Step 1: Story + IntroScene
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;

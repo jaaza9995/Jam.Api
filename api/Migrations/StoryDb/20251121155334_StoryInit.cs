@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Jam.Api.Migrations.StoryDb
 {
     /// <inheritdoc />
-    public partial class InitialStoryDb : Migration
+    public partial class StoryInit : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
