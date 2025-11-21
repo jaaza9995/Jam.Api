@@ -77,14 +77,14 @@ builder.Services.AddIdentity<AuthUser, IdentityRole>()
 
 builder.Services.AddCors(options =>
     {
-    options.AddPolicy("CorsPolicy", builder =>
-    {
-        builder.WithOrigins("http://localhost:5173") // Allow requests from the React frontend
-               .AllowAnyMethod()
-               .AllowAnyHeader()
-               .AllowCredentials();
+        options.AddPolicy("CorsPolicy", builder =>
+        {
+            builder.WithOrigins("http://localhost:4000") // Allow requests from the React frontend
+                   .AllowAnyMethod()
+                   .AllowAnyHeader()
+                   .AllowCredentials();
+        });
     });
-});
 
 builder.Services.AddScoped<IAnswerOptionRepository, AnswerOptionRepository>();
 builder.Services.AddScoped<UserService>();
@@ -97,7 +97,7 @@ builder.Services.AddAuthorization(options =>
     // Policy for admin
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
 });
-    
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
