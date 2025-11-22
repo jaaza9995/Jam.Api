@@ -21,6 +21,8 @@ import RegisterPage from "./auth/RegisterPage";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import { AuthProvider } from "./auth/AuthContext";
 
+import { StoryPlayer } from "./StoryPlaying/StoryPlayer";
+
 import './App.css';
 
 const App: React.FC = () => {
@@ -69,6 +71,11 @@ const App: React.FC = () => {
               <Route path="/edit/:storyId/endings" element={<EditEndingsPage />} />
 
             </Route>
+
+            <Route 
+              path="/play/:storyId" 
+              element={<StoryPlayerWrapper />}
+            />
 
             {/* ---------------- CATCH ALL ---------------- */}
             <Route path="*" element={<Navigate to="/" replace />} />

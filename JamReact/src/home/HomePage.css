@@ -33,9 +33,9 @@
   transform: scale(1.05);
 }
 
-
 .section-block {
   margin-top: 40px;
+  margin-left: 32px;
 }
 
 .section-title {
@@ -68,25 +68,71 @@
   height: 340px;
   margin: 10px auto;
   padding: 15px;
+  /* padding: 15px;*/
   font-size: 12px;
+}
+
+/* title and description in story-card */
+.story-content {
+  flex-grow: 1;
+  overflow-y: auto; /* scroll hvis beskrivelse er for lang */
+  margin-bottom: 5px;
+}
+
+/* question count, difficulty and game code at the bottom of story-card */
+.bottom-info {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1px;
+}
+
+/* question count and difficulty row */
+.diff-qc-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2px;
+}
+
+.difficulty {
+  font-size: 8px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-style: italic;
+  padding: 5px 10px;
+  border-radius: 10px;
+  border: none;
+  box-shadow: 3px 4px 0px #2e221ba3;
+  pointer-events: none;
+}
+
+.easy { background: #6afb93; color: #104019;}
+.medium { background: #ead067; color: #70480d;}
+.hard { background: #ff7777; color: #380b0b;}
+
+/* idk abt this one..*/
+
+.question-count {
+  /*padding: 4px 10px;*/
+  padding-left: 10px;
+  padding-top: 15px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 10px;
+}
+
+.private-code {
+  /*margin-top: auto;
+  margin-bottom: 10px;*/
+  font-size: 12px;
+  color: #ffea75;
+  font-weight: bold;
 }
 
 .story-buttons {
   display: flex;
   gap: 20px;
   justify-content: center;
-}
-
-.private-code {
   margin-top: auto;
-  margin-bottom: 10px;
-  font-size: 12px;
-  color: #ffea75;
-  font-weight: bold;
-}
-
-.difficulty {
-  margin-top: 5px;
-  font-size: 12px;
-  color: #aaa;
 }

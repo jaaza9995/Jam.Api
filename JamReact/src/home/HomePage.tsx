@@ -73,18 +73,37 @@ useEffect(() => {
           <ul className="story-list">
             {stories.map((s) => (
               <li key={s.storyId} className="story-card">
+                <div className="story-content">
+                  <h3>{s.title}</h3>
+                  <p>{s.description}</p>
+                </div>
+                <div className="bottom-info">
+                  <div className="diff-qc-row">
+                    <span className="question-count"> 
+                      <p>Questions: {s.questionCount}</p>
+                    </span>
 
-                <h3>{s.title}</h3>
-                <p>{s.description}</p>
-                <p>Questions: {s.questionCount}</p>
+                    {/* DIFFICULTY */}
+                    <span className="difficulty"> 
+                      {(s.difficultyLevel === "Easy" || s.difficultyLevel === 0) && (
+                        <button className="difficulty easy">Easy</button>
+                      )}  
 
-                {/* DIFFICULTY */}
-                {(s.difficultyLevel === "Easy" || s.difficultyLevel === 0) && <div className="Difficulty easy">Easy</div>}
+                      {(s.difficultyLevel === "Medium" || s.difficultyLevel === 1) && (
+                        <button className="difficulty medium">Medium</button>
+                      )}  
 
-                {/* PRIVATE CODE */}
-                {(s.accessibility === "Private" || s.accessibility === 1) && (
-                  <p className="private-code">Game Code: {s.code}</p>
-                )}
+                      {(s.difficultyLevel === "Hard" || s.difficultyLevel === 2) && (
+                        <button className="difficulty hard">Hard</button>
+                      )}  
+                    </span>
+                  </div>
+
+                  {/* PRIVATE CODE */}
+                  {(s.accessibility === "Private" || s.accessibility === 1) && (
+                    <p className="private-code">Game Code: {s.code}</p>
+                  )}
+                </div>
 
                 {/* Buttons */}
                 <div className="story-buttons">
@@ -92,14 +111,14 @@ useEffect(() => {
                     className="pixel-btn edit"
                     onClick={() => navigate(`/play/${s.storyId}`)}
                   >
-                    PLAY
+                    EDIT
                   </button>
 
                   <button
                     className="pixel-btn play"
                     onClick={() => navigate(`/edit/${s.storyId}/intro`)}
                   >
-                    EDIT
+                    PLAY
                   </button>
                 </div>
 
@@ -119,9 +138,45 @@ useEffect(() => {
           <ul className="story-list">
             {recentlyPlayed.map((s) => (
               <li key={s.storyId} className="story-card">
-                <h3>{s.title}</h3>
-                <p>{s.description}</p>
-                <p>Questions: {s.questionCount}</p>
+                <div className="story-content">
+                  <h3>{s.title}</h3>
+                  <p>{s.description}</p>
+                </div>
+                <div className="bottom-info">
+                  <div className="diff-qc-row">
+                    <span className="question-count">
+                      <p>Questions: {s.questionCount}</p>
+                    </span>
+                    {/* DIFFICULTY */}
+                    <span className="difficulty"> 
+                      {(s.difficultyLevel === "Easy" || s.difficultyLevel === 0) && (
+                        <button className="difficulty easy">Easy</button>
+                      )}  
+
+                      {(s.difficultyLevel === "Medium" || s.difficultyLevel === 1) && (
+                        <button className="difficulty medium">Medium</button>
+                      )}  
+
+                      {(s.difficultyLevel === "Hard" || s.difficultyLevel === 2) && (
+                        <button className="difficulty hard">Hard</button>
+                      )}  
+                    </span>
+                  </div>
+                  {/* PRIVATE CODE */}
+                  {(s.accessibility === "Private" || s.accessibility === 1) && (
+                    <p className="private-code">Game Code: {s.code}</p>
+                  )}
+                </div>
+
+                {/* Buttons */}
+                <div className="story-buttons">
+                  <button
+                    className="pixel-btn play"
+                    onClick={() => navigate(`/play/${s.storyId}`)}
+                  >
+                    PLAY
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
