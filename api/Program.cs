@@ -59,6 +59,15 @@ builder.Services.AddSwaggerGen(c =>
         }});
 });
 
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(60);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 builder.Services.AddDbContext<StoryDbContext>(options =>
 {
     options.UseSqlite(
@@ -79,7 +88,9 @@ builder.Services.AddCors(options =>
     {
     options.AddPolicy("CorsPolicy", builder =>
     {
-        builder.WithOrigins("http://localhost:4000") // Allow requests from the React frontend
+        builder.WithOrigins(
+                "http://localhost:4000"  // custom Vite port (matches VITE_PORT)
+            ) // Allow requests from the React frontend
                .AllowAnyMethod()
                .AllowAnyHeader()
                .AllowCredentials();
@@ -147,6 +158,7 @@ app.UseRouting();
 app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseSession();
 app.MapControllers();
 
 app.Run();

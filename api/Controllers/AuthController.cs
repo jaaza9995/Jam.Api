@@ -96,9 +96,10 @@ namespace Jam.Api.Controllers
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserName!), // Subject of the token
-                new Claim(JwtRegisteredClaimNames.Email, user.Email!), // User's email
-                new Claim(ClaimTypes.NameIdentifier, user.Id), // Unique identifier for the user
+                // Put user Id in "sub" to avoid inbound claim mapping overriding it with username
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id), // Subject of the token (used as NameIdentifier by default mapping)
+                new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName ?? string.Empty), // Username
+                new Claim(ClaimTypes.NameIdentifier, user.Id), // Explicit Id claim
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // Unique identifier for the token
                 new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()) // Issued at timestamp
             };

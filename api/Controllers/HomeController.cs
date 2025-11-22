@@ -34,55 +34,70 @@ public class HomeController : ControllerBase
     }
 
     // GET: api/home/homepage
-    [HttpGet("homepage")]
-    public async Task<IActionResult> GetHomePage()
+  [HttpGet("homepage")]
+public async Task<IActionResult> GetHomePage()
+{
+    try
     {
-        try
+        // Hent UserId direkte fra JWT
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                _logger.LogWarning("Invalid or expired authentication token.");
-                await _signInManager.SignOutAsync();
-                return Unauthorized(new { message = "User session expired. Please log in again." });
-            }
-
-            var userStories = await _storyRepository.GetStoriesByUserId(user.Id);
-            var recentlyPlayed = await _storyRepository.GetMostRecentPlayedStories(user.Id, 5);
-
-            var questionCounts = new Dictionary<int, int>();
-            foreach (var s in userStories.Concat(recentlyPlayed))
-            {
-                questionCounts[s.StoryId] = await _storyRepository.GetAmountOfQuestionsForStory(s.StoryId) ?? 0;
-            }
-
-            // Returner kun rene data (ingen ViewModels)
-            return Ok(new
-            {
-                FirstName = user.UserName,
-                YourStories = userStories.Select(s => new
-                {
-                    s.StoryId,
-                    s.Title,
-                    s.Description,
-                    s.DifficultyLevel,
-                    s.Accessibility
-                }),
-                RecentlyPlayed = recentlyPlayed.Select(s => new
-                {
-                    s.StoryId,
-                    s.Title,
-                    s.Description,
-                    s.DifficultyLevel,
-                    s.Accessibility
-                }),
-                QuestionCounts = questionCounts
-            });
+            _logger.LogWarning("Token missing user ID.");
+            return Unauthorized(new { message = "Invalid token" });
         }
-        catch (Exception e)
+
+        // Hent bruker basert på ID (IKKE email)
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
         {
-            _logger.LogError(e, "Error while loading dashboard");
-            return StatusCode(500, new { message = "Unexpected error while loading dashboard" });
+            _logger.LogWarning("User not found for ID {id}", userId);
+            await _signInManager.SignOutAsync();
+            return Unauthorized(new { message = "User session expired. Please log in again." });
         }
+
+        var userStories = await _storyRepository.GetStoriesByUserId(user.Id);
+        var recentlyPlayed = await _storyRepository.GetMostRecentPlayedStories(user.Id, 5);
+
+        var questionCounts = new Dictionary<int, int>();
+        foreach (var s in userStories.Concat(recentlyPlayed))
+        {
+            questionCounts[s.StoryId] = await _storyRepository.GetAmountOfQuestionsForStory(s.StoryId) ?? 0;
+        }
+
+        return Ok(new
+        {
+            FirstName = user.UserName,
+            YourStories = userStories.Select(s => new
+            {
+                s.StoryId,
+                s.Title,
+                s.Description,
+                s.DifficultyLevel,
+                s.Accessibility,
+                s.Code,
+                QuestionCount = questionCounts[s.StoryId],
+                
+            }),
+            RecentlyPlayed = recentlyPlayed.Select(s => new
+            {
+                s.StoryId,
+                s.Title,
+                s.Description,
+                s.DifficultyLevel,
+                s.Accessibility,
+                s.Code,
+                QuestionCount = questionCounts[s.StoryId]
+               
+            })
+        });
     }
+    catch (Exception e)
+    {
+        _logger.LogError(e, "Error while loading dashboard");
+        return StatusCode(500, new { message = "Unexpected error while loading dashboard" });
+    }
+}
 }

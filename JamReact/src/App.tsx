@@ -1,18 +1,25 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { Container } from 'react-bootstrap'
+import { Container } from "react-bootstrap";
 
 import HomePage from "./home/HomePage";
+
+// CREATE
 import CreateIntro from "./create/CreateIntro";
 import CreateQuestions from "./create/CreateQuestions";
 import CreateEndings from "./create/CreateEndings";
-
 import { StoryCreationProvider } from "./storyCreation/StoryCreationContext";
 
-import NavMenu from './shared/NavMenu'
-import LoginPage from './auth/LoginPage'
-import RegisterPage from './auth/RegisterPage'
-import ProtectedRoute from './auth/ProtectedRoute'
-import { AuthProvider } from './auth/AuthContext'
+// EDIT
+import EditStoryPage from "./editing/EditStoryPage";
+import EditIntroPage from "./editing/EditIntroPage";
+import EditQuestionsPage from "./editing/EditQuestionsPage";
+import EditEndingsPage from "./editing/EditEndingsPage";
+
+import NavMenu from "./shared/NavMenu";
+import LoginPage from "./auth/LoginPage";
+import RegisterPage from "./auth/RegisterPage";
+import ProtectedRoute from "./auth/ProtectedRoute";
+import { AuthProvider } from "./auth/AuthContext";
 
 import './App.css';
 
@@ -24,14 +31,24 @@ const App: React.FC = () => {
         <Container className="mt-4">
 
           <Routes>
-            {/* Public */}
+            {/* ---------------- PUBLIC ---------------- */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
-            {/* Protected */}
+            {/* ---------------- PROTECTED ---------------- */}
             <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<HomePage />} />
+              
+              {/* HOME */}
+              <Route
+                path="/"
+                element={
+                  !localStorage.getItem("token")
+                    ? <Navigate to="/login" replace />
+                    : <HomePage />
+                }
+              />
 
+              {/* CREATE FLOW */}
               <Route
                 path="/create/*"
                 element={
@@ -44,12 +61,19 @@ const App: React.FC = () => {
                   </StoryCreationProvider>
                 }
               />
+
+              {/* EDIT FLOW */}
+              <Route path="/edit/:storyId" element={<EditStoryPage />} />
+              <Route path="/edit/:storyId/intro" element={<EditIntroPage />} />
+              <Route path="/edit/:storyId/questions" element={<EditQuestionsPage />} />
+              <Route path="/edit/:storyId/endings" element={<EditEndingsPage />} />
+
             </Route>
 
-            {/* Catch-all */}
+            {/* ---------------- CATCH ALL ---------------- */}
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
 
+          </Routes>
         </Container>
       </Router>
     </AuthProvider>

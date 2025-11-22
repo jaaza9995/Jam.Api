@@ -1,137 +1,97 @@
-/* ========================= */
-/* GLOBAL / BACKGROUND       */
-/* ========================= */
-
-
-/* ========================= */
-/* MAIN CONTAINER            */
-/* ========================= */
-.home-wrapper {
-  width: 100%;
-  max-width: 1200px;
-  text-align: center;
+.homepage-container {
+  background-color: #0d0b14;
+  min-height: 100vh;
+  padding: 40px;
   color: #fff;
+  font-family: "Press Start 2P", monospace;
+  text-align: center;
 }
 
-/* ========================= */
-/* TITLE                     */
-/* ========================= */
-.game-title {
-  font-size: 38px;
+.homepage-header {
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 20px;
+  font-size: 12px;
+}
+
+.welcome-user {
+  color: #888;
+}
+
+.homepage-title {
+  color: #7ad3ff;
+  font-size: 32px;
+  margin-top: 40px;
   margin-bottom: 40px;
-  color: #4ecbff;
-  letter-spacing: 2px;
+  text-shadow: 0 0 4px #7ad3ff;
 }
 
-/* ========================= */
-/* BUTTONS                   */
-/* ========================= */
-.button-row {
+.homepage-buttons {
   display: flex;
   justify-content: center;
-  gap: 40px;
-  margin-bottom: 50px;
-}
-
-.pixel-btn {
-  font-family: "Press Start 2P";
-  padding: 15px 30px;
-  border: none;
-  border-radius: 6px;
-  box-shadow: 0px 6px #000;
-  cursor: pointer;
-  transition: 0.1s ease;
-  font-size: 12px;
-}
-
-.pixel-btn:active {
-  transform: translateY(3px);
-  box-shadow: 0px 3px #000;
-}
-
-/* Button colors */
-.teal {
-  background: #27d8bd;
-  color: #000;
-}
-.pink {
-  background: #ff72d0;
-  color: #000;
-}
-.blue {
-  background: #4ba3ff;
-  color: #000;
-}
-.yellow {
-  background: #ffd966;
-  color: #000;
-}
-
-/* ========================= */
-/* SECTION TITLES            */
-/* ========================= */
-.section-title {
-  margin-top: 60px;
-  margin-bottom: 25px;
-  font-size: 22px;
-  color: #ffcf57;
-  text-align: left;
-  padding-left: 40px;
-}
-
-/* ========================= */
-/* STORY GRID                */
-/* ========================= */
-.story-grid {
-  display: flex;
   gap: 30px;
-  flex-wrap: wrap;
-  padding-left: 40px;
+  margin-bottom: 60px;
 }
 
-/* ========================= */
-/* STORY CARD                */
-/* ========================= */
-.story-card {
-  width: 300px;
-  background: #1e1230;
-  border: 3px solid #4a3b61;
+.btn-green {
+  background: #4cf1c0;
+  color: #000;
+  padding: 15px 30px;
   border-radius: 10px;
-  padding: 25px;
-  color: #fff;
-  text-align: left;
+  border: none;
+  font-family: inherit;
+  box-shadow: 3px 4px 0px #000;
+  cursor: pointer;
 }
 
-.story-title {
-  color: #8be4ff;
-  font-size: 16px;
-  margin-bottom: 10px;
+.btn-pink {
+  background: #ff9bd5;
+  color: #000;
+  padding: 15px 30px;
+  border-radius: 10px;
+  border: none;
+  font-family: inherit;
+  box-shadow: 3px 4px 0px #000;
+  cursor: pointer;
 }
 
-.story-desc {
-  font-size: 10px;
-  opacity: 0.8;
+.section-block {
+  margin-top: 40px;
+}
+
+.section-title {
+  color: #ffc24f;
+  font-size: 18px;
   margin-bottom: 15px;
-  line-height: 1.4;
 }
 
-.story-meta {
-  font-size: 11px;
-  margin-bottom: 4px;
-}
-
-.card-buttons {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-}
-
-/* ========================= */
-/* NO STORIES                */
-/* ========================= */
-.no-stories {
-  padding-left: 40px;
+.empty-text {
+  color: #ccc;
   font-size: 12px;
-  opacity: 0.7;
-  text-align: left;
+}
+
+.story-list {
+  list-style: none;
+  padding: 0;
+}
+
+.story-card {
+  background-color: #1b1625;
+  width: 50%;
+  margin: 10px auto;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.story-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.private-code {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #ffea75;
+  font-weight: bold;
 }
