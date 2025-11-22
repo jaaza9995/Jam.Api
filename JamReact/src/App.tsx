@@ -14,6 +14,8 @@ import RegisterPage from './auth/RegisterPage'
 import ProtectedRoute from './auth/ProtectedRoute'
 import { AuthProvider } from './auth/AuthContext'
 
+import './App.css';
+
 const App: React.FC = () => {
   return (
     <AuthProvider>

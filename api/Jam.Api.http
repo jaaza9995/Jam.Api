@@ -1,6 +1,0 @@
-@Jam.Api_HostAddress = http://localhost:5217
-
-GET {{Jam.Api_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

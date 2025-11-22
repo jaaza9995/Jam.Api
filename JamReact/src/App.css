@@ -1,35 +1,88 @@
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+:root {
+  --primary-color: #646cff;
+  --secondary-color: #c084fc;
+  --bg-color: #140c1c;        /* SAMME som index.css */
+  --text-color: #f0f0f0;
+  --card-bg: #1a1a3d;
+  --accent-color: #61dafb;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* GLOBAL APP */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* 🚀 IMPORTANT FIX — fjern padding som lager hvite felt */
+#root {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;   /* <- FIXEN */
 }
 
-.card {
-  padding: 2em;
+/* Pixel wrapper */
+.pixel-bg {
+  background: #130631;
+  box-shadow: 0 0 12px rgba(138, 43, 226, 0.5);
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-top: 30px;
 }
 
-.read-the-docs {
-  color: #888;
+/* Buttons */
+.pixel-btn {
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--primary-color);
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pixel-btn:hover {
+  filter: drop-shadow(0 0 0.8rem var(--secondary-color));
+  transform: scale(1.05);
+}
+
+/* Cards */
+.story-card {
+  background-color: var(--card-bg);
+  border: 2px solid var(--primary-color);
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 0.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.story-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 15px var(--accent-color);
+}
+
+/* Titles */
+h1, h2, h3 {
+  color: var(--primary-color);
+}
+
+/* Navbar overrides */
+.navbar {
+  background-color: #1a1a3d;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.navbar-brand {
+  color: var(--primary-color) !important;
+}
+
+.navbar-nav .nav-link {
+  color: var(--text-color) !important;
+}
+
+.navbar-nav .nav-link:hover {
+  color: var(--secondary-color) !important;
 }

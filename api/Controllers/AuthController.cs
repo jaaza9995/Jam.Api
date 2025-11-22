@@ -40,7 +40,6 @@ namespace Jam.Api.Controllers
             var user = new AuthUser
             {
                 UserName = registerDto.Username,
-                Email = registerDto.Email,
             };
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);

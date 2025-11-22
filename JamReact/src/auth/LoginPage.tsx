@@ -15,7 +15,7 @@ const LoginPage: React.FC = () => {
         setError(null);
         try {
             await login({ username, password });
-            navigate('/items'); // Redirect to a protected page or dashboard on success
+            navigate('/'); // Redirect to a protected page or dashboard on success
         } catch (err) {
             setError('Invalid username or password.');
             console.error(err);

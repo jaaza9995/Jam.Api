@@ -1,6 +1,7 @@
 import React from 'react';
 import { Nav, Navbar, NavDropdown } from 'react-bootstrap';
 import AuthSection from '../auth/AuthSection';
+import './NavMenu.css';
 
 const NavMenu: React.FC = () => {
   return (

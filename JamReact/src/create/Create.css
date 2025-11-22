@@ -1,0 +1,166 @@
+/* =========================================================
+   SHARED CREATE PAGE ELEMENTS
+   ========================================================= */
+
+/* Page wrappers */
+.create-wrapper,
+.intro-wrapper,
+.questions-wrapper,
+.ending-wrapper {
+  width: 70%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 35px;
+  text-align: left;
+}
+
+/* Titles (unique for create pages) */
+.pixel-title {
+  color: #4ecbff;
+  font-size: 36px;
+  text-align: center;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+}
+
+/* Labels */
+.input-label,
+.question-label,
+.ending-label {
+  color: #ffcf57;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+/* Textareas & inputs */
+.pixel-input,
+.pixel-textarea,
+.pixel-select,
+.pixel-input-small,
+.ending-input {
+  width: 100%;
+  background: #1e1230;
+  border: 2px solid #4a3b61;
+  padding: 14px;
+  border-radius: 10px;
+  color: white;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  resize: vertical;
+}
+
+.pixel-input-small {
+  width: 70%;
+}
+
+.pixel-textarea,
+.ending-input {
+  min-height: 110px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Select */
+.pixel-select {
+  cursor: pointer;
+}
+
+/* Error message */
+.error-msg {
+  color: #ff4f79;
+  background: rgba(255, 79, 121, 0.15);
+  padding: 6px 10px;
+  border-left: 4px solid #ff4f79;
+  border-radius: 2px;
+  font-size: 10px;
+  margin-bottom: 12px;
+  line-height: 1.4;
+  max-width: 420px;
+}
+
+
+/* =========================================================
+   SHARED BUTTONS FOR CREATE PAGES
+   (reuses .pixel-btn from App.css but allows overrides)
+   ========================================================= */
+
+.pixel-btn.create-btn {
+  padding: 18px 28px;
+  border-radius: 10px;
+  font-size: 12px;
+  box-shadow: 0px 6px black;
+  border: none;
+}
+
+.teal { background: #27d8bd; color: #000; }
+.pink { background: #ff72d0; color: #000; }
+.blue { background: #4ba3ff; color: #000; }
+
+.wide-btn { width: 300px; }
+.small-btn { width: 170px; }
+
+/* Button rows */
+.button-row-intro,
+.ending-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin-top: 30px;
+}
+
+/* Question Answer Row */
+.answer-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+/* Correct answer selector */
+.correct-btn {
+  width: 35px;
+  height: 35px;
+  background: #444;
+  border: 2px solid white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.correct-btn.selected {
+  background: #27d8bd;
+}
+
+/* Question container */
+.question-box {
+  width: 70%;
+  background: #1e1230;
+  border: 3px solid #4a3b61;
+  border-radius: 12px;
+  padding: 30px;
+  text-align: left;
+}
+
+
+/* =========================================================
+   ENDING PAGE SPECIFIC
+   ========================================================= */
+
+.ending-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+
+/* =========================================================
+   FIX FOR REMOVING BANNERS / STRIPES
+   ========================================================= */
+
+.side-banner,
+.vertical-banner,
+.left-banner,
+.pink-banner {
+  display: none !important;
+}
