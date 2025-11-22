@@ -14,6 +14,8 @@ import RegisterPage from './auth/RegisterPage'
 import ProtectedRoute from './auth/ProtectedRoute'
 import { AuthProvider } from './auth/AuthContext'
 
+import { StoryPlayer } from "./StoryPlaying/StoryPlayer";
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -43,6 +45,8 @@ const App: React.FC = () => {
                 }
               />
             </Route>
+
+            <Route path="/play/:storyId" element={<StoryPlayerWrapper />} />
 
             {/* Catch-all */}
             <Route path="*" element={<Navigate to="/" replace />} />

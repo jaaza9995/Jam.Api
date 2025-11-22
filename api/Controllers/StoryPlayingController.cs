@@ -8,6 +8,7 @@ using Jam.Models.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Jam.DTOs.StoryPlaying;
+using System.Security.Claims;
 
 namespace Jam.Api.Controllers;
 
@@ -100,6 +101,16 @@ public class StoryPlayingController : ControllerBase
     {
         try
         {
+            // 1. Get UserId
+            var userId = GetCurrentUserId();
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                // Dette skal teknisk sett ikke skje hvis [Authorize] er på, 
+                // men det er en god sjekk.
+                return Unauthorized(new ErrorDto { ErrorTitle = "User not authenticated." });
+            }
+
             var story = await _storyRepository.GetStoryById(storyId);
             if (story == null)
                 return NotFound(new ErrorDto { ErrorTitle = "Story not found" });
@@ -110,7 +121,7 @@ public class StoryPlayingController : ControllerBase
                     return BadRequest(new ErrorDto { ErrorTitle = "Invalid code" });
             }
 
-            var session = await BeginPlayingSessionAsync(story);
+            var session = await BeginPlayingSessionAsync(story, userId);
 
             return Ok(new
             {
@@ -126,11 +137,8 @@ public class StoryPlayingController : ControllerBase
         }
     }
 
-    private async Task<PlayingSession> BeginPlayingSessionAsync(Story story)
+    private async Task<PlayingSession> BeginPlayingSessionAsync(Story story, string userId)
     {
-        var user = await _userManager.GetUserAsync(User)
-            ?? throw new Exception("User not logged in.");
-
         await _storyRepository.IncrementPlayed(story.StoryId);
 
         var introScene = await _sceneRepository.GetIntroSceneByStoryId(story.StoryId)
@@ -148,11 +156,18 @@ public class StoryPlayingController : ControllerBase
             CurrentSceneId = introScene.IntroSceneId,
             CurrentSceneType = SceneType.Intro,
             StoryId = story.StoryId,
-            UserId = user.Id
+            UserId = userId
         };
 
         await _playingSessionRepository.AddPlayingSession(session);
         return session;
+    }
+
+    private string? GetCurrentUserId()
+    {
+        // Henter UserId (Sub) fra JWT-tokenets Claims
+        // "NameIdentifier" eller "Sub" er standard claims for UserId i ASP.NET Core
+        return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     }
 
     // ============================================================
