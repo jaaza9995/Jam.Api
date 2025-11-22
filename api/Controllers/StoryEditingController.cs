@@ -52,7 +52,8 @@ public class StoryEditingController : ControllerBase
                 Title = story.Title,
                 Description = story.Description,
                 DifficultyLevel = story.DifficultyLevel,
-                Accessibility = story.Accessibility
+                Accessibility = story.Accessibility,
+                Code = story.Code
             };
             return Ok(dto);
         }
@@ -184,19 +185,20 @@ public class StoryEditingController : ControllerBase
             if (!questionScenes.Any())
                 return NotFound(new ErrorDto { ErrorTitle = "No question scenes found." });
 
-            var dtoList = questionScenes.Select(scene => new QuestionSceneBaseDto
+            var dtoList = questionScenes.Select(scene =>
             {
-                QuestionSceneId = scene.QuestionSceneId,
-                StoryId = scene.StoryId,
-                StoryText = scene.SceneText,
-                QuestionText = scene.Question,
-                Answers = scene.AnswerOptions.Select(a => new AnswerOptionInput
+                var selection = SelectLatestAnswers(scene.AnswerOptions);
+                return new QuestionSceneBaseDto
                 {
-                    AnswerText = a.Answer,
-                    ContextText = a.FeedbackText
-                }).ToList(),
-                CorrectAnswerIndex = scene.AnswerOptions.FindIndex(a => a.IsCorrect),
-                IsEditing = true
+                    QuestionSceneId = scene.QuestionSceneId,
+                    StoryId = scene.StoryId,
+                    StoryText = scene.SceneText,
+                    QuestionText = scene.Question,
+                    // Prefer the newest 4 answers (highest AnswerOptionId); drop stale blanks
+                    Answers = selection.answers,
+                    CorrectAnswerIndex = selection.correctIndex,
+                    IsEditing = true
+                };
             }).ToList();
 
             return Ok(dtoList);
@@ -212,6 +214,17 @@ public class StoryEditingController : ControllerBase
     public async Task<IActionResult> UpdateQuestionScenes(int storyId, [FromBody] List<QuestionSceneBaseDto> model)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        // Basic guard: don't accept empty questions/answers (frontend validation can be bypassed)
+        var validationError = ValidateQuestionScenes(model);
+        if (!string.IsNullOrEmpty(validationError))
+        {
+            return BadRequest(new ErrorDto
+            {
+                ErrorTitle = "Validation failed",
+                ErrorMessage = validationError
+            });
+        }
 
         try
         {
@@ -349,5 +362,74 @@ public class StoryEditingController : ControllerBase
             _logger.LogError(e, "Error deleting story");
             return StatusCode(500, new ErrorDto { ErrorTitle = "Unexpected error while deleting story." });
         }
+    }
+
+    // Simple validation to avoid saving empty questions/answers from the editor
+    private string? ValidateQuestionScenes(List<QuestionSceneBaseDto> model)
+    {
+        var activeScenes = model.Where(m => !m.MarkedForDeletion).ToList();
+        foreach (var scene in activeScenes)
+        {
+            if (string.IsNullOrWhiteSpace(scene.StoryText))
+                return "Story context cannot be empty.";
+
+            if (string.IsNullOrWhiteSpace(scene.QuestionText))
+                return "Question text cannot be empty.";
+
+            if (scene.Answers == null || scene.Answers.Count != 4)
+                return "Each question must have exactly 4 answers.";
+
+            if (scene.Answers.Any(a => string.IsNullOrWhiteSpace(a.AnswerText)))
+                return "All answer options must be filled.";
+
+            if (scene.Answers.Any(a => string.IsNullOrWhiteSpace(a.ContextText)))
+                return "All feedback/context texts must be filled.";
+
+            if (scene.CorrectAnswerIndex is < 0 or > 3)
+                return "A correct answer must be selected.";
+        }
+
+        return null;
+    }
+
+    private (List<AnswerOptionInput> answers, int correctIndex) SelectLatestAnswers(ICollection<AnswerOption> options)
+    {
+        // Take the newest "chunk" of 4 answers (highest ids) to mirror the latest save.
+        var latestChunk = options
+            .OrderByDescending(o => o.AnswerOptionId)
+            .Take(4)
+            .OrderBy(o => o.AnswerOptionId) // stable for UI
+            .ToList();
+
+        var answers = latestChunk.Select(o => new AnswerOptionInput
+        {
+            AnswerText = o.Answer,
+            ContextText = o.FeedbackText
+        }).ToList();
+
+        while (answers.Count < 4)
+            answers.Add(new AnswerOptionInput());
+
+        // Prefer correct flag inside the latest chunk
+        var correctIdx = latestChunk.FindIndex(o => o.IsCorrect);
+
+        // Fallback: if none marked correct in the chunk, try to map the latest correct flag overall
+        if (correctIdx == -1)
+        {
+            var latestCorrect = options
+                .OrderByDescending(o => o.AnswerOptionId)
+                .FirstOrDefault(o => o.IsCorrect);
+
+            if (latestCorrect != null)
+            {
+                var matchIdx = latestChunk.FindIndex(o =>
+                    o.Answer == latestCorrect.Answer &&
+                    o.FeedbackText == latestCorrect.FeedbackText);
+
+                correctIdx = matchIdx != -1 ? matchIdx : 0;
+            }
+        }
+
+        return (answers, correctIdx);
     }
 }

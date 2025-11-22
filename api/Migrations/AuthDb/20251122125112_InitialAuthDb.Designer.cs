@@ -3,16 +3,19 @@ using System;
 using Jam.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Jam.Api.Migrations
+namespace Jam.Api.Migrations.AuthDb
 {
     [DbContext(typeof(AuthDbContext))]
-    partial class AuthDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251122125112_InitialAuthDb")]
+    partial class InitialAuthDb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
@@ -158,6 +161,9 @@ namespace Jam.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("AuthUserId")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("CurrentLevel")
                         .HasColumnType("INTEGER");
 
@@ -187,9 +193,9 @@ namespace Jam.Api.Migrations
 
                     b.HasKey("PlayingSessionId");
 
-                    b.HasIndex("StoryId");
+                    b.HasIndex("AuthUserId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("StoryId");
 
                     b.ToTable("PlayingSession");
                 });
@@ -232,6 +238,9 @@ namespace Jam.Api.Migrations
                     b.Property<int>("Accessibility")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("AuthUserId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Code")
                         .HasColumnType("TEXT");
 
@@ -263,7 +272,7 @@ namespace Jam.Api.Migrations
 
                     b.HasKey("StoryId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("AuthUserId");
 
                     b.ToTable("Story");
                 });
@@ -431,19 +440,17 @@ namespace Jam.Api.Migrations
 
             modelBuilder.Entity("Jam.Models.PlayingSession", b =>
                 {
+                    b.HasOne("Jam.Models.AuthUser", null)
+                        .WithMany("PlayingSessions")
+                        .HasForeignKey("AuthUserId");
+
                     b.HasOne("Jam.Models.Story", "Story")
                         .WithMany("PlayingSessions")
                         .HasForeignKey("StoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Jam.Models.AuthUser", "User")
-                        .WithMany("PlayingSessions")
-                        .HasForeignKey("UserId");
-
                     b.Navigation("Story");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Jam.Models.QuestionScene", b =>
@@ -465,11 +472,9 @@ namespace Jam.Api.Migrations
 
             modelBuilder.Entity("Jam.Models.Story", b =>
                 {
-                    b.HasOne("Jam.Models.AuthUser", "User")
+                    b.HasOne("Jam.Models.AuthUser", null)
                         .WithMany("Stories")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
+                        .HasForeignKey("AuthUserId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

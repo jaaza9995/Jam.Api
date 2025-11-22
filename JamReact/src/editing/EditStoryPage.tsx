@@ -1,68 +1,122 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getStoryMetadata, updateStoryMetadata } from "./storyEditingService";
+import { getStoryMetadata } from "./storyEditingService";
+import { useAuth } from "../auth/AuthContext";
+import DeleteModal from "../shared/DeleteModal";
+import "./EditStoryPage.css";
 
-const EditStory = () => {
+const API_URL = import.meta.env.VITE_API_URL;
+
+const EditStoryPage = () => {
   const { storyId } = useParams();
   const navigate = useNavigate();
+  const { token } = useAuth();
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [difficulty, setDifficulty] = useState(1);
-  const [accessibility, setAccessibility] = useState(0);
+  const [meta, setMeta] = useState<any>(null);
+  const [questionCount, setQuestionCount] = useState<number | null>(null);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     const load = async () => {
       const res = await getStoryMetadata(Number(storyId));
       if (!res.ok) return;
+
       const data = await res.json();
+      setMeta(data);
 
-      setTitle(data.title);
-      setDescription(data.description);
-      setDifficulty(data.difficultyLevel);
-      setAccessibility(data.accessibility);
+      const qRes = await fetch(`${API_URL}/api/storyediting/${storyId}/questions`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (qRes.ok) {
+        const questions = await qRes.json();
+        setQuestionCount(questions.length);
+      }
     };
-    load();
-  }, [storyId]);
 
-  const handleSave = async () => {
-    const res = await updateStoryMetadata(Number(storyId), {
-      storyId,
-      title,
-      description,
-      difficultyLevel: difficulty,
-      accessibility,
+    load();
+  }, [storyId, token]);
+
+  if (!meta) return <div className="pixel-bg">Loading...</div>;
+
+  const isPrivate =
+    meta.accessibility === 1 ||
+    meta.accessibility === "Private" ||
+    meta.accessibility === "private";
+
+  const code = meta.code ?? null;
+
+  const handleDelete = async () => {
+    const res = await fetch(`${API_URL}/api/storyediting/${storyId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` }
     });
 
-    if (res.ok) navigate(`/edit/${storyId}/intro`);
+    if (res.ok) {
+      navigate("/");
+    } else {
+      alert("Failed to delete story.");
+    }
   };
 
   return (
-    <div className="pixel-bg">
-      <h1>Edit Story</h1>
+    <div className="pixel-bg edit-dashboard">
 
-      <label>Title</label>
-      <input value={title} onChange={e => setTitle(e.target.value)} />
+      {showDeleteModal && (
+        <DeleteModal
+          storyTitle={meta.title}
+          onConfirm={handleDelete}
+          onCancel={() => setShowDeleteModal(false)}
+        />
+      )}
 
-      <label>Description</label>
-      <textarea value={description} onChange={e => setDescription(e.target.value)} />
+      <div className="story-card">
+        <h1 className="story-title">{meta.title}</h1>
 
-      <label>Difficulty</label>
-      <select value={difficulty} onChange={e => setDifficulty(Number(e.target.value))}>
-        <option value={1}>Easy</option>
-        <option value={2}>Medium</option>
-        <option value={3}>Hard</option>
-      </select>
+        <p className="story-description">{meta.description}</p>
 
-      <label>Accessibility</label>
-      <select value={accessibility} onChange={e => setAccessibility(Number(e.target.value))}>
-        <option value={0}>Public</option>
-        <option value={1}>Private</option>
-      </select>
+        <div className="story-meta-grid">
+          <p><strong>Difficulty:</strong> {difficultyLabel(meta.difficultyLevel)}</p>
+          <p><strong>Accessibility:</strong> {isPrivate ? "Private" : "Public"}</p>
 
-      <button className="pixel-btn teal" onClick={handleSave}>Next</button>
+          {isPrivate && (
+            <p className="story-meta">
+              <strong>Code:</strong> {code || "No code generated yet"}
+            </p>
+          )}
+
+          <p><strong>Questions:</strong> {questionCount ?? "Loading..."}</p>
+        </div>
+      </div>
+
+      <div className="edit-dashboard-buttons">
+        <button className="pixel-btn teal" onClick={() => navigate(`/edit/${storyId}/intro`)}>Edit Intro</button>
+        <button className="pixel-btn teal" onClick={() => navigate(`/edit/${storyId}/questions`)}>Edit Questions</button>
+        <button className="pixel-btn teal" onClick={() => navigate(`/edit/${storyId}/endings`)}>Edit Endings</button>
+
+        <button className="pixel-btn pink" onClick={() => setShowDeleteModal(true)}>
+          Delete Game
+        </button>
+
+        <button className="pixel-btn blue" onClick={() => navigate("/")}>Back to Home</button>
+      </div>
+
     </div>
   );
 };
 
-export default EditStory;
+export default EditStoryPage;
+
+// HELPER
+const difficultyLabel = (level: number) => {
+  switch (level) {
+    case 1: return "Easy";
+    case 2: return "Medium";
+    case 3: return "Hard";
+    default: return "Unknown";
+  }
+};

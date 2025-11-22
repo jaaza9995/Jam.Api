@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import "./HomePage.css";
 import { useNavigate } from "react-router-dom";
-import { Story } from "../types/story";
+import { Story } from "../types/createStory";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -83,6 +83,7 @@ useEffect(() => {
                   <p className="private-code">Game Code: {s.code}</p>
                 )}
 
+
                 {/* Buttons */}
                 <div className="story-buttons">
                   <button
@@ -94,7 +95,7 @@ useEffect(() => {
 
                   <button
                     className="pixel-btn pink"
-                    onClick={() => navigate(`/edit/${s.storyId}/intro`)}
+                    onClick={() => navigate(`/edit/${s.storyId}`)}
                   >
                     EDIT
                   </button>

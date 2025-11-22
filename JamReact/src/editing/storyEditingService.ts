@@ -38,7 +38,7 @@ export async function updateIntroScene(
   introText: string,
   token: string
 ) {
-  const res = await fetch(`${API_URL}/api/storyediting/${storyId}/intro`, {
+  return await fetch(`${API_URL}/api/storyediting/${storyId}/intro`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -46,9 +46,6 @@ export async function updateIntroScene(
     },
     body: JSON.stringify({ introText }),
   });
-
-  if (!res.ok) throw new Error("Failed to update intro");
-  return await res.json();
 }
 
 

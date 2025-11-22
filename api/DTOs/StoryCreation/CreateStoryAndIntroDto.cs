@@ -6,8 +6,7 @@ namespace Jam.DTOs.StoryCreation;
 
 public class CreateStoryAndIntroDto 
 {
-    [Required(ErrorMessage = "Please enter a title for your story.")]
-    [StringLength(100, MinimumLength = 2, ErrorMessage = "The title must be between 2 and 100 characters.")]
+    [Required]
     public string Title { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Please enter a description for your story.")]

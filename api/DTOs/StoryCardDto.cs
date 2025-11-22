@@ -5,5 +5,5 @@ public class StoryCardDto
     public string Description { get; set; } = string.Empty;
     public int QuestionCount { get; set; }
     public string Accessibility { get; set; } = string.Empty;
-    public string? Code { get; set; }   // ✔ Viktig!
+    public string Code { get; set; } = string.Empty;  // ✔ Viktig!
 }

@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Container } from "react-bootstrap";
+import { StoryPlayer } from "./StoryPlaying/StoryPlayer";
 
 import HomePage from "./home/HomePage";
 

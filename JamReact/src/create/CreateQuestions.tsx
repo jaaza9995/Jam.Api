@@ -16,6 +16,14 @@ const emptyQuestion = () => ({
   correctAnswerIndex: -1,
 });
 
+const emptyErrors = () => ({
+  storyText: "",
+  questionText: "",
+  answers: "",
+  contextTexts: "",
+  correct: "",
+});
+
 const CreateQuestions = () => {
   const navigate = useNavigate();
   const { data, setData } = useStoryCreation();
@@ -24,47 +32,43 @@ const CreateQuestions = () => {
     data.questions.length > 0 ? data.questions : [emptyQuestion()]
   );
 
-  const [errors, setErrors] = useState<{ [key: number]: string }>({});
+  // errors[i] = { storyText?, questionText?, answers?, contextTexts?, correct? }
+  const [errors, setErrors] = useState<any[]>([]);
 
+  // -----------------------------
+  // VALIDATION
+  // -----------------------------
   const validate = () => {
-  const err: { [key: number]: string } = {};
+    const errList = questions.map((q) => {
+      const e: any = {};
 
-  questions.forEach((q, i) => {
-    // Valider én og én, og stopp når du finner en feil
-      if (!q.storyText.trim()) {
-        err[i] = "Story context is required.";
-        return;
-      }
+      if (!q.storyText.trim()) e.storyText = "Story context is required.";
+      if (!q.questionText.trim()) e.questionText = "Question text is required.";
 
-      if (!q.questionText.trim()) {
-        err[i] = "Question text is required.";
-        return;
-      }
+      if (q.answers.some((a) => !a.answerText.trim()))
+        e.answers = "All 4 answer options must be filled.";
 
-      if (q.answers.some(a => !a.answerText.trim())) {
-        err[i] = "All 4 answer options must be filled.";
-        return;
-      }
+      if (q.answers.some((a) => !a.contextText.trim()))
+        e.contextTexts = "All 4 context texts must be filled.";
 
-      if (q.answers.some(a => !a.contextText.trim())) {
-        err[i] = "All 4 context texts must be filled.";
-        return;
-      }
+      if (q.correctAnswerIndex < 0)
+        e.correct = "Please choose a correct answer.";
 
-      if (q.correctAnswerIndex < 0) {
-        err[i] = "Please choose a correct answer.";
-        return;
-      }
+      return e;
     });
 
-    setErrors(err);
-    return Object.keys(err).length === 0;
+    setErrors(errList);
+
+    // return TRUE only if all questions have NO errors
+    return errList.every((e) => Object.keys(e).length === 0);
   };
 
+  // -----------------------------
+  // HANDLERS
+  // -----------------------------
   const handleNext = async () => {
     if (!validate()) return;
 
-    // mappe til formatet backend forventer (QuestionSceneBaseDto)
     const mapped = questions.map((q) => ({
       storyText: q.storyText,
       questionText: q.questionText,
@@ -85,9 +89,7 @@ const CreateQuestions = () => {
       return;
     }
 
-    // lagre i context slik at brukeren kan gå tilbake
     setData((prev) => ({ ...prev, questions }));
-
     navigate("/create/endings");
   };
 
@@ -95,17 +97,27 @@ const CreateQuestions = () => {
     const copy = [...questions];
     copy[index] = updated;
     setQuestions(copy);
+
+    // Clear errors for that field dynamically
+    const newErrors = [...errors];
+    newErrors[index] = {};
+    setErrors(newErrors);
   };
 
   const remove = (index: number) => {
     if (questions.length === 1) return;
     setQuestions(questions.filter((_, i) => i !== index));
+    setErrors(errors.filter((_, i) => i !== index));
   };
 
   const add = () => {
     setQuestions([...questions, emptyQuestion()]);
+    setErrors([...errors, emptyErrors()]);
   };
 
+  // -----------------------------
+  // RENDER
+  // -----------------------------
   return (
     <div className="pixel-bg">
       <h1 className="pixel-title">CREATE QUESTIONS</h1>
@@ -117,22 +129,26 @@ const CreateQuestions = () => {
             <textarea
               className="pixel-input"
               value={q.storyText}
-              onChange={(e) => update(i, { ...q, storyText: e.target.value })}
+              placeholder="Write the story text shown before the question..."
+              onChange={(e) =>
+                update(i, { ...q, storyText: e.target.value })
+              }
             />
-            {errors[i] && errors[i].includes("Story") && (
-              <p className="error-msg">{errors[i]}</p>
+            {errors[i]?.storyText && (
+              <p className="error-msg">{errors[i].storyText}</p>
             )}
 
             <h3 className="question-label">QUESTION</h3>
             <textarea
               className="pixel-input"
               value={q.questionText}
+              placeholder="Write the question the player must answer..."
               onChange={(e) =>
                 update(i, { ...q, questionText: e.target.value })
               }
             />
-            {errors[i] && errors[i].includes("Question") && (
-              <p className="error-msg">{errors[i]}</p>
+            {errors[i]?.questionText && (
+              <p className="error-msg">{errors[i].questionText}</p>
             )}
 
             <h3 className="question-label">ANSWER OPTIONS</h3>
@@ -141,6 +157,7 @@ const CreateQuestions = () => {
                 <input
                   className="pixel-input-small"
                   value={a.answerText}
+                  placeholder={`Answer option ${ai + 1}`}
                   onChange={(e) => {
                     const list = [...q.answers];
                     list[ai].answerText = e.target.value;
@@ -160,12 +177,11 @@ const CreateQuestions = () => {
                 </button>
               </div>
             ))}
-
-            {errors[i] && errors[i].includes("answer options") && (
-              <p className="error-msg">{errors[i]}</p>
+            {errors[i]?.answers && (
+              <p className="error-msg">{errors[i].answers}</p>
             )}
-            {errors[i] && errors[i].includes("correct") && (
-              <p className="error-msg">{errors[i]}</p>
+            {errors[i]?.correct && (
+              <p className="error-msg">{errors[i].correct}</p>
             )}
 
             <h3 className="question-label">CONTEXT TEXTS</h3>
@@ -174,6 +190,7 @@ const CreateQuestions = () => {
                 key={ai}
                 className="pixel-input"
                 value={a.contextText}
+                placeholder="Story text that appears after choosing this answer..."
                 onChange={(e) => {
                   const list = [...q.answers];
                   list[ai].contextText = e.target.value;
@@ -181,6 +198,9 @@ const CreateQuestions = () => {
                 }}
               />
             ))}
+            {errors[i]?.contextTexts && (
+              <p className="error-msg">{errors[i].contextTexts}</p>
+            )}
 
             <button
               className="pixel-btn pink small-remove"

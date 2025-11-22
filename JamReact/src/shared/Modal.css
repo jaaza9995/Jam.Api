@@ -42,15 +42,21 @@
 }
 
 .btn-white {
-  background: white;
+  background: #ff77cc;
+  color: #1c1424;
   padding: 10px 18px;
   border: none;
   font-family: "Press Start 2P";
+  cursor: pointer;
+  min-width: 140px;
 }
 
 .btn-pink {
-  background: #ff77cc;
+  background: #ff99d9;
+  color: #1c1424;
   padding: 10px 18px;
   border: none;
   font-family: "Press Start 2P";
+  cursor: pointer;
+  min-width: 140px;
 }

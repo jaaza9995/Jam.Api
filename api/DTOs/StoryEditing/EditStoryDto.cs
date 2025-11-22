@@ -7,19 +7,17 @@ public class EditStoryDto
 {
     public int StoryId { get; set; }
 
-    [Required(ErrorMessage = "Please enter a story title.")]
-    [StringLength(100, ErrorMessage = "The title cannot exceed 100 characters.")]
+    [Required]
     public string Title { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Please provide a description for your story.")]
-    [StringLength(500, ErrorMessage = "The description cannot exceed 500 characters.")]
+    [Required]
     public string Description { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Please select a difficulty level.")]
-    [Display(Name = "Difficulty Level")]
+    [Required]
     public DifficultyLevel DifficultyLevel { get; set; }
 
-    [Required(ErrorMessage = "Please select an accessibility option.")]
-    [Display(Name = "Accessibility")]
+    [Required]
     public Accessibility Accessibility { get; set; }
+
+    public string? Code { get; set; }
 }

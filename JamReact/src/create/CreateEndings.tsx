@@ -12,29 +12,38 @@ const CreateEndings = () => {
   const [neutral, setNeutral] = useState(data.endings.neutral);
   const [bad, setBad] = useState(data.endings.bad);
 
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({
+    good: "",
+    neutral: "",
+    bad: "",
+  });
 
+  // -----------------------
+  // VALIDATION
+  // -----------------------
   const validate = () => {
-    if (!good.trim()) return "Good ending is required.";
-    if (!neutral.trim()) return "Neutral ending is required.";
-    if (!bad.trim()) return "Bad ending is required.";
-    return "";
+    const newErrors: any = {};
+
+    if (!good.trim()) newErrors.good = "Opps, your forgot to write a good ending.";
+    if (!neutral.trim()) newErrors.neutral = "Opps, your forgot to write a neutral ending.";
+    if (!bad.trim()) newErrors.bad = "Opps, your forgot to write a bad ending.";
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
   };
 
+  // -----------------------
+  // SUBMIT
+  // -----------------------
   const handleFinish = async () => {
-    const val = validate();
-    if (val) {
-      setError(val);
-      return;
-    }
+    if (!validate()) return;
 
-    // Oppdater React context (lokal state)
     setData((prev) => ({
       ...prev,
       endings: { good, neutral, bad },
     }));
 
-    // 1. Lagre endings i backend-session
     const res = await saveEndings({
       goodEnding: good,
       neutralEnding: neutral,
@@ -45,20 +54,16 @@ const CreateEndings = () => {
       console.error("Failed to save endings");
       return;
     }
-     const json = await res.json();
-    console.log("Story created:", json);
 
-
-    
-    // 3. Naviger hjem etter fullført lagring
     navigate("/");
   };
 
+  // -----------------------
+  // RENDER
+  // -----------------------
   return (
     <div className="pixel-bg">
       <h1 className="pixel-title">CREATE ENDINGS</h1>
-
-      {error && <p className="error-msg">{error}</p>}
 
       <div className="ending-wrapper">
 
@@ -67,8 +72,17 @@ const CreateEndings = () => {
           <textarea
             className="ending-input"
             value={good}
-            onChange={(e) => setGood(e.target.value)}
+            placeholder="Write the good ending for your story..."
+            onChange={(e) => {
+              setGood(e.target.value);
+              setData((prev) => ({
+                ...prev,
+                endings: { ...prev.endings, good: e.target.value },
+              }));
+              setErrors((prev) => ({ ...prev, good: "" }));
+            }}
           />
+          {errors.good && <p className="error-msg">{errors.good}</p>}
         </div>
 
         <div className="ending-block">
@@ -76,8 +90,17 @@ const CreateEndings = () => {
           <textarea
             className="ending-input"
             value={neutral}
-            onChange={(e) => setNeutral(e.target.value)}
+            placeholder="Write the neutral ending..."
+            onChange={(e) => {
+              setNeutral(e.target.value);
+              setData((prev) => ({
+                ...prev,
+                endings: { ...prev.endings, neutral: e.target.value },
+              }));
+              setErrors((prev) => ({ ...prev, neutral: "" }));
+            }}
           />
+          {errors.neutral && <p className="error-msg">{errors.neutral}</p>}
         </div>
 
         <div className="ending-block">
@@ -85,14 +108,30 @@ const CreateEndings = () => {
           <textarea
             className="ending-input"
             value={bad}
-            onChange={(e) => setBad(e.target.value)}
+            placeholder="Write the BAD ending..."
+            onChange={(e) => {
+              setBad(e.target.value);
+              setData((prev) => ({
+                ...prev,
+                endings: { ...prev.endings, bad: e.target.value },
+              }));
+              setErrors((prev) => ({ ...prev, bad: "" }));
+            }}
           />
+          {errors.bad && <p className="error-msg">{errors.bad}</p>}
         </div>
 
         <div className="ending-buttons">
           <button
             className="pixel-btn pink side-btn"
-            onClick={() => navigate("/create/questions")}
+            onClick={() => {
+              // persist current endings before going back
+              setData((prev) => ({
+                ...prev,
+                endings: { good, neutral, bad },
+              }));
+              navigate("/create/questions");
+            }}
           >
             BACK
           </button>
@@ -101,7 +140,6 @@ const CreateEndings = () => {
             FINISH
           </button>
         </div>
-
       </div>
     </div>
   );

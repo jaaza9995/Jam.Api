@@ -1,5 +1,5 @@
 import React from "react";
-import "./DeleteModal.css";
+import "./Modal.css";
 
 interface DeleteModalProps {
   storyTitle: string;
