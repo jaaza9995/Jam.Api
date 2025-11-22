@@ -8,11 +8,16 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Jam.Api.Migrations.AuthDb
+namespace Jam.Api.Migrations.StoryDb
 {
-    [DbContext(typeof(AuthDbContext))]
-    [Migration("20251120175826_InitialAuthDb")]
-    partial class InitialAuthDb
+    [DbContext(typeof(StoryDbContext))]
+<<<<<<<< HEAD:api/Migrations/StoryDb/20251121184835_InitialStoryDb.Designer.cs
+    [Migration("20251121184835_InitialStoryDb")]
+    partial class InitialStoryDb
+========
+    [Migration("20251121155334_StoryInit")]
+    partial class StoryInit
+>>>>>>>> 64a7d3ecc456809cda3bdebb1b383d7b3b160e12:api/Migrations/StoryDb/20251121155334_StoryInit.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,7 +49,7 @@ namespace Jam.Api.Migrations.AuthDb
 
                     b.HasIndex("QuestionSceneId");
 
-                    b.ToTable("AnswerOption");
+                    b.ToTable("AnswerOptions");
                 });
 
             modelBuilder.Entity("Jam.Models.AuthUser", b =>
@@ -131,7 +136,7 @@ namespace Jam.Api.Migrations.AuthDb
 
                     b.HasIndex("StoryId");
 
-                    b.ToTable("EndingScene");
+                    b.ToTable("EndingScenes");
                 });
 
             modelBuilder.Entity("Jam.Models.IntroScene", b =>
@@ -152,7 +157,7 @@ namespace Jam.Api.Migrations.AuthDb
                     b.HasIndex("StoryId")
                         .IsUnique();
 
-                    b.ToTable("IntroScene");
+                    b.ToTable("IntroScenes");
                 });
 
             modelBuilder.Entity("Jam.Models.PlayingSession", b =>
@@ -194,7 +199,7 @@ namespace Jam.Api.Migrations.AuthDb
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PlayingSession");
+                    b.ToTable("PlayingSessions");
                 });
 
             modelBuilder.Entity("Jam.Models.QuestionScene", b =>
@@ -219,11 +224,12 @@ namespace Jam.Api.Migrations.AuthDb
 
                     b.HasKey("QuestionSceneId");
 
-                    b.HasIndex("NextQuestionSceneId");
+                    b.HasIndex("NextQuestionSceneId")
+                        .IsUnique();
 
                     b.HasIndex("StoryId");
 
-                    b.ToTable("QuestionScene");
+                    b.ToTable("QuestionScenes");
                 });
 
             modelBuilder.Entity("Jam.Models.Story", b =>
@@ -268,7 +274,7 @@ namespace Jam.Api.Migrations.AuthDb
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Story");
+                    b.ToTable("Stories");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -442,7 +448,8 @@ namespace Jam.Api.Migrations.AuthDb
 
                     b.HasOne("Jam.Models.AuthUser", "User")
                         .WithMany("PlayingSessions")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Story");
 
@@ -453,7 +460,8 @@ namespace Jam.Api.Migrations.AuthDb
                 {
                     b.HasOne("Jam.Models.QuestionScene", "NextQuestionScene")
                         .WithMany()
-                        .HasForeignKey("NextQuestionSceneId");
+                        .HasForeignKey("NextQuestionSceneId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("Jam.Models.Story", "Story")
                         .WithMany("QuestionScenes")
@@ -470,7 +478,8 @@ namespace Jam.Api.Migrations.AuthDb
                 {
                     b.HasOne("Jam.Models.AuthUser", "User")
                         .WithMany("Stories")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("User");
                 });

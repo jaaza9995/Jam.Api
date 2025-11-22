@@ -59,6 +59,15 @@ builder.Services.AddSwaggerGen(c =>
         }});
 });
 
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(60);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 builder.Services.AddDbContext<StoryDbContext>(options =>
 {
     options.UseSqlite(
@@ -79,7 +88,9 @@ builder.Services.AddCors(options =>
     {
     options.AddPolicy("CorsPolicy", builder =>
     {
-        builder.WithOrigins("http://localhost:5173") // Allow requests from the React frontend
+        builder.WithOrigins(
+                "http://localhost:4000"  // custom Vite port (matches VITE_PORT)
+            ) // Allow requests from the React frontend
                .AllowAnyMethod()
                .AllowAnyHeader()
                .AllowCredentials();
@@ -131,13 +142,6 @@ var loggerConfiguration = new LoggerConfiguration()
 var logger = loggerConfiguration.CreateLogger();
 builder.Logging.AddSerilog(logger);
 
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
-{
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -151,10 +155,10 @@ if (app.Environment.IsDevelopment())
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseSession();
 app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseSession();
 app.MapControllers();
 
 app.Run();

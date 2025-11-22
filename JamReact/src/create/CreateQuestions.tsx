@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./CreateQuestions.css";
+import "./Create.css";
 import useStoryCreation from "../storyCreation/StoryCreationContext";
-import { saveQuestions } from "../storyCreation/StoryCreationApi";
+import { saveQuestions } from "../storyCreation/StoryCreationService";
 
 const emptyQuestion = () => ({
   storyText: "",

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./CreateIntro.css";
+import "./Create.css";
 import useStoryCreation from "../storyCreation/StoryCreationContext";
-import { saveIntro } from "../storyCreation/StoryCreationApi";
+import { saveIntro } from "../storyCreation/StoryCreationService";
 
 const CreateIntro = () => {
   const navigate = useNavigate();

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./CreateEndings.css";
+import "./Create.css";
 import useStoryCreation from "../storyCreation/StoryCreationContext";
-import { saveEndings, completeStory } from "../storyCreation/StoryCreationApi";
+import { saveEndings } from "../storyCreation/StoryCreationService";
 
 const CreateEndings = () => {
   const navigate = useNavigate();
@@ -35,28 +35,21 @@ const CreateEndings = () => {
     }));
 
     // 1. Lagre endings i backend-session
-    const res1 = await saveEndings({
+    const res = await saveEndings({
       goodEnding: good,
       neutralEnding: neutral,
       badEnding: bad,
     });
 
-    if (!res1.ok) {
+    if (!res.ok) {
       console.error("Failed to save endings");
       return;
     }
-
-    // 2. Fullfør story (lagre i databasen)
-    const res2 = await completeStory();
-
-    if (!res2.ok) {
-      console.error("Failed to complete story");
-      return;
-    }
-
-    const json = await res2.json();
+     const json = await res.json();
     console.log("Story created:", json);
 
+
+    
     // 3. Naviger hjem etter fullført lagring
     navigate("/");
   };

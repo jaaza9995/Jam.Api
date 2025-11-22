@@ -1,5 +1,22 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
+// ---------------------------
+// COMMON AUTH HEADERS
+// ---------------------------
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  return headers;
+};
+
 // ----------------------------
 // STEP 1 – INTRO
 // ----------------------------
@@ -12,8 +29,8 @@ export const saveIntro = async (payload: {
 }) => {
   return await fetch(`${API_URL}/api/storycreation/intro`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
+    headers: getAuthHeaders(),     
+    credentials: "include",    
     body: JSON.stringify(payload),
   });
 };
@@ -24,8 +41,8 @@ export const saveIntro = async (payload: {
 export const saveQuestions = async (payload: any) => {
   return await fetch(`${API_URL}/api/storycreation/questions`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
+    headers: getAuthHeaders(),    
+    credentials: "include",    
     body: JSON.stringify(payload),
   });
 };
@@ -40,8 +57,8 @@ export const saveEndings = async (payload: {
 }) => {
   return await fetch(`${API_URL}/api/storycreation/endings`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
+    headers: getAuthHeaders(),  
+    credentials: "include",      
     body: JSON.stringify(payload),
   });
 };
@@ -49,9 +66,3 @@ export const saveEndings = async (payload: {
 // ----------------------------
 // STEP 4 – COMPLETE STORY
 // ----------------------------
-export const completeStory = async () => {
-  return await fetch(`${API_URL}/api/storycreation/complete`, {
-    method: "POST",
-    credentials: "include",
-  });
-};
