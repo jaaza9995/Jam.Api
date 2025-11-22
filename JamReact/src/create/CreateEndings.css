@@ -1,0 +1,78 @@
+.pixel-bg {
+  background: #140c1c;
+  min-height: 100vh;
+  padding: 40px;
+  color: white;
+  font-family: "Press Start 2P", cursive;
+}
+
+.pixel-title {
+  color: #4ecbff;
+  font-size: 42px;
+  text-align: center;
+  letter-spacing: 3px;
+  margin-bottom: 40px;
+}
+
+/* Main wrapper */
+.ending-wrapper {
+  width: 60%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+}
+
+/* Each ending block */
+.ending-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.ending-label {
+  color: #ffcf57;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.ending-input {
+  width: 100%;
+  min-height: 120px;
+  background: #201433;
+  border: 2px solid #4ecbff;
+  border-radius: 12px;
+  padding: 14px;
+  color: white;
+  font-size: 12px;
+}
+
+/* Buttons on the right */
+.ending-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 20px;
+}
+
+.pixel-btn {
+  font-family: "Press Start 2P", cursive;
+  padding: 18px 30px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0px 6px black;
+  font-size: 12px;
+}
+
+.pink {
+  background: #ff72d0;
+}
+
+.teal {
+  background: #27d8bd;
+}
+
+.side-btn {
+  width: 200px;
+}
