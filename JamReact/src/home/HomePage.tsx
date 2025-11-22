@@ -49,18 +49,18 @@ useEffect(() => {
 
 
   return (
-    <div className="homepage-container">
+    <div className="pixel-bg">
 
       <h1 className="homepage-title">WELCOME TO MATH UNIVERSE</h1>
 
       <div className="homepage-buttons">
         <button
-          className="btn-green"
+          className="btn-bigHome make"
           onClick={() => navigate("/create/intro")}
         >
           MAKE NEW GAME
         </button>
-        <button className="btn-pink">ADD NEW GAME</button>
+        <button className="btn-bigHome add">ADD NEW GAME</button>
       </div>
 
       {/* ================= YOUR GAMES ================ */}
@@ -78,6 +78,9 @@ useEffect(() => {
                 <p>{s.description}</p>
                 <p>Questions: {s.questionCount}</p>
 
+                {/* DIFFICULTY */}
+                {(s.difficultyLevel === "Easy" || s.difficultyLevel === 0) && <div className="Difficulty easy">Easy</div>}
+
                 {/* PRIVATE CODE */}
                 {(s.accessibility === "Private" || s.accessibility === 1) && (
                   <p className="private-code">Game Code: {s.code}</p>
@@ -86,14 +89,14 @@ useEffect(() => {
                 {/* Buttons */}
                 <div className="story-buttons">
                   <button
-                    className="pixel-btn teal"
+                    className="pixel-btn edit"
                     onClick={() => navigate(`/play/${s.storyId}`)}
                   >
                     PLAY
                   </button>
 
                   <button
-                    className="pixel-btn pink"
+                    className="pixel-btn play"
                     onClick={() => navigate(`/edit/${s.storyId}/intro`)}
                   >
                     EDIT

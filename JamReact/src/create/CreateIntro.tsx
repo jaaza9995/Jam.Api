@@ -63,7 +63,7 @@ const CreateIntro = () => {
 
   return (
     <div className="pixel-bg">
-      <h1 className="intro-title">CREATE NEW GAME</h1>
+      <h1 className="pixel-title">CREATE NEW GAME</h1>
 
       <div className="form-section">
         {error && <p className="error-msg">{error}</p>}
@@ -113,7 +113,7 @@ const CreateIntro = () => {
         </select>
 
         <div className="button-row-intro">
-          <button className="pixel-btn pink" onClick={() => navigate("/")}>
+          <button className="pixel-btn next" onClick={() => navigate("/")}>
             BACK
           </button>
           <button className="pixel-btn teal" onClick={handleNext}>

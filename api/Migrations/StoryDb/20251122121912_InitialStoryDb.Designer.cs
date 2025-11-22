@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Jam.Api.Migrations.StoryDb
 {
     [DbContext(typeof(StoryDbContext))]
-    [Migration("20251122073716_RemoveUserRelationships")]
-    partial class RemoveUserRelationships
+    [Migration("20251122121912_InitialStoryDb")]
+    partial class InitialStoryDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
