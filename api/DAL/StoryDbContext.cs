@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Jam.DAL;
 
-public class StoryDbContext : IdentityDbContext<AuthUser>
+public class StoryDbContext : DbContext
 {
     public StoryDbContext(DbContextOptions<StoryDbContext> options) : base(options)
     {
@@ -28,18 +28,18 @@ public class StoryDbContext : IdentityDbContext<AuthUser>
         // ==========================================================================
 
         // User -> Story: If a User is deleted, their Stories remain, but the Story.UserId is set to NULL
-        modelBuilder.Entity<Story>()
-            .HasOne(s => s.User)
-            .WithMany(u => u.Stories)
-            .HasForeignKey(s => s.UserId)
-            .OnDelete(DeleteBehavior.SetNull);
+        //modelBuilder.Entity<Story>()
+        //    .HasOne(s => s.User)
+        //    .WithMany(u => u.Stories)
+        //    .HasForeignKey(s => s.UserId)
+        //    .OnDelete(DeleteBehavior.SetNull);
 
         // User -> PlayingSession: If a User is deleted, the sessions remain, but PlayingSession.UserId is set to NULL
-        modelBuilder.Entity<PlayingSession>()
-            .HasOne(ps => ps.User)
-            .WithMany(u => u.PlayingSessions)
-            .HasForeignKey(ps => ps.UserId)
-            .OnDelete(DeleteBehavior.SetNull);
+        //modelBuilder.Entity<PlayingSession>()
+        //    .HasOne(ps => ps.User)
+        //    .WithMany(u => u.PlayingSessions)
+        //    .HasForeignKey(ps => ps.UserId)
+        //    .OnDelete(DeleteBehavior.SetNull);
 
 
 

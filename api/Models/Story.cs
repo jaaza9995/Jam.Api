@@ -16,7 +16,7 @@ public class Story
     public int Failed { get; set; } // how many times the story has been failed
     public int Dnf { get; set; } // how many times the story has been abandoned
     public string? UserId { get; set; } // Foreign key to User, nullable to allow User deletion without deleting stories
-    public AuthUser? User { get; set; } // Navigation property 
+    //public AuthUser? User { get; set; } // Navigation property 
     public IntroScene IntroScene { get; set; } = new(); // Navigation property
     public List<QuestionScene> QuestionScenes { get; set; } = new(); // Navigation property
     public List<EndingScene> EndingScenes { get; set; } = new(); // Navigation property

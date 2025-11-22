@@ -4,8 +4,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Jam.DTOs.StoryPlaying;
 
-public class PlaySceneDto : IValidatableObject
+public class PlaySceneDto
 {
+    // Common to all types of scenes
     public int SessionId { get; set; }
     public int SceneId { get; set; }
     public string SceneText { get; set; } = string.Empty;
@@ -14,9 +15,12 @@ public class PlaySceneDto : IValidatableObject
 
     // For QuestionScenes
     public string? Question { get; set; }
-    public IEnumerable<AnswerOption>? AnswerOptions { get; set; }
+    public IEnumerable<AnswerOption>? AnswerOptions { get; set; } 
     public int? SelectedAnswerId { get; set; } // user’s selected answer in the form 
     public Guid AnswerRandomSeed { get; set; } // in case client-side validation fails 
+
+
+    public int? NextSceneAfterIntroId { get; set; } // To navigate from IntroScene to first QuestionScene
 
 
     // Playing stats
@@ -24,16 +28,4 @@ public class PlaySceneDto : IValidatableObject
     public int MaxScore { get; set; }
     public int CurrentLevel { get; set; }
 
-
-    // Conditional validation
-    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        if (SceneType == SceneType.Question && SelectedAnswerId == null)
-        {
-            yield return new ValidationResult(
-                "You must select an answer before continuing.",
-                new[] { nameof(SelectedAnswerId) }
-            );
-        }
-    }
 }
