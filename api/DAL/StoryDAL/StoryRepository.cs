@@ -29,7 +29,7 @@ public class StoryRepository : IStoryRepository
         try
         {
             return await _db.Stories
-                .Include(s => s.User) // eager load owner
+                //.Include(s => s.User) // eager load owner
                 .ToListAsync();
         }
         catch (Exception e)

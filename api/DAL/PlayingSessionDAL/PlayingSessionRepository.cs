@@ -27,8 +27,8 @@ public class PlayingSessionRepository : IPlayingSessionRepository
         try
         {
             return await _db.PlayingSessions
-                .Include(s => s.User) // eager load player
-                .Include(s => s.Story) // eager load story
+                //.Include(s => s.User) // eager load player
+                //.Include(s => s.Story) // eager load story
                 .ToListAsync();
         }
         catch (Exception e)

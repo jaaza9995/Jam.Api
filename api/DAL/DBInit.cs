@@ -9,9 +9,6 @@ public static class DBInit
 {
     public static async Task SeedAsync(IApplicationBuilder app)
     {
-
-
-
         using var scope = app.ApplicationServices.CreateAsyncScope();
 
         var storyContext = scope.ServiceProvider.GetRequiredService<StoryDbContext>();
@@ -19,21 +16,23 @@ public static class DBInit
 
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AuthUser>>();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        
-        //await context.Database.EnsureCreatedAsync();
 
-        // For development only
-        //await context.Database.EnsureDeletedAsync();
+        // await authContext.Database.MigrateAsync();   // Identity tables
+        // await storyContext.Database.MigrateAsync();  // Story tables
 
-        await authContext.Database.MigrateAsync();   // Identity tables
-        await storyContext.Database.MigrateAsync();  // Story tables
+        // Reset AuthDb
+        await authContext.Database.EnsureDeletedAsync();
+        await authContext.Database.EnsureCreatedAsync();
+
+        // Reset StoryDb
+        await storyContext.Database.EnsureDeletedAsync();
+        await storyContext.Database.EnsureCreatedAsync();
 
         if (!storyContext.Database.CanConnect() || !authContext.Database.CanConnect())
         {
-            Console.WriteLine("⚠️ Database not ready yet!");
+            Console.WriteLine("Database not ready yet!");
             return;
         }
-
 
         // Ensure roles exist
         if (!await roleManager.RoleExistsAsync("Admin"))
@@ -128,7 +127,7 @@ public static class DBInit
                     Finished = 12,
                     Failed = 5,
                     Dnf = 3,
-                    User = barry,
+                    UserId = barry?.Id,
                 },
                 new Story
                 {
@@ -141,7 +140,7 @@ public static class DBInit
                     Failed = 0,
                     Dnf = 0,
                     Code = "A123B29",
-                    User = emily,
+                    UserId = emily!.Id,
                 },
                 new Story
                 {
@@ -153,7 +152,7 @@ public static class DBInit
                     Finished = 0,
                     Failed = 0,
                     Dnf = 0,
-                    User = bob,
+                    UserId = bob!.Id,
                 },
             };
             storyContext.Stories.AddRange(stories);
@@ -355,7 +354,7 @@ public static class DBInit
                 CurrentSceneId = neutralEnding.EndingSceneId,
                 CurrentSceneType = SceneType.Ending,
                 Story = stories[1],
-                User = barry,
+                UserId = barry!.Id,
             };
 
             var smithyPlayingSession = new PlayingSession
@@ -367,7 +366,7 @@ public static class DBInit
                 CurrentSceneId = questionScene2.QuestionSceneId,
                 CurrentSceneType = SceneType.Question,
                 Story = stories[0],
-                User = emily,
+                UserId = emily.Id,
             };
 
             storyContext.PlayingSessions.AddRange(theFlashPlayingSession, smithyPlayingSession);

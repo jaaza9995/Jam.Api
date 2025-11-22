@@ -80,4 +80,24 @@ const App: React.FC = () => {
   );
 };
 
+
+// 💡 VIKTIG: Hjelpekomponent for å hente storyId fra URL
+// Dette er nødvendig for å fange opp ID-en fra URL-en og sende den som en number prop.
+import { useParams } from 'react-router-dom';
+
+const StoryPlayerWrapper = () => {
+    // useParams henter verdien etter :storyId i URL-en
+    const { storyId } = useParams<{ storyId: string }>(); 
+    
+    // Konverterer string (fra URL) til number, da StoryPlayer forventer number.
+    const storyIdNumber = parseInt(storyId || '0', 10);
+    
+    // Render StoryPlayer kun hvis vi har en gyldig ID
+    if (!storyIdNumber) {
+        return <div>Feil: Historie ID mangler eller er ugyldig.</div>;
+    }
+
+    return <StoryPlayer storyId={storyIdNumber} />;
+};
+
 export default App;
