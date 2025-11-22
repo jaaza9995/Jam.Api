@@ -187,16 +187,36 @@ public class StoryEditingController : ControllerBase
 
             var dtoList = questionScenes.Select(scene =>
             {
-                var selection = SelectLatestAnswers(scene.AnswerOptions);
+                var answersOrdered = scene.AnswerOptions
+                    .OrderBy(a => a.AnswerOptionId)
+                    .ToList();
+
+                var answersDto = answersOrdered
+                    .Select(a => new AnswerOptionInput
+                    {
+                        AnswerOptionId = a.AnswerOptionId,
+                        AnswerText = a.Answer,
+                        ContextText = a.FeedbackText
+                    })
+                    .ToList();
+
+                // finn index for korrekt svar
+                var correctIdx = answersOrdered
+                    .Select((a, idx) => new { a, idx })
+                    .FirstOrDefault(x => x.a.IsCorrect)?.idx ?? 0;
+
+                // sørg for at vi alltid har 4 elementer (pad med tomme hvis nødvendig)
+                while (answersDto.Count < 4)
+                    answersDto.Add(new AnswerOptionInput());
+
                 return new QuestionSceneBaseDto
                 {
                     QuestionSceneId = scene.QuestionSceneId,
                     StoryId = scene.StoryId,
                     StoryText = scene.SceneText,
                     QuestionText = scene.Question,
-                    // Prefer the newest 4 answers (highest AnswerOptionId); drop stale blanks
-                    Answers = selection.answers,
-                    CorrectAnswerIndex = selection.correctIndex,
+                    Answers = answersDto,
+                    CorrectAnswerIndex = correctIdx,
                     IsEditing = true
                 };
             }).ToList();
@@ -210,58 +230,136 @@ public class StoryEditingController : ControllerBase
         }
     }
 
-    [HttpPut("{storyId:int}/questions")]
-    public async Task<IActionResult> UpdateQuestionScenes(int storyId, [FromBody] List<QuestionSceneBaseDto> model)
-    {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        // Basic guard: don't accept empty questions/answers (frontend validation can be bypassed)
-        var validationError = ValidateQuestionScenes(model);
-        if (!string.IsNullOrEmpty(validationError))
+  [HttpPut("{storyId:int}/questions")]
+public async Task<IActionResult> UpdateQuestionScenes(
+    int storyId,
+    [FromBody] List<QuestionSceneBaseDto> model,
+    [FromServices] StoryDbContext db)
+{
+    if (!ModelState.IsValid)
+    {
+        var firstModelError = ModelState.Values
+            .SelectMany(v => v.Errors)
+            .Select(e => e.ErrorMessage)
+            .FirstOrDefault() ?? "Invalid payload.";
+
+        _logger.LogWarning("UpdateQuestionScenes modelstate invalid: {Error}", firstModelError);
+        return BadRequest(new ErrorDto
         {
-            return BadRequest(new ErrorDto
+            ErrorTitle = "Validation failed",
+            ErrorMessage = firstModelError
+        });
+    }
+
+    // Normalize incoming answers so every scene has exactly 4 slots (pad/trim)
+    foreach (var scene in model)
+    {
+        scene.Answers = NormalizeAnswers(scene.Answers);
+        // Guard against out-of-range values from the client (clamp to 0-3)
+        if (scene.CorrectAnswerIndex < 0) scene.CorrectAnswerIndex = 0;
+        else if (scene.CorrectAnswerIndex > 3) scene.CorrectAnswerIndex = 3;
+
+        // Trim all answer texts to avoid false "empty" hits
+        scene.Answers = scene.Answers
+            .Select(a => new AnswerOptionInput
             {
-                ErrorTitle = "Validation failed",
-                ErrorMessage = validationError
-            });
+                AnswerText = (a.AnswerText ?? string.Empty).Trim(),
+                ContextText = (a.ContextText ?? string.Empty).Trim()
+            })
+            .ToList();
+    }
+
+    var validationError = ValidateQuestionScenes(model);
+    if (!string.IsNullOrEmpty(validationError))
+    {
+        _logger.LogWarning("UpdateQuestionScenes validation failed: {Error}", validationError);
+        return BadRequest(new ErrorDto
+        {
+            ErrorTitle = "Validation failed",
+            ErrorMessage = validationError
+        });
+    }
+
+    try
+    {
+        // Hent alle eksisterende spørsmål for story
+        var existingScenes = await db.QuestionScenes
+            .Include(q => q.AnswerOptions)
+            .Where(q => q.StoryId == storyId)
+            .ToListAsync();
+
+        var activeScenes = model.Where(m => !m.MarkedForDeletion).ToList();
+
+        // --- SLETT SPØRSMÅL SOM IKKE LENGER FINNES ---
+        var idsFromClient = activeScenes
+            .Where(m => m.QuestionSceneId != 0)
+            .Select(m => m.QuestionSceneId)
+            .ToHashSet();
+
+        var scenesToDelete = existingScenes
+            .Where(s => !idsFromClient.Contains(s.QuestionSceneId))
+            .ToList();
+
+        db.QuestionScenes.RemoveRange(scenesToDelete);
+
+        // --- OPPDATER EKSISTERENDE ---
+        foreach (var dto in activeScenes.Where(m => m.QuestionSceneId != 0))
+        {
+            var scene = existingScenes
+                .First(s => s.QuestionSceneId == dto.QuestionSceneId);
+
+            scene.SceneText = dto.StoryText;
+            scene.Question = dto.QuestionText;
+
+            // Fjern gamle svar og legg inn de nye
+            scene.AnswerOptions.Clear();
+
+            scene.AnswerOptions = dto.Answers
+                .Select((a, idx) => new AnswerOption
+                {
+                    AnswerOptionId = a.AnswerOptionId, 
+                    Answer = a.AnswerText,
+                    FeedbackText = a.ContextText,
+                    IsCorrect = idx == dto.CorrectAnswerIndex,
+                    QuestionSceneId = scene.QuestionSceneId
+                })
+                .ToList();
         }
 
-        try
+        // --- LEGG TIL NYE SPØRSMÅL (QuestionSceneId == 0) ---
+        foreach (var dto in activeScenes.Where(m => m.QuestionSceneId == 0))
         {
-            // slett markerte spørsmål
-            var toDelete = model.Where(q => q.MarkedForDeletion && q.QuestionSceneId != 0);
-            foreach (var del in toDelete)
-                await _sceneRepository.DeleteQuestionScene(del.QuestionSceneId);
-
-            // oppdater og legg til
-            var questionScenes = model
-                .Where(q => !q.MarkedForDeletion)
-                .Select(vm => new QuestionScene
-                {
-                    QuestionSceneId = vm.QuestionSceneId,
-                    StoryId = storyId,
-                    SceneText = vm.StoryText,
-                    Question = vm.QuestionText,
-                    AnswerOptions = vm.Answers.Select((a, i) => new AnswerOption
+            var newScene = new QuestionScene
+            {
+                StoryId = storyId,
+                SceneText = dto.StoryText,
+                Question = dto.QuestionText,
+                AnswerOptions = dto.Answers
+                    .Select((a, idx) => new AnswerOption
                     {
                         Answer = a.AnswerText,
                         FeedbackText = a.ContextText,
-                        IsCorrect = i == vm.CorrectAnswerIndex
-                    }).ToList()
-                }).ToList();
+                        IsCorrect = idx == dto.CorrectAnswerIndex
+                    })
+                    .ToList()
+            };
 
-            var success = await _sceneRepository.UpdateQuestionScenes(questionScenes);
-            if (!success)
-                return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to update question scenes." });
+            await db.QuestionScenes.AddAsync(newScene);
+        }
 
-            return Ok(new { message = "Question scenes updated successfully." });
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error updating question scenes");
-            return StatusCode(500, new ErrorDto { ErrorTitle = "Unexpected error while updating question scenes." });
-        }
+        await db.SaveChangesAsync();
+
+        return Ok(new { message = "Question scenes updated successfully." });
     }
+    catch (Exception e)
+    {
+        _logger.LogError(e, "Error updating question scenes");
+        return StatusCode(500, new ErrorDto { ErrorTitle = "Unexpected error while updating question scenes." });
+    }
+}
+
+
 
     [HttpDelete("questions/{questionSceneId:int}")]
     public async Task<IActionResult> DeleteQuestion(int questionSceneId)
@@ -368,22 +466,17 @@ public class StoryEditingController : ControllerBase
     private string? ValidateQuestionScenes(List<QuestionSceneBaseDto> model)
     {
         var activeScenes = model.Where(m => !m.MarkedForDeletion).ToList();
-        foreach (var scene in activeScenes)
+        for (int i = 0; i < activeScenes.Count; i++)
         {
+            var scene = activeScenes[i];
+            // Answers are normalized to 4 entries before validation
             if (string.IsNullOrWhiteSpace(scene.StoryText))
                 return "Story context cannot be empty.";
 
             if (string.IsNullOrWhiteSpace(scene.QuestionText))
                 return "Question text cannot be empty.";
 
-            if (scene.Answers == null || scene.Answers.Count != 4)
-                return "Each question must have exactly 4 answers.";
-
-            if (scene.Answers.Any(a => string.IsNullOrWhiteSpace(a.AnswerText)))
-                return "All answer options must be filled.";
-
-            if (scene.Answers.Any(a => string.IsNullOrWhiteSpace(a.ContextText)))
-                return "All feedback/context texts must be filled.";
+            // Answers are normalized to 4 items; we do not block on empty answer/context here
 
             if (scene.CorrectAnswerIndex is < 0 or > 3)
                 return "A correct answer must be selected.";
@@ -392,44 +485,12 @@ public class StoryEditingController : ControllerBase
         return null;
     }
 
-    private (List<AnswerOptionInput> answers, int correctIndex) SelectLatestAnswers(ICollection<AnswerOption> options)
+    // Ensure answers list always has exactly 4 elements
+    private List<AnswerOptionInput> NormalizeAnswers(List<AnswerOptionInput>? answers)
     {
-        // Take the newest "chunk" of 4 answers (highest ids) to mirror the latest save.
-        var latestChunk = options
-            .OrderByDescending(o => o.AnswerOptionId)
-            .Take(4)
-            .OrderBy(o => o.AnswerOptionId) // stable for UI
-            .ToList();
-
-        var answers = latestChunk.Select(o => new AnswerOptionInput
-        {
-            AnswerText = o.Answer,
-            ContextText = o.FeedbackText
-        }).ToList();
-
-        while (answers.Count < 4)
-            answers.Add(new AnswerOptionInput());
-
-        // Prefer correct flag inside the latest chunk
-        var correctIdx = latestChunk.FindIndex(o => o.IsCorrect);
-
-        // Fallback: if none marked correct in the chunk, try to map the latest correct flag overall
-        if (correctIdx == -1)
-        {
-            var latestCorrect = options
-                .OrderByDescending(o => o.AnswerOptionId)
-                .FirstOrDefault(o => o.IsCorrect);
-
-            if (latestCorrect != null)
-            {
-                var matchIdx = latestChunk.FindIndex(o =>
-                    o.Answer == latestCorrect.Answer &&
-                    o.FeedbackText == latestCorrect.FeedbackText);
-
-                correctIdx = matchIdx != -1 ? matchIdx : 0;
-            }
-        }
-
-        return (answers, correctIdx);
+        var list = answers?.Take(4).ToList() ?? new List<AnswerOptionInput>();
+        while (list.Count < 4)
+            list.Add(new AnswerOptionInput());
+        return list;
     }
 }

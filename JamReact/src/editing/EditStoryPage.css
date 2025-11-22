@@ -261,3 +261,36 @@
   position: relative;
   z-index: 5;
 }
+.saved-toast,
+.nochanges-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  z-index: 9999;
+  animation: fadeInOut 4s ease forwards;
+}
+
+/* rosa "saved" toast */
+.saved-toast {
+  background: #ff66c4;
+  color: white;
+  border: 2px solid #ff2fa1;
+}
+
+/* blå info-toast */
+.nochanges-toast {
+  background: #4db5ff;
+  color: white;
+  border: 2px solid #2498f0;
+}
+
+/* fade animation */
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-10px); }
+}

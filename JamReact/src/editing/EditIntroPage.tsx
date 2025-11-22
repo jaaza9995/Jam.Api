@@ -1,3 +1,5 @@
+// src/editing/EditIntroPage.tsx
+
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
@@ -7,35 +9,46 @@ import {
   getStoryMetadata,
   getIntro,
   updateIntroScene,
-  updateStoryMetadata
+  updateStoryMetadata,
 } from "./storyEditingService";
 
 import ConfirmUndoModal from "../shared/ConfirmUndoModal";
 
+import { StoryMetadataDto, IntroDto } from "../types/editStory";
+
 const API_URL = import.meta.env.VITE_API_URL;
 
-const EditIntroPage = () => {
+const EditIntroPage: React.FC = () => {
   const { storyId } = useParams();
   const navigate = useNavigate();
   const { token } = useAuth();
 
-  // metadata fields
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [difficulty, setDifficulty] = useState(1);
-  const [accessibility, setAccessibility] = useState(0);
+  // METADATA
+  const [title, setTitle] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [difficulty, setDifficulty] = useState<number>(1);
+  const [accessibility, setAccessibility] = useState<number>(0);
 
-  // intro field
-  const [introText, setIntroText] = useState("");
+  // INTRO TEXT
+  const [introText, setIntroText] = useState<string>("");
 
-  // original values
-  const [original, setOriginal] = useState<any>(null);
+  // ORIGINAL VALUES
+  const [original, setOriginal] = useState<{
+    title: string;
+    description: string;
+    difficulty: number;
+    accessibility: number;
+    intro: string;
+  } | null>(null);
 
-  const [loading, setLoading] = useState(true);
-  const [showUndoConfirm, setShowUndoConfirm] = useState(false);
-  const [showSavedMsg, setShowSavedMsg] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [showUndoConfirm, setShowUndoConfirm] = useState<boolean>(false);
+  const [showSavedMsg, setShowSavedMsg] = useState<boolean>(false);
 
-  // 🔥 VALIDATION ERRORS – SAMME SOM CREATE PAGE
+  // 🔥 NEW: "no changes" toast
+  const [showNoChangesMsg, setShowNoChangesMsg] = useState<boolean>(false);
+
+  // ERRORS
   const [errors, setErrors] = useState({
     title: "",
     description: "",
@@ -44,41 +57,59 @@ const EditIntroPage = () => {
     accessibility: "",
   });
 
-  // 🔥 VALIDATE FUNCTION – 100% MATCH MED CREATE siden
-  const validate = () => {
-    const newErrors: any = {};
+  // ------------------------------------
+  // VALIDATION
+  // ------------------------------------
+  const validate = (): boolean => {
+    const newErrors = {
+      title: "",
+      description: "",
+      introText: "",
+      difficulty: "",
+      accessibility: "",
+    };
 
     if (!title.trim()) newErrors.title = "You must write a Title for your game.";
-    if (!description.trim()) newErrors.description = "You must write a Description for your game";
-    if (!introText.trim()) newErrors.introText = "You must write an Intro Text for your game";
+    if (!description.trim())
+      newErrors.description = "You must write a Description for your game";
+    if (!introText.trim())
+      newErrors.introText = "You must write an Intro Text for your game";
+
     if (!difficulty) newErrors.difficulty = "Please choose difficulty.";
-    if (!accessibility && accessibility !== 0) newErrors.accessibility = "Please choose accessibility.";
+    if (accessibility !== 0 && accessibility !== 1)
+      newErrors.accessibility = "Please choose accessibility.";
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return Object.values(newErrors).every((e) => e === "");
   };
 
+  // ------------------------------------
+  // LOAD FROM BACKEND
+  // ------------------------------------
   useEffect(() => {
     const load = async () => {
-      if (!storyId || !token) return;
+      if (!storyId || !token) {
+        console.error("Missing token");
+        return;
+      }
 
-      const mRes = await getStoryMetadata(Number(storyId));
-      const m = await mRes.json();
+      const metaRes = await getStoryMetadata(Number(storyId));
+      const meta = await metaRes.json() as StoryMetadataDto;
 
-      const i = await getIntro(Number(storyId), token);
+      const intro = await getIntro(Number(storyId), token);
 
-      setTitle(m.title);
-      setDescription(m.description);
-      setDifficulty(m.difficultyLevel);
-      setAccessibility(m.accessibility);
-      setIntroText(i.introText);
+      setTitle(meta.title);
+      setDescription(meta.description);
+      setDifficulty(meta.difficultyLevel);
+      setAccessibility(Number(meta.accessibility));
+      setIntroText(intro.introText);
 
       setOriginal({
-        title: m.title,
-        description: m.description,
-        difficulty: m.difficultyLevel,
-        accessibility: m.accessibility,
-        intro: i.introText
+        title: meta.title,
+        description: meta.description,
+        difficulty: meta.difficultyLevel,
+        accessibility: Number(meta.accessibility),
+        intro: intro.introText,
       });
 
       setLoading(false);
@@ -87,9 +118,11 @@ const EditIntroPage = () => {
     load();
   }, [storyId, token]);
 
-  const hasChanges = () => {
+  // ------------------------------------
+  // CHANGE DETECTION
+  // ------------------------------------
+  const hasChanges = (): boolean => {
     if (!original) return false;
-
     return (
       title !== original.title ||
       description !== original.description ||
@@ -99,57 +132,69 @@ const EditIntroPage = () => {
     );
   };
 
+  // ------------------------------------
   // SAVE
+  // ------------------------------------
   const handleSave = async () => {
-    if (!storyId || !token) return;
 
-    // 🔥 RUN VALIDATION
-    const isValid = validate();
-    if (!isValid) return;
+    // 🔥 NEW: show "no changes" toast
+    if (!hasChanges()) {
+      setShowNoChangesMsg(true);
+      setTimeout(() => setShowNoChangesMsg(false), 4000);
+      return;
+    }
 
+    // Validation
+    if (!validate()) return;
+
+    // Save metadata
     await updateStoryMetadata(Number(storyId), {
       storyId: Number(storyId),
       title,
       description,
       difficultyLevel: difficulty,
-      accessibility
+      accessibility,
     });
 
-    await updateIntroScene(Number(storyId), introText, token);
+    // Save intro text
+    await updateIntroScene(Number(storyId), introText, token!);
 
-    const updated = await getStoryMetadata(Number(storyId)).then(res => res.json());
+    // Refresh original values
+    const updatedMeta = await getStoryMetadata(Number(storyId)).then((res) =>
+      res.json()
+    );
 
     setOriginal({
-      title: updated.title,
-      description: updated.description,
-      difficulty: updated.difficultyLevel,
-      accessibility: updated.accessibility,
+      title: updatedMeta.title,
+      description: updatedMeta.description,
+      difficulty: updatedMeta.difficultyLevel,
+      accessibility: Number(updatedMeta.accessibility),
       intro: introText,
-      code: updated.code
     });
 
     setShowSavedMsg(true);
     setTimeout(() => setShowSavedMsg(false), 5000);
   };
 
+  // ------------------------------------
   // BACK BUTTON
+  // ------------------------------------
   const handleBack = () => {
-    if (hasChanges()) {
-      setShowUndoConfirm(true);
-    } else {
-      navigate(`/edit/${storyId}`);
-    }
+    if (hasChanges()) setShowUndoConfirm(true);
+    else navigate(`/edit/${storyId}`);
   };
 
-  const confirmUndo = () => {
-    navigate(`/edit/${storyId}`);
-  };
+  const confirmUndo = () => navigate(`/edit/${storyId}`);
 
   if (loading) return <div className="pixel-bg">Loading...</div>;
 
+  // ------------------------------------
+  // RENDER
+  // ------------------------------------
   return (
     <div className="pixel-bg edit-container">
 
+      {/* Undo modal */}
       {showUndoConfirm && (
         <ConfirmUndoModal
           onConfirm={confirmUndo}
@@ -157,8 +202,12 @@ const EditIntroPage = () => {
         />
       )}
 
-      {showSavedMsg && (
-        <div className="saved-toast">Saved Changes</div>
+      {/* Saved toast */}
+      {showSavedMsg && <div className="saved-toast">Saved Changes</div>}
+
+      {/* 🔥 NEW: No changes toast */}
+      {showNoChangesMsg && (
+        <div className="nochanges-toast">No changes have been done</div>
       )}
 
       <h1 className="edit-title">Edit Intro</h1>
@@ -170,7 +219,7 @@ const EditIntroPage = () => {
         value={title}
         onChange={(e) => {
           setTitle(e.target.value);
-          setErrors(prev => ({ ...prev, title: "" }));
+          setErrors((prev) => ({ ...prev, title: "" }));
         }}
       />
       {errors.title && <p className="error-msg">{errors.title}</p>}
@@ -182,7 +231,7 @@ const EditIntroPage = () => {
         value={description}
         onChange={(e) => {
           setDescription(e.target.value);
-          setErrors(prev => ({ ...prev, description: "" }));
+          setErrors((prev) => ({ ...prev, description: "" }));
         }}
       />
       {errors.description && <p className="error-msg">{errors.description}</p>}
@@ -192,33 +241,23 @@ const EditIntroPage = () => {
       <select
         className="pixel-input"
         value={difficulty}
-        onChange={(e) => {
-          setDifficulty(Number(e.target.value));
-          setErrors(prev => ({ ...prev, difficulty: "" }));
-        }}
+        onChange={(e) => setDifficulty(Number(e.target.value))}
       >
-        <option value="">Select difficulty...</option>
         <option value={1}>Easy</option>
         <option value={2}>Medium</option>
         <option value={3}>Hard</option>
       </select>
-      {errors.difficulty && <p className="error-msg">{errors.difficulty}</p>}
 
       {/* ACCESSIBILITY */}
       <label className="edit-label">Accessibility</label>
       <select
         className="pixel-input"
         value={accessibility}
-        onChange={(e) => {
-          setAccessibility(Number(e.target.value));
-          setErrors(prev => ({ ...prev, accessibility: "" }));
-        }}
+        onChange={(e) => setAccessibility(Number(e.target.value))}
       >
-        <option value="">Select accessibility...</option>
         <option value={0}>Public</option>
         <option value={1}>Private</option>
       </select>
-      {errors.accessibility && <p className="error-msg">{errors.accessibility}</p>}
 
       {/* INTRO TEXT */}
       <label className="edit-label">Introduction</label>
@@ -227,7 +266,7 @@ const EditIntroPage = () => {
         value={introText}
         onChange={(e) => {
           setIntroText(e.target.value);
-          setErrors(prev => ({ ...prev, introText: "" }));
+          setErrors((prev) => ({ ...prev, introText: "" }));
         }}
       />
       {errors.introText && <p className="error-msg">{errors.introText}</p>}
@@ -241,7 +280,6 @@ const EditIntroPage = () => {
           Back
         </button>
       </div>
-
     </div>
   );
 };

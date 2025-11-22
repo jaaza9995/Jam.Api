@@ -21,4 +21,5 @@ public class Story
     public List<QuestionScene> QuestionScenes { get; set; } = new(); // Navigation property
     public List<EndingScene> EndingScenes { get; set; } = new(); // Navigation property
     public List<PlayingSession> PlayingSessions { get; set; } = new(); // Navigation property
+    public int QuestionCount { get; set; } // denormalized count of questions for easy access
 }

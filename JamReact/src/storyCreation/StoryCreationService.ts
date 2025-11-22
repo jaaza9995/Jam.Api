@@ -1,3 +1,5 @@
+import { QuestionScenesPayload } from "../types/createStory";
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 // ---------------------------
@@ -38,7 +40,7 @@ export const saveIntro = async (payload: {
 // ----------------------------
 // STEP 2 – QUESTIONS
 // ----------------------------
-export const saveQuestions = async (payload: any) => {
+export const saveQuestions = async (payload: QuestionScenesPayload) => {
   return await fetch(`${API_URL}/api/storycreation/questions`, {
     method: "POST",
     headers: getAuthHeaders(),    

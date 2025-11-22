@@ -1,8 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { Container } from "react-bootstrap";
 import { StoryPlayer } from "./StoryPlaying/StoryPlayer";
 
 import HomePage from "./home/HomePage";
+import BrowsePage from "./browse/BrowsePage";
 
 // CREATE
 import CreateIntro from "./create/CreateIntro";
@@ -22,7 +23,20 @@ import RegisterPage from "./auth/RegisterPage";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import { AuthProvider } from "./auth/AuthContext";
 
+
 import './App.css';
+
+// Wrapper that converts :storyId from the URL to a number for StoryPlayer
+const StoryPlayerWrapper: React.FC = () => {
+  const { storyId } = useParams<{ storyId: string }>();
+  const storyIdNumber = parseInt(storyId || "0", 10);
+
+  if (!storyIdNumber) {
+    return <div>Feil: Historie ID mangler eller er ugyldig.</div>;
+  }
+
+  return <StoryPlayer storyId={storyIdNumber} />;
+};
 
 const App: React.FC = () => {
   return (
@@ -69,6 +83,12 @@ const App: React.FC = () => {
               <Route path="/edit/:storyId/questions" element={<EditQuestionsPage />} />
               <Route path="/edit/:storyId/endings" element={<EditEndingsPage />} />
 
+              {/* BROWSE */}
+              <Route path="/browse" element={<BrowsePage />} />
+
+              {/* PLAY */}
+              <Route path="/play/:storyId" element={<StoryPlayerWrapper />} />
+
             </Route>
 
             {/* ---------------- CATCH ALL ---------------- */}
@@ -79,26 +99,6 @@ const App: React.FC = () => {
       </Router>
     </AuthProvider>
   );
-};
-
-
-// 💡 VIKTIG: Hjelpekomponent for å hente storyId fra URL
-// Dette er nødvendig for å fange opp ID-en fra URL-en og sende den som en number prop.
-import { useParams } from 'react-router-dom';
-
-const StoryPlayerWrapper = () => {
-    // useParams henter verdien etter :storyId i URL-en
-    const { storyId } = useParams<{ storyId: string }>(); 
-    
-    // Konverterer string (fra URL) til number, da StoryPlayer forventer number.
-    const storyIdNumber = parseInt(storyId || '0', 10);
-    
-    // Render StoryPlayer kun hvis vi har en gyldig ID
-    if (!storyIdNumber) {
-        return <div>Feil: Historie ID mangler eller er ugyldig.</div>;
-    }
-
-    return <StoryPlayer storyId={storyIdNumber} />;
 };
 
 export default App;

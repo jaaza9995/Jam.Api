@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./Create.css";
 import useStoryCreation from "../storyCreation/StoryCreationContext";
 import { saveIntro } from "../storyCreation/StoryCreationService";
+import { IntroDto, IntroErrors } from "../types/createStory";
 
 const CreateIntro = () => {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ const CreateIntro = () => {
   const [difficulty, setDifficulty] = useState(data.intro.difficulty);
   const [accessibility, setAccessibility] = useState(data.intro.accessibility);
 
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<IntroErrors>({
     title: "",
     description: "",
     introText: "",
@@ -22,51 +23,57 @@ const CreateIntro = () => {
     accessibility: "",
   });
 
-    const validate = () => {
-    const newErrors: any = {};
+  const validate = () => {
+    const newErrors: IntroErrors = {
+      title: "",
+      description: "",
+      introText: "",
+      difficulty: "",
+      accessibility: "",
+    };
 
-      if (!title.trim()) newErrors.title = "You must write a Title for your game.";
-      if (!description.trim()) newErrors.description = "You must write a Description for your game";
-      if (!introText.trim()) newErrors.introText = "You must write a Intro Text for your game";
-      if (!difficulty) newErrors.difficulty = "Please choose difficulty.";
-      if (!accessibility) newErrors.accessibility = "Please choose accessibility.";
+    if (!title.trim()) newErrors.title = "You must write a Title for your game.";
+    if (!description.trim()) newErrors.description = "You must write a Description for your game";
+    if (!introText.trim()) newErrors.introText = "You must write a Intro Text for your game";
+    if (!difficulty) newErrors.difficulty = "Please choose difficulty.";
+    if (!accessibility) newErrors.accessibility = "Please choose accessibility.";
 
-      setErrors(newErrors);
-      return Object.keys(newErrors).length === 0;
+    setErrors(newErrors);
+    return Object.values(newErrors).every(v => v === "");
   };
 
-
   const handleNext = async () => {
-  const isValid = validate();
-  if (!isValid) return;
+    if (!validate()) return;
 
-    // Oppdater React Context
-    setData((prev) => ({
-    ...prev,
-    intro: {
+    // update context
+    setData(prev => ({
+      ...prev,
+      intro: {
+        title,
+        description,
+        introText,
+        difficulty,
+        accessibility,
+      },
+    }));
+
+    const payload: IntroDto = {
       title,
       description,
       introText,
-      difficulty,
-      accessibility,
-    },
-  }));
+      difficultyLevel: Number(difficulty),
+      accessibility: Number(accessibility),
+    };
 
-  const res = await saveIntro({
-    title,
-    description,
-    introText,
-    difficultyLevel: Number(difficulty),
-    accessibility: Number(accessibility),
-  });
+    const res = await saveIntro(payload);
 
-  if (!res.ok) {
-    console.error("Failed to save intro");
-    return;
-  }
+    if (!res.ok) {
+      console.error("Failed to save intro");
+      return;
+    }
 
-  navigate("/create/questions");
-};
+    navigate("/create/questions");
+  };
 
   return (
     <div className="pixel-bg">

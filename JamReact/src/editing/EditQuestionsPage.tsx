@@ -1,62 +1,101 @@
 // src/editing/EditQuestionsPage.tsx
+
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./EditStoryPage.css";
-import {
-  getQuestions,
-  updateQuestions,
-  deleteQuestion,
-} from "./storyEditingService";
+import { getQuestions, updateQuestions } from "./storyEditingService";
 import ConfirmUndoModal from "../shared/ConfirmUndoModal";
 
-interface AnswerOption {
-  answerOptionId?: number;   // i tilfelle backend sender id
-  answerText: string;
-  contextText: string;
-}
+import {
+  QuestionSceneDto as QuestionScene,
+  AnswerOptionDto as AnswerOption,
+} from "../types/editStory";
 
-interface QuestionScene {
-  questionSceneId: number;
-  storyText: string;
-  questionText: string;
-  answers: AnswerOption[];
-  correctAnswerIndex: number;   // 0–3
-}
+type QuestionErrors = {
+  storyText?: string;
+  questionText?: string;
+  answers?: string;
+  contextTexts?: string;
+  correct?: string;
+};
+
+const normalizeAnswers = (answers: AnswerOption[] | null | undefined): AnswerOption[] => {
+  if (!answers || answers.length === 0) {
+    return [
+      { answerOptionId: 0, answerText: "", contextText: "" },
+      { answerOptionId: 0, answerText: "", contextText: "" },
+      { answerOptionId: 0, answerText: "", contextText: "" },
+      { answerOptionId: 0, answerText: "", contextText: "" }
+    ];
+  }
+
+  const list = answers
+    .map((a) => ({
+      answerOptionId: a.answerOptionId ?? 0,
+      answerText: a.answerText ?? "",
+      contextText: a.contextText ?? ""
+    }))
+    .slice(0, 4);
+
+  while (list.length < 4) {
+    list.push({
+      answerOptionId: 0,
+      answerText: "",
+      contextText: ""
+    });
+  }
+
+  return list;
+};
+
 
 const emptyQuestion = (): QuestionScene => ({
   questionSceneId: 0,
   storyText: "",
   questionText: "",
-  answers: [
-    { answerText: "", contextText: "" },
-    { answerText: "", contextText: "" },
-    { answerText: "", contextText: "" },
-    { answerText: "", contextText: "" },
-  ],
+  answers: normalizeAnswers([]),
   correctAnswerIndex: -1,
 });
+
+// Map UI state to backend DTO shape
+const toBackendPayload = (list: QuestionScene[], storyId: number) =>
+  list.map((q) => ({
+    storyId,
+    questionSceneId: q.questionSceneId ?? 0,
+    storyText: q.storyText,
+    questionText: q.questionText,
+    correctAnswerIndex: q.correctAnswerIndex,
+    markedForDeletion: false,
+
+    answers: normalizeAnswers(q.answers).map((a) => ({
+      answerOptionId: a.answerOptionId ?? 0,
+      answerText: a.answerText.trim(),
+      contextText: a.contextText.trim()
+    }))
+  }));
+  
+
 
 const EditQuestionsPage: React.FC = () => {
   const { storyId } = useParams();
   const navigate = useNavigate();
 
   const [questions, setQuestions] = useState<QuestionScene[]>([]);
-  const [originalQuestions, setOriginalQuestions] = useState<QuestionScene[]>(
-    []
-  );
-  const [errors, setErrors] = useState<any[]>([]);
+  const [originalQuestions, setOriginalQuestions] = useState<QuestionScene[]>([]);
+  const [errors, setErrors] = useState<QuestionErrors[]>([]);
   const [backendError, setBackendError] = useState("");
-  const [loading, setLoading] = useState(true);
 
+  const [loading, setLoading] = useState(true);
   const [showUndoConfirm, setShowUndoConfirm] = useState(false);
   const [showSavedMsg, setShowSavedMsg] = useState(false);
+  const [showNoChangesMsg, setShowNoChangesMsg] = useState(false);
 
   // -------------------------------
-  // LOAD QUESTIONS
+  // LOAD
   // -------------------------------
   useEffect(() => {
     const load = async () => {
-      if (!storyId) return;
+      if (!storyId) return; 
 
       const res = await getQuestions(Number(storyId));
       if (!res.ok) {
@@ -66,22 +105,14 @@ const EditQuestionsPage: React.FC = () => {
 
       const data = (await res.json()) as QuestionScene[];
 
-      // sørg for at alle har 4 svar
       const normalized = data.map((q) => ({
         ...q,
-        answers:
-          q.answers && q.answers.length === 4
-            ? q.answers
-            : [
-                { answerText: "", contextText: "" },
-                { answerText: "", contextText: "" },
-                { answerText: "", contextText: "" },
-                { answerText: "", contextText: "" },
-              ],
+        answers: normalizeAnswers(q.answers)
       }));
 
       setQuestions(normalized);
       setOriginalQuestions(JSON.parse(JSON.stringify(normalized)));
+      setErrors(normalized.map(() => ({})));
       setLoading(false);
     };
 
@@ -94,37 +125,47 @@ const EditQuestionsPage: React.FC = () => {
   // -------------------------------
   // VALIDATION
   // -------------------------------
- // -------------------------------
-// VALIDATION — MATCHER CREATE 1:1
-// -------------------------------
-const validate = () => {
-  const newErrors: any[] = [];
+  const validate = (list: QuestionScene[]) => {
+    const newErrors: QuestionErrors[] = [];
 
-    questions.forEach((q, i) => {
-      const err: any = {};
+    list.forEach((q) => {
+      const err: QuestionErrors = {};
 
-      if (!q.storyText.trim())
+      // --- STORY TEXT ---
+      if (!q.storyText.trim()) {
         err.storyText = "Story context is required.";
+      }
 
-      if (!q.questionText.trim())
+      // --- QUESTION TEXT ---
+      if (!q.questionText.trim()) {
         err.questionText = "Question text is required.";
+      }
 
-      if (q.answers.some(a => !a.answerText.trim()))
-        err.answers = "All 4 answer options must be filled.";
+      // --- ANSWERS (4 EXACT) ---
+      if (!q.answers || q.answers.length !== 4) {
+        err.answers = "Each question must have exactly 4 answers.";
+      } else {
+        // --- ANSWER TEXTS ---
+        if (q.answers.some((a) => !a.answerText.trim())) {
+          err.answers = "All 4 answer options must be filled.";
+        }
 
-      if (q.answers.some(a => !a.contextText.trim()))
-        err.contextTexts = "All 4 context texts must be filled.";
+        // --- CONTEXT TEXTS ---
+        if (q.answers.some((a) => !a.contextText.trim())) {
+          err.contextTexts = "All 4 context texts must be filled.";
+        }
+      }
 
-      if (q.correctAnswerIndex < 0)
+      // --- CORRECT ANSWER ---
+      if (q.correctAnswerIndex < 0 || q.correctAnswerIndex > 3) {
         err.correct = "Please choose a correct answer.";
+      }
 
-      newErrors[i] = err;
+      newErrors.push(err);
     });
 
     setErrors(newErrors);
-
-    // Return TRUE if no errors anywhere
-    return newErrors.every(e => Object.keys(e).length === 0);
+    return newErrors.every((e) => Object.keys(e).length === 0);
   };
 
 
@@ -135,32 +176,58 @@ const validate = () => {
     setBackendError("");
 
     if (!storyId) return;
-    if (!validate()) return;
 
-    const res = await updateQuestions(Number(storyId), questions);
+    if (!hasChanges()) {
+      setShowNoChangesMsg(true);
+      setTimeout(() => setShowNoChangesMsg(false), 3500);
+      return;
+    }
+
+    const normalized: QuestionScene[] = questions.map((q) => ({
+      ...q,
+      answers: normalizeAnswers(q.answers),
+    }));
+
+    if (!validate(normalized)) return;
+
+    const payload = toBackendPayload(normalized, Number(storyId));
+    console.log("PAYLOAD SENT TO BACKEND:", JSON.stringify(payload, null, 2));
+    const res = await updateQuestions(Number(storyId), payload as any);
 
     if (!res.ok) {
       try {
-        const body = (await res.json()) as {
-          errors?: Record<string, string[]>;
-        };
+        const body = await res.json();
 
-        if (body.errors) {
-          const first = Object.values(body.errors)[0][0];
+        if (
+          body &&
+          typeof body === "object" &&
+          "errors" in body &&
+          body.errors
+        ) {
+          const errs = body.errors as Record<string, string[]>;
+          const first = Object.values(errs)[0][0];
           setBackendError(first);
-        } else {
-          setBackendError("Something went wrong.");
+          return;
         }
+
+        if (body?.errorMessage) {
+          setBackendError(body.errorMessage);
+          return;
+        }
+
+        setBackendError("Something went wrong.");
       } catch {
         setBackendError("Unexpected server error.");
       }
       return;
     }
 
-    setShowSavedMsg(true);
-    setTimeout(() => setShowSavedMsg(false), 5000);
+    // Success
+    setOriginalQuestions(JSON.parse(JSON.stringify(normalized)));
+    setQuestions(normalized);
 
-    setOriginalQuestions(JSON.parse(JSON.stringify(questions)));
+    setShowSavedMsg(true);
+    setTimeout(() => setShowSavedMsg(false), 3500);
   };
 
   // -------------------------------
@@ -168,42 +235,38 @@ const validate = () => {
   // -------------------------------
   const handleAdd = () => {
     setQuestions((prev) => [...prev, emptyQuestion()]);
+    setErrors((prev) => [...prev, {}]);
   };
 
-  const handleDeleteScene = async (sceneId: number, index: number) => {
+  const handleDeleteScene = (sceneId: number, index: number) => {
     if (questions.length === 1) {
       alert("You must have at least one question.");
       return;
     }
 
-    if (sceneId !== 0) {
-      // backend delete av hele questionScene
-      await deleteQuestion(sceneId);
-    }
-
+    // Bare fjern fra frontend-state – slettingen skjer når vi trykker Save
     setQuestions((prev) => prev.filter((_, i) => i !== index));
+    setErrors((prev) => prev.filter((_, i) => i !== index));
   };
 
   // -------------------------------
   // BACK
   // -------------------------------
   const handleBack = () => {
-    if (hasChanges()) {
-      setShowUndoConfirm(true);
-    } else {
-      navigate(`/edit/${storyId}`);
-    }
+    if (hasChanges()) setShowUndoConfirm(true);
+    else navigate(`/edit/${storyId}`);
   };
 
-  const confirmUndo = () => {
-    navigate(`/edit/${storyId}`);
-  };
+  const confirmUndo = () => navigate(`/edit/${storyId}`);
 
   if (loading) return <div className="pixel-bg">Loading...</div>;
 
+  // -------------------------------
+  // RENDER
+  // -------------------------------
   return (
     <div className="pixel-bg edit-container">
-      {/* Undo-modal */}
+
       {showUndoConfirm && (
         <ConfirmUndoModal
           onConfirm={confirmUndo}
@@ -211,108 +274,100 @@ const validate = () => {
         />
       )}
 
-      {/* Saved toast */}
+      {backendError && <p className="error-msg">{backendError}</p>}
+
       {showSavedMsg && <div className="saved-toast">Saved Changes</div>}
+      {showNoChangesMsg && (
+        <div className="nochanges-toast">No changes have been done</div>
+      )}
 
       <h1 className="edit-title">Edit Questions</h1>
 
-      {backendError && <p className="error-msg">{backendError}</p>}
-
       {questions.map((q, i) => (
-        <div key={i} className="question-scene-card">
-          {/* STORY CONTEXT (valgfritt å vise – du kan fjerne denne seksjonen om du ikke vil ha den) */}
+        // if QuestionSceneId is 0 (new question) use the index so keys are unique
+        <div key={q.questionSceneId !== 0 ? q.questionSceneId : i} className="question-scene-card">
 
-          
-         <h3 className="question-label">STORY CONTEXT</h3>
+          {/* STORY CONTEXT */}
+          <h3 className="question-label">STORY CONTEXT</h3>
           <textarea
             className="pixel-input"
             value={q.storyText}
             onChange={(e) => {
               const updated = [...questions];
               updated[i] = { ...updated[i], storyText: e.target.value };
-
               setQuestions(updated);
 
-              // clear error dynamically
               const copy = [...errors];
               copy[i] = { ...copy[i], storyText: "" };
               setErrors(copy);
             }}
           />
-          {errors[i]?.storyText && (
-            <p className="error-msg">{errors[i].storyText}</p>
-          )}
-
-          
+          {errors[i]?.storyText && <p className="error-msg">{errors[i]?.storyText}</p>}
 
           {/* QUESTION */}
-       <h3 className="question-label">QUESTION</h3>
-      <textarea
-        className="pixel-input"
-        value={q.questionText}
-        onChange={(e) => {
-          const updated = [...questions];
-          updated[i] = { ...updated[i], questionText: e.target.value };
-          setQuestions(updated);
+          <h3 className="question-label">QUESTION</h3>
+          <textarea
+            className="pixel-input"
+            value={q.questionText}
+            onChange={(e) => {
+              const updated = [...questions];
+              updated[i] = { ...updated[i], questionText: e.target.value };
+              setQuestions(updated);
 
-          const copy = [...errors];
-          copy[i] = { ...copy[i], questionText: "" };
-          setErrors(copy);
-        }}
-      />
-      {errors[i]?.questionText && (
-        <p className="error-msg">{errors[i].questionText}</p>
-      )}
+              const copy = [...errors];
+              copy[i] = { ...copy[i], questionText: "" };
+              setErrors(copy);
+            }}
+          />
+          {errors[i]?.questionText && <p className="error-msg">{errors[i]?.questionText}</p>}
 
+          {/* ANSWERS */}
+          <h3 className="question-label">ANSWER OPTIONS</h3>
 
-          {/* ANSWER OPTIONS */}
           {q.answers.map((a, idx) => (
-          <div className="answer-row" key={idx}>
-            <input
-              className="pixel-input"
-              value={a.answerText}
-              onChange={(e) => {
-                const newQ = [...questions];
-                const answers = [...newQ[i].answers];
-                answers[idx].answerText = e.target.value;
-                newQ[i].answers = answers;
-                setQuestions(newQ);
+            <div className="answer-row" key={idx}>
+              <input
+                className="pixel-input"
+                value={a.answerText}
+                onChange={(e) => {
+                  const updated = [...questions];
+                  const answers = normalizeAnswers(updated[i].answers);
+                  answers[idx] = { ...answers[idx], answerText: e.target.value };
+                  updated[i] = { ...updated[i], answers };
+                  setQuestions(updated);
 
-                const copy = [...errors];
-                copy[i] = { ...copy[i], answers: "" };
-                setErrors(copy);
-              }}
-            />
+                  const copy = [...errors];
+                  copy[i] = { ...copy[i], answers: "" };
+                  setErrors(copy);
+                }}
+              />
 
-            <button
-              className={
-                q.correctAnswerIndex === idx
-                  ? "correct-toggle correct-toggle--active"
-                  : "correct-toggle"
-              }
-              onClick={() => {
-                const updated = [...questions];
-                updated[i] = { ...updated[i], correctAnswerIndex: idx };
-                setQuestions(updated);
+              <button
+                className={
+                  q.correctAnswerIndex === idx
+                    ? "correct-toggle correct-toggle--active"
+                    : "correct-toggle"
+                }
+                onClick={() => {
+                  const updated = [...questions];
+                  updated[i] = { ...updated[i], correctAnswerIndex: idx };
+                  setQuestions(updated);
 
-                const copy = [...errors];
-                copy[i] = { ...copy[i], correct: "" };
-                setErrors(copy);
-              }}
-            >
-              ✓
-            </button>
-          </div>
-        ))}
+                  const copy = [...errors];
+                  copy[i] = { ...copy[i], correct: "" };
+                  setErrors(copy);
+                }}
+              >
+                ✓
+              </button>
+            </div>
+          ))}
 
-        {errors[i]?.answers && (
-          <p className="error-msg">{errors[i].answers}</p>
-        )}
+          {errors[i]?.answers && <p className="error-msg">{errors[i]?.answers}</p>}
+          {errors[i]?.correct && <p className="error-msg">{errors[i]?.correct}</p>}
 
-        {errors[i]?.correct && (
-          <p className="error-msg">{errors[i].correct}</p>
-        )}
-
+          {/* CONTEXT TEXTS */}
+          <h3 className="question-label">CONTEXT TEXTS</h3>
           {q.answers.map((a, idx) => (
             <textarea
               key={idx}
@@ -320,9 +375,9 @@ const validate = () => {
               value={a.contextText}
               onChange={(e) => {
                 const updated = [...questions];
-                const answers = [...updated[i].answers];
-                answers[idx].contextText = e.target.value;
-                updated[i].answers = answers;
+                const answers = normalizeAnswers(updated[i].answers);
+                answers[idx] = { ...answers[idx], contextText: e.target.value };
+                updated[i] = { ...updated[i], answers };
                 setQuestions(updated);
 
                 const copy = [...errors];
@@ -333,11 +388,9 @@ const validate = () => {
           ))}
 
           {errors[i]?.contextTexts && (
-            <p className="error-msg">{errors[i].contextTexts}</p>
+            <p className="error-msg">{errors[i]?.contextTexts}</p>
           )}
 
-
-          {/* DELETE WHOLE QUESTION SCENE */}
           <button
             className="pixel-btn pink delete-scene-btn"
             onClick={() => handleDeleteScene(q.questionSceneId, i)}
@@ -347,17 +400,10 @@ const validate = () => {
         </div>
       ))}
 
-      {/* BOTTOM BUTTONS */}
       <div className="edit-buttons">
-        <button className="pixel-btn teal" onClick={handleAdd}>
-          Add Question
-        </button>
-        <button className="pixel-btn teal" onClick={handleSave}>
-          Save Changes
-        </button>
-        <button className="pixel-btn blue" onClick={handleBack}>
-          Back
-        </button>
+        <button className="pixel-btn teal" onClick={handleAdd}>Add Question</button>
+        <button className="pixel-btn teal" onClick={handleSave}>Save Changes</button>
+        <button className="pixel-btn blue" onClick={handleBack}>Back</button>
       </div>
     </div>
   );

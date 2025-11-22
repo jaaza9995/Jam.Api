@@ -60,7 +60,12 @@ useEffect(() => {
         >
           MAKE NEW GAME
         </button>
-        <button className="btn-pink">ADD NEW GAME</button>
+        <button
+          className="btn-pink"
+          onClick={() => navigate("/browse")}
+        >
+          ADD NEW GAME
+        </button>
       </div>
 
       {/* ================= YOUR GAMES ================ */}

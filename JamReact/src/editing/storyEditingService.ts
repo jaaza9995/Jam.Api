@@ -1,3 +1,5 @@
+import { StoryMetadataDto, EndingsDto } from "../types/editStory";
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 const getAuthHeaders = () => {
@@ -9,12 +11,12 @@ const getAuthHeaders = () => {
 };
 
 // ------------------ STORY METADATA ------------------
-export const getStoryMetadata = (storyId: number) =>
+export const getStoryMetadata = (storyId: number): Promise<Response> =>
   fetch(`${API_URL}/api/storyediting/${storyId}`, {
     headers: getAuthHeaders(),
   });
 
-export const updateStoryMetadata = (storyId: number, payload: any) =>
+export const updateStoryMetadata = (storyId: number, payload: StoryMetadataDto) =>
   fetch(`${API_URL}/api/storyediting/${storyId}`, {
     method: "PUT",
     headers: getAuthHeaders(),
@@ -50,12 +52,12 @@ export async function updateIntroScene(
 
 
 // ------------------ QUESTIONS ------------------
-export const getQuestions = (storyId: number) =>
+export const getQuestions = (storyId: number): Promise<Response> =>
   fetch(`${API_URL}/api/storyediting/${storyId}/questions`, {
     headers: getAuthHeaders(),
   });
 
-export const updateQuestions = (storyId: number, payload: any) =>
+export const updateQuestions = (storyId: number, payload: unknown) =>
   fetch(`${API_URL}/api/storyediting/${storyId}/questions`, {
     method: "PUT",
     headers: getAuthHeaders(),
@@ -70,12 +72,12 @@ export const deleteQuestion = (questionSceneId: number) =>
   });
 
 // ------------------ ENDINGS ------------------
-export const getEndings = (storyId: number) =>
+export const getEndings = (storyId: number): Promise<Response> =>
   fetch(`${API_URL}/api/storyediting/${storyId}/endings`, {
     headers: getAuthHeaders(),
   });
 
-export const updateEndings = (storyId: number, payload: any) =>
+export const updateEndings = (storyId: number, payload: EndingsDto) =>
   fetch(`${API_URL}/api/storyediting/${storyId}/endings`, {
     method: "PUT",
     headers: getAuthHeaders(),

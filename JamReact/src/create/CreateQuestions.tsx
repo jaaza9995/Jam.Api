@@ -4,7 +4,13 @@ import "./Create.css";
 import useStoryCreation from "../storyCreation/StoryCreationContext";
 import { saveQuestions } from "../storyCreation/StoryCreationService";
 
-const emptyQuestion = () => ({
+import {
+  QuestionSceneDto,
+  QuestionErrors,
+  QuestionScenesPayload
+} from "../types/createStory";
+
+const emptyQuestion = (): QuestionSceneDto => ({
   storyText: "",
   questionText: "",
   answers: [
@@ -16,7 +22,7 @@ const emptyQuestion = () => ({
   correctAnswerIndex: -1,
 });
 
-const emptyErrors = () => ({
+const emptyErrors = (): QuestionErrors => ({
   storyText: "",
   questionText: "",
   answers: "",
@@ -28,19 +34,18 @@ const CreateQuestions = () => {
   const navigate = useNavigate();
   const { data, setData } = useStoryCreation();
 
-  const [questions, setQuestions] = useState(
+  const [questions, setQuestions] = useState<QuestionSceneDto[]>(
     data.questions.length > 0 ? data.questions : [emptyQuestion()]
   );
 
-  // errors[i] = { storyText?, questionText?, answers?, contextTexts?, correct? }
-  const [errors, setErrors] = useState<any[]>([]);
+  const [errors, setErrors] = useState<QuestionErrors[]>([]);
 
   // -----------------------------
   // VALIDATION
   // -----------------------------
   const validate = () => {
-    const errList = questions.map((q) => {
-      const e: any = {};
+    const errList: QuestionErrors[] = questions.map((q) => {
+      const e: QuestionErrors = {};
 
       if (!q.storyText.trim()) e.storyText = "Story context is required.";
       if (!q.questionText.trim()) e.questionText = "Question text is required.";
@@ -59,28 +64,26 @@ const CreateQuestions = () => {
 
     setErrors(errList);
 
-    // return TRUE only if all questions have NO errors
     return errList.every((e) => Object.keys(e).length === 0);
   };
 
   // -----------------------------
-  // HANDLERS
+  // NEXT
   // -----------------------------
   const handleNext = async () => {
     if (!validate()) return;
 
-    const mapped = questions.map((q) => ({
-      storyText: q.storyText,
-      questionText: q.questionText,
-      correctAnswerIndex: q.correctAnswerIndex,
-      answers: q.answers.map((a) => ({
-        answerText: a.answerText,
-        contextText: a.contextText,
+    const payload: QuestionScenesPayload = {
+      questionScenes: questions.map((q) => ({
+        storyText: q.storyText,
+        questionText: q.questionText,
+        correctAnswerIndex: q.correctAnswerIndex,
+        answers: q.answers.map((a) => ({
+          answerText: a.answerText,
+          contextText: a.contextText,
+        })),
       })),
-    }));
-
-    const payload = { questionScenes: mapped };
-    console.log("payload", payload);
+    };
 
     const res = await saveQuestions(payload);
     if (!res.ok) {
@@ -93,12 +96,14 @@ const CreateQuestions = () => {
     navigate("/create/endings");
   };
 
-  const update = (index: number, updated: any) => {
+  // -----------------------------
+  // UPDATERS
+  // -----------------------------
+  const update = (index: number, updated: QuestionSceneDto) => {
     const copy = [...questions];
     copy[index] = updated;
     setQuestions(copy);
 
-    // Clear errors for that field dynamically
     const newErrors = [...errors];
     newErrors[index] = {};
     setErrors(newErrors);
@@ -129,7 +134,6 @@ const CreateQuestions = () => {
             <textarea
               className="pixel-input"
               value={q.storyText}
-              placeholder="Write the story text shown before the question..."
               onChange={(e) =>
                 update(i, { ...q, storyText: e.target.value })
               }
@@ -142,7 +146,6 @@ const CreateQuestions = () => {
             <textarea
               className="pixel-input"
               value={q.questionText}
-              placeholder="Write the question the player must answer..."
               onChange={(e) =>
                 update(i, { ...q, questionText: e.target.value })
               }
@@ -157,7 +160,6 @@ const CreateQuestions = () => {
                 <input
                   className="pixel-input-small"
                   value={a.answerText}
-                  placeholder={`Answer option ${ai + 1}`}
                   onChange={(e) => {
                     const list = [...q.answers];
                     list[ai].answerText = e.target.value;
@@ -177,6 +179,7 @@ const CreateQuestions = () => {
                 </button>
               </div>
             ))}
+
             {errors[i]?.answers && (
               <p className="error-msg">{errors[i].answers}</p>
             )}
@@ -190,7 +193,6 @@ const CreateQuestions = () => {
                 key={ai}
                 className="pixel-input"
                 value={a.contextText}
-                placeholder="Story text that appears after choosing this answer..."
                 onChange={(e) => {
                   const list = [...q.answers];
                   list[ai].contextText = e.target.value;
@@ -219,7 +221,11 @@ const CreateQuestions = () => {
         </button>
         <button
           className="pixel-btn pink small-btn"
-          onClick={() => navigate("/create/intro")}
+          onClick={() => {
+            // lagre nåværende spørsmål uten ekstra validering før vi går tilbake
+            setData((prev) => ({ ...prev, questions }));
+            navigate("/create/intro");
+          }}
         >
           BACK
         </button>

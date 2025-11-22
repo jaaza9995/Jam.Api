@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./Create.css";
 import useStoryCreation from "../storyCreation/StoryCreationContext";
 import { saveEndings } from "../storyCreation/StoryCreationService";
+import { EndingDto, EndingErrors } from "../types/createStory";
 
 const CreateEndings = () => {
   const navigate = useNavigate();
@@ -12,30 +13,23 @@ const CreateEndings = () => {
   const [neutral, setNeutral] = useState(data.endings.neutral);
   const [bad, setBad] = useState(data.endings.bad);
 
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<EndingErrors>({
     good: "",
     neutral: "",
     bad: "",
   });
 
-  // -----------------------
-  // VALIDATION
-  // -----------------------
   const validate = () => {
-    const newErrors: any = {};
+    const newErrors: EndingErrors = { good: "", neutral: "", bad: "" };
 
     if (!good.trim()) newErrors.good = "Opps, your forgot to write a good ending.";
     if (!neutral.trim()) newErrors.neutral = "Opps, your forgot to write a neutral ending.";
     if (!bad.trim()) newErrors.bad = "Opps, your forgot to write a bad ending.";
 
     setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
+    return !newErrors.good && !newErrors.neutral && !newErrors.bad;
   };
 
-  // -----------------------
-  // SUBMIT
-  // -----------------------
   const handleFinish = async () => {
     if (!validate()) return;
 
@@ -44,11 +38,13 @@ const CreateEndings = () => {
       endings: { good, neutral, bad },
     }));
 
-    const res = await saveEndings({
+    const payload: EndingDto = {
       goodEnding: good,
       neutralEnding: neutral,
       badEnding: bad,
-    });
+    };
+
+    const res = await saveEndings(payload);
 
     if (!res.ok) {
       console.error("Failed to save endings");
@@ -57,6 +53,7 @@ const CreateEndings = () => {
 
     navigate("/");
   };
+
 
   // -----------------------
   // RENDER

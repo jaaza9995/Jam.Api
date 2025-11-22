@@ -100,4 +100,56 @@ public async Task<IActionResult> GetHomePage()
         return StatusCode(500, new { message = "Unexpected error while loading dashboard" });
     }
 }
+[HttpGet("public")]
+[Authorize]
+public async Task<IActionResult> GetPublicGames()
+{
+    var publicStories = await _storyRepository.GetAllPublicStories();
+
+    var result = new List<object>();
+
+    foreach (var s in publicStories)
+    {
+        var qCount = await _storyRepository.GetAmountOfQuestionsForStory(s.StoryId) ?? 0;
+
+        result.Add(new
+        {
+            s.StoryId,
+            s.Title,
+            s.Description,
+            s.DifficultyLevel,
+            s.Accessibility,
+            QuestionCount = qCount
+        });
+    }
+
+    return Ok(result);
+}
+
+[HttpGet("private/{code}")]
+[Authorize]
+public async Task<IActionResult> GetPrivateGame(string code)
+{
+    if (string.IsNullOrWhiteSpace(code))
+        return BadRequest(new { message = "Code is required" });
+
+    var story = await _storyRepository.GetPrivateStoryByCode(code);
+
+    if (story == null)
+        return NotFound(new { message = "No game found with this code." });
+
+    var qCount = await _storyRepository.GetAmountOfQuestionsForStory(story.StoryId) ?? 0;
+
+    return Ok(new
+    {
+        story.StoryId,
+        story.Title,
+        story.Description,
+        story.DifficultyLevel,
+        story.Accessibility,
+        story.Code,
+        QuestionCount = qCount
+    });
+}
+
 }

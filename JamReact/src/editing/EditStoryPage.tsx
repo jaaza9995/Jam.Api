@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { getStoryMetadata } from "./storyEditingService";
 import { useAuth } from "../auth/AuthContext";
 import DeleteModal from "../shared/DeleteModal";
 import "./EditStoryPage.css";
+import { StoryMetadataDto } from "../types/editStory";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 const EditStoryPage = () => {
   const { storyId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { token } = useAuth();
 
-  const [meta, setMeta] = useState<any>(null);
+  const [meta, setMeta] = useState<StoryMetadataDto | null>(null);
   const [questionCount, setQuestionCount] = useState<number | null>(null);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -39,7 +41,7 @@ const EditStoryPage = () => {
     };
 
     load();
-  }, [storyId, token]);
+  }, [storyId, token, location.key]);
 
   if (!meta) return <div className="pixel-bg">Loading...</div>;
 
