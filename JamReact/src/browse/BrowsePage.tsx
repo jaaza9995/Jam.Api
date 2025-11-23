@@ -10,13 +10,12 @@ const BrowsePage: React.FC = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
 
-  const [publicGames, setPublicGames] = useState([]);
+  const [publicGames, setPublicGames] = useState<any[]>([]);
   const [publicSearch, setPublicSearch] = useState("");
 
   const [privateCode, setPrivateCode] = useState("");
   const [privateMatch, setPrivateMatch] = useState<any>(null);
 
-  // Modal state
   const [showModal, setShowModal] = useState(false);
   const [selectedGame, setSelectedGame] = useState<any>(null);
 
@@ -34,17 +33,23 @@ const BrowsePage: React.FC = () => {
     navigate(`/play/${selectedGame.storyId}`);
   };
 
-  // Fetch all public games
+  // ---------------------------
+  // FETCH PUBLIC GAMES
+  // ---------------------------
   useEffect(() => {
     const fetchPublic = async () => {
       try {
         const res = await fetch(`${API_URL}/api/browse/public`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         });
+
         if (!res.ok) return;
 
         const data = await res.json();
-        setPublicGames(data);
+        setPublicGames(data || []);
       } catch (e) {
         console.error("Error loading public games", e);
       }
@@ -53,16 +58,25 @@ const BrowsePage: React.FC = () => {
     fetchPublic();
   }, [token]);
 
-  const filtered = publicGames.filter((g: any) =>
-    g.title.toLowerCase().includes(publicSearch.toLowerCase())
-  );
+  // ---------------------------
+  // PUBLIC SEARCH
+  // ---------------------------
+  const filtered = publicGames.filter((g: any) => {
+    const title = (g?.title || "").toLowerCase();
+    return title.includes(publicSearch.toLowerCase());
+  });
 
-  // Private game search
+  // ---------------------------
+  // PRIVATE CODE SEARCH
+  // ---------------------------
   const handlePrivateSearch = async () => {
     if (!privateCode.trim()) return;
 
     const res = await fetch(`${API_URL}/api/browse/private/${privateCode}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (res.ok) {
@@ -71,12 +85,12 @@ const BrowsePage: React.FC = () => {
       openModal(game);
     } else {
       alert("No game found with this code.");
+      setPrivateMatch(null);
     }
   };
 
   return (
     <div className="browse-container">
-
       <h1 className="browse-title">Find a Game</h1>
 
       <div className="browse-sections">
@@ -93,16 +107,20 @@ const BrowsePage: React.FC = () => {
           />
 
           <ul className="browse-list">
-            {filtered.map((g: any) => (
-              <li
-                key={g.storyId}
-                className="browse-card"
-                onClick={() => openModal(g)}
-              >
-                <h3>{g.title}</h3>
-                <p>{g.description}</p>
-              </li>
-            ))}
+            {filtered.length > 0 ? (
+              filtered.map((g) => (
+                <li
+                  key={g.storyId}
+                  className="browse-card"
+                  onClick={() => openModal(g)}
+                >
+                  <h3>{g.title}</h3>
+                  <p>{g.description}</p>
+                </li>
+              ))
+            ) : (
+              <p className="empty-msg">No games match your search.</p>
+            )}
           </ul>
         </div>
 

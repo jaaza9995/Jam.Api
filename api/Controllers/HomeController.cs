@@ -36,125 +36,72 @@ public class HomeController : ControllerBase
 
     // GET: api/home/homepage
   [HttpGet("homepage")]
-public async Task<IActionResult> GetHomePage()
-{
-    try
+    public async Task<IActionResult> GetHomePage()
     {
-        // Hent UserId direkte fra JWT
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        if (string.IsNullOrEmpty(userId))
+        try
         {
-            _logger.LogWarning("Token missing user ID.");
-            return Unauthorized(new { message = "Invalid token" });
-        }
+            // Hent UserId direkte fra JWT
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        // Hent bruker basert på ID (IKKE email)
-        var user = await _userManager.FindByIdAsync(userId);
-
-        if (user == null)
-        {
-            _logger.LogWarning("User not found for ID {id}", userId);
-            await _signInManager.SignOutAsync();
-            return Unauthorized(new { message = "User session expired. Please log in again." });
-        }
-
-        var userStories = await _storyRepository.GetStoriesByUserId(user.Id);
-       var recentlyPlayed = (await _storyRepository.GetMostRecentPlayedStories(user.Id, 5))
-        .OrderByDescending(s => s.Played)   // hvis Played brukes
-        .ToList();
-
-
-        var questionCounts = new Dictionary<int, int>();
-        foreach (var s in userStories.Concat(recentlyPlayed))
-        {
-            questionCounts[s.StoryId] = await _storyRepository.GetAmountOfQuestionsForStory(s.StoryId) ?? 0;
-        }
-
-        return Ok(new
-        {
-            FirstName = user.UserName,
-            YourStories = userStories.Select(s => new
+            if (string.IsNullOrEmpty(userId))
             {
-                s.StoryId,
-                s.Title,
-                s.Description,
-                s.DifficultyLevel,
-                s.Accessibility,
-                s.Code,
-                QuestionCount = questionCounts[s.StoryId],
+                _logger.LogWarning("Token missing user ID.");
+                return Unauthorized(new { message = "Invalid token" });
+            }
+
+            // Hent bruker basert på ID (IKKE email)
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                _logger.LogWarning("User not found for ID {id}", userId);
+                await _signInManager.SignOutAsync();
+                return Unauthorized(new { message = "User session expired. Please log in again." });
+            }
+
+            var userStories = await _storyRepository.GetStoriesByUserId(user.Id);
+        var recentlyPlayed = (await _storyRepository.GetMostRecentPlayedStories(user.Id, 5))
+            .OrderByDescending(s => s.Played)   // hvis Played brukes
+            .ToList();
+
+
+            var questionCounts = new Dictionary<int, int>();
+            foreach (var s in userStories.Concat(recentlyPlayed))
+            {
+                questionCounts[s.StoryId] = await _storyRepository.GetAmountOfQuestionsForStory(s.StoryId) ?? 0;
+            }
+
+            return Ok(new
+            {
+                FirstName = user.UserName,
+                YourStories = userStories.Select(s => new
+                {
+                    s.StoryId,
+                    s.Title,
+                    s.Description,
+                    s.DifficultyLevel,
+                    s.Accessibility,
+                    s.Code,
+                    QuestionCount = questionCounts[s.StoryId],
+                    
+                }),
+                RecentlyPlayed = recentlyPlayed.Select(s => new
+                {
+                    s.StoryId,
+                    s.Title,
+                    s.Description,
+                    s.DifficultyLevel,
+                    s.Accessibility,
+                    s.Code,
+                    QuestionCount = questionCounts[s.StoryId]
                 
-            }),
-            RecentlyPlayed = recentlyPlayed.Select(s => new
-            {
-                s.StoryId,
-                s.Title,
-                s.Description,
-                s.DifficultyLevel,
-                s.Accessibility,
-                s.Code,
-                QuestionCount = questionCounts[s.StoryId]
-               
-            })
-        });
-    }
-    catch (Exception e)
-    {
-        _logger.LogError(e, "Error while loading dashboard");
-        return StatusCode(500, new { message = "Unexpected error while loading dashboard" });
-    }
-}
-[HttpGet("public")]
-[Authorize]
-public async Task<IActionResult> GetPublicGames()
-{
-    var publicStories = await _storyRepository.GetAllPublicStories();
-
-    var result = new List<object>();
-
-    foreach (var s in publicStories)
-    {
-        var qCount = await _storyRepository.GetAmountOfQuestionsForStory(s.StoryId) ?? 0;
-
-        result.Add(new
+                })
+            });
+        }
+        catch (Exception e)
         {
-            s.StoryId,
-            s.Title,
-            s.Description,
-            s.DifficultyLevel,
-            s.Accessibility,
-            QuestionCount = qCount
-        });
+            _logger.LogError(e, "Error while loading dashboard");
+            return StatusCode(500, new { message = "Unexpected error while loading dashboard" });
+        }
     }
-
-    return Ok(result);
-}
-
-[HttpPost("private")]
-[Authorize]
-public async Task<IActionResult> GetPrivateGame([FromBody] JoinPrivateStoryRequestDto request)
-{
-    if (!ModelState.IsValid)
-        return BadRequest(ModelState);
-
-    var story = await _storyRepository.GetPrivateStoryByCode(request.Code);
-
-    if (story == null)
-        return NotFound(new { message = "No game found with this code." });
-
-    var qCount = await _storyRepository.GetAmountOfQuestionsForStory(story.StoryId) ?? 0;
-
-    return Ok(new
-    {
-        story.StoryId,
-        story.Title,
-        story.Description,
-        story.DifficultyLevel,
-        story.Accessibility,
-        story.Code,
-        QuestionCount = qCount
-    });
-}
-
-
 }
