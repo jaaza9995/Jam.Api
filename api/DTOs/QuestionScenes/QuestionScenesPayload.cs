@@ -5,6 +5,6 @@ public class QuestionScenesPayload
 
 {
     [Required]
-    [MinLength(1)]
+    [MinLength(1, ErrorMessage = "At least one question is required")]
     public List<UpdateQuestionSceneDto> QuestionScenes { get; set; } = new();
 }

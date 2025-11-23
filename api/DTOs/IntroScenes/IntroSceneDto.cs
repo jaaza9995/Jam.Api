@@ -6,7 +6,7 @@ namespace Jam.DTOs.IntroScenes
     {
         public int StoryId { get; set; }
         [Required]
-        [MinLength(10)]
+        [MinLength(10, ErrorMessage = "Intro Text must be at least 10 characters")]
         public string IntroText { get; set; } = string.Empty;
     }
 }
