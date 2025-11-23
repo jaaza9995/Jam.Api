@@ -4,6 +4,8 @@ import "./Create.css";
 import useStoryCreation from "../storyCreation/StoryCreationContext";
 import { saveIntro } from "../storyCreation/StoryCreationService";
 import { IntroDto, IntroErrors } from "../types/createStory";
+import { parseBackendErrors } from "../utils/parseBackendErrors";
+import FormErrorMessage from "../components/FormErrorMessage";
 
 const CreateIntro = () => {
   const navigate = useNavigate();
@@ -33,8 +35,8 @@ const CreateIntro = () => {
     };
 
     if (!title.trim()) newErrors.title = "You must write a Title for your game.";
-    if (!description.trim()) newErrors.description = "You must write a Description for your game";
-    if (!introText.trim()) newErrors.introText = "You must write a Intro Text for your game";
+    if (!description.trim()) newErrors.description = "You must write a Description for your game.";
+    if (!introText.trim()) newErrors.introText = "You must write an Intro Text for your game.";
     if (!difficulty) newErrors.difficulty = "Please choose difficulty.";
     if (!accessibility) newErrors.accessibility = "Please choose accessibility.";
 
@@ -45,7 +47,7 @@ const CreateIntro = () => {
   const handleNext = async () => {
     if (!validate()) return;
 
-    // update context
+    // Update context
     setData(prev => ({
       ...prev,
       intro: {
@@ -68,7 +70,16 @@ const CreateIntro = () => {
     const res = await saveIntro(payload);
 
     if (!res.ok) {
-      console.error("Failed to save intro");
+      const parsed = parseBackendErrors(res.data);
+
+      setErrors({
+        title: parsed.title || "",
+        description: parsed.description || "",
+        introText: parsed.introText || "",
+        difficulty: parsed.difficultyLevel || "",
+        accessibility: parsed.accessibility || "",
+      });
+
       return;
     }
 
@@ -80,76 +91,80 @@ const CreateIntro = () => {
       <h1 className="intro-title">CREATE NEW GAME</h1>
 
       <div className="form-section">
-        
 
+        {/* TITLE */}
         <label className="input-label">TITLE</label>
         <input
           className="pixel-input"
           value={title}
           placeholder="Enter the title of your game..."
           onChange={(e) => {
-            setTitle(e.target.value)
-            setErrors((prev) => ({ ...prev, title: "" }));  
-            }}
+            setTitle(e.target.value);
+            setErrors(prev => ({ ...prev, title: "" }));
+          }}
         />
-        {errors.title && <p className="error-msg">{errors.title}</p>}
+        <FormErrorMessage message={errors.title} />
 
+        {/* DESCRIPTION */}
         <label className="input-label">DESCRIPTION</label>
         <textarea
           className="pixel-textarea"
           value={description}
           placeholder="Write a description..."
           onChange={(e) => {
-            setDescription(e.target.value)
-            setErrors((prev) => ({ ...prev, description: "" }));
-        }}
+            setDescription(e.target.value);
+            setErrors(prev => ({ ...prev, description: "" }));
+          }}
         />
-        {errors.description && <p className="error-msg">{errors.description}</p>}
+        <FormErrorMessage message={errors.description} />
+
+        {/* INTRO TEXT */}
         <label className="input-label">INTRO TEXT</label>
         <textarea
           className="pixel-textarea"
           value={introText}
-          placeholder="Write the intro story the player sees first..."
+          placeholder="Write the intro story..."
           onChange={(e) => {
-            setIntroText(e.target.value)
-            setErrors((prev) => ({ ...prev, introText: "" }));
-        }}
+            setIntroText(e.target.value);
+            setErrors(prev => ({ ...prev, introText: "" }));
+          }}
         />
-        {errors.introText && <p className="error-msg">{errors.introText}</p>}
+        <FormErrorMessage message={errors.introText} />
 
+        {/* DIFFICULTY */}
         <label className="input-label">DIFFICULTY</label>
         <select
           className="pixel-select"
           value={difficulty}
           onChange={(e) => {
-            setDifficulty(e.target.value)
-            setErrors((prev) => ({ ...prev, difficulty: "" }));
-        }}
+            setDifficulty(e.target.value);
+            setErrors(prev => ({ ...prev, difficulty: "" }));
+          }}
         >
           <option value="" disabled hidden>Select difficulty...</option>
           <option value="0">Easy</option>
           <option value="1">Medium</option>
           <option value="2">Hard</option>
         </select>
-        {errors.difficulty && <p className="error-msg">{errors.difficulty}</p>}
+        <FormErrorMessage message={errors.difficulty} />
 
-
+        {/* ACCESSIBILITY */}
         <label className="input-label">ACCESSIBILITY</label>
         <select
           className="pixel-select"
           value={accessibility}
           onChange={(e) => {
-            setAccessibility(e.target.value)
-          setErrors((prev) => ({ ...prev, accessibility: "" }));
-        }}
+            setAccessibility(e.target.value);
+            setErrors(prev => ({ ...prev, accessibility: "" }));
+          }}
         >
-          <option value="" disabled hidden>Select Accessibility...</option>
+          <option value="" disabled hidden>Select accessibility...</option>
           <option value="0">Public</option>
           <option value="1">Private</option>
         </select>
-        {errors.accessibility && <p className="error-msg">{errors.accessibility}</p>}
+        <FormErrorMessage message={errors.accessibility} />
 
-
+        {/* BUTTONS */}
         <div className="button-row-intro">
           <button className="pixel-btn pink" onClick={() => navigate("/")}>
             BACK

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import "./EditStoryPage.css";
+import { parseBackendErrors } from "../utils/parseBackendErrors";
 
 import {
   getStoryMetadata,
@@ -152,67 +153,97 @@ const EditIntroPage: React.FC = () => {
   // ------------------------------------
   // SAVE
   // ------------------------------------
-  const handleSave = async () => {
-    setBackendError("");
 
-    // 🔥 NEW: show "no changes" toast
-    if (!hasChanges()) {
-      setShowNoChangesMsg(true);
-      setTimeout(() => setShowNoChangesMsg(false), 4000);
-      return;
-    }
+const handleSave = async () => {
+  setBackendError("");
 
-    if (!storyId || !token) {
-      setBackendError("Missing story or token");
-      return;
-    }
+  // 🔥 NEW: show "no changes" toast
+  if (!hasChanges()) {
+    setShowNoChangesMsg(true);
+    setTimeout(() => setShowNoChangesMsg(false), 4000);
+    return;
+  }
 
-    // Validation
-    if (!validate()) return;
+  if (!storyId || !token) {
+    setBackendError("Missing story or token");
+    return;
+  }
 
-    // Save metadata
-    const metaRes = await updateStoryMetadata(Number(storyId), {
-      storyId: Number(storyId),
-      title,
-      description,
-      difficultyLevel: difficulty,
-      accessibility,
-    });
+  // Local validation
+  if (!validate()) return;
 
-    if (!metaRes.ok) {
-      setBackendError("Could not save story details.");
-      return;
-    }
+  // -----------------------------
+  // SAVE METADATA
+  // -----------------------------
+  const metaRes = await updateStoryMetadata(Number(storyId), {
+    storyId: Number(storyId),
+    title,
+    description,
+    difficultyLevel: difficulty,
+    accessibility,
+  });
 
-    // Save intro text
-    const introRes = await updateIntroScene(Number(storyId), introText);
+  if (!metaRes.ok) {
+    let body = null;
+    try {
+      body = await metaRes.json();
+    } catch {}
 
-    if (!introRes.ok) {
-      let msg = "Could not save intro text.";
-      try {
-        const body = await introRes.json();
-        if (body?.errorTitle) msg = body.errorTitle;
-      } catch { /* ignore parse errors */ }
-      setBackendError(msg);
-      return;
-    }
+    const parsed = parseBackendErrors(body);
 
-    // Refresh original values
-    const updatedMeta = await getStoryMetadata(Number(storyId)).then((res) =>
-      res.json()
-    );
+    setErrors((prev) => ({
+      ...prev,
+      title: parsed.title || "",
+      description: parsed.description || "",
+      difficulty: parsed.difficultyLevel || "",
+      accessibility: parsed.accessibility || "",
+    }));
 
-    setOriginal({
-      title: updatedMeta.title,
-      description: updatedMeta.description,
-      difficulty: updatedMeta.difficultyLevel,
-      accessibility: Number(updatedMeta.accessibility),
-      intro: introText,
-    });
+    if (body?.errorTitle) setBackendError(body.errorTitle);
+    return;
+  }
 
-    setShowSavedMsg(true);
-    setTimeout(() => setShowSavedMsg(false), 5000);
-  };
+  // -----------------------------
+  // SAVE INTRO TEXT
+  // -----------------------------
+  const introRes = await updateIntroScene(Number(storyId), introText);
+
+  if (!introRes.ok) {
+    let body = null;
+    try {
+      body = await introRes.json();
+    } catch {}
+
+    const parsed = parseBackendErrors(body);
+
+    setErrors((prev) => ({
+      ...prev,
+      introText: parsed.introText || "",
+    }));
+
+    if (body?.errorTitle) setBackendError(body.errorTitle);
+
+    return;
+  }
+
+  // -----------------------------
+  // REFRESH ORIGINAL SAVED DATA
+  // -----------------------------
+  const updatedMeta = await getStoryMetadata(Number(storyId)).then((res) =>
+    res.json()
+  );
+
+  setOriginal({
+    title: updatedMeta.title,
+    description: updatedMeta.description,
+    difficulty: updatedMeta.difficultyLevel,
+    accessibility: Number(updatedMeta.accessibility),
+    intro: introText,
+  });
+
+  setShowSavedMsg(true);
+  setTimeout(() => setShowSavedMsg(false), 5000);
+};
 
   // ------------------------------------
   // BACK BUTTON

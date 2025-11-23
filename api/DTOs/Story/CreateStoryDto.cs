@@ -6,9 +6,11 @@ namespace Jam.DTOs.Story
     public class CreateStoryDto
     {
         [Required]
+        [MinLength(3)]
         public string Title { get; set; } = string.Empty;
-
+        
         [Required]
+        [MinLength(10)]
         public string Description { get; set; } = string.Empty;
 
         [Required]

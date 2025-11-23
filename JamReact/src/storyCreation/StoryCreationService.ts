@@ -88,10 +88,9 @@ export async function deleteStory(storyId: number) {
 export async function saveIntro(payload: IntroDto) {
   const res = await fetch(`${API_URL}/api/storycreation/intro`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
+    headers: getAuthHeaders(),
+    credentials: "include",
+    body: JSON.stringify(payload),
   });
 
   let data = null;

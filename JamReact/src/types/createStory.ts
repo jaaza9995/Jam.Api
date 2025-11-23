@@ -6,6 +6,7 @@ export interface Story {
   accessibility: number | string;
   questionCount: number;
   code?: string;
+  lastPlayed: string;
 }
 export interface EndingDto {
   goodEnding: string;

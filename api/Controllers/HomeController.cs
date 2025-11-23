@@ -3,6 +3,7 @@ using Jam.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Jam.DTOs.JoinPrivateStoryRequestDto;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -59,7 +60,10 @@ public async Task<IActionResult> GetHomePage()
         }
 
         var userStories = await _storyRepository.GetStoriesByUserId(user.Id);
-        var recentlyPlayed = await _storyRepository.GetMostRecentPlayedStories(user.Id, 5);
+       var recentlyPlayed = (await _storyRepository.GetMostRecentPlayedStories(user.Id, 5))
+        .OrderByDescending(s => s.Played)   // hvis Played brukes
+        .ToList();
+
 
         var questionCounts = new Dictionary<int, int>();
         foreach (var s in userStories.Concat(recentlyPlayed))
@@ -126,14 +130,14 @@ public async Task<IActionResult> GetPublicGames()
     return Ok(result);
 }
 
-[HttpGet("private/{code}")]
+[HttpPost("private")]
 [Authorize]
-public async Task<IActionResult> GetPrivateGame(string code)
+public async Task<IActionResult> GetPrivateGame([FromBody] JoinPrivateStoryRequestDto request)
 {
-    if (string.IsNullOrWhiteSpace(code))
-        return BadRequest(new { message = "Code is required" });
+    if (!ModelState.IsValid)
+        return BadRequest(ModelState);
 
-    var story = await _storyRepository.GetPrivateStoryByCode(code);
+    var story = await _storyRepository.GetPrivateStoryByCode(request.Code);
 
     if (story == null)
         return NotFound(new { message = "No game found with this code." });
@@ -151,5 +155,6 @@ public async Task<IActionResult> GetPrivateGame(string code)
         QuestionCount = qCount
     });
 }
+
 
 }

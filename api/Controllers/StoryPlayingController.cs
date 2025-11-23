@@ -6,6 +6,7 @@ using Jam.DTOs;
 using Jam.DTOs.StoryPlaying;
 using Jam.Models;
 using Jam.Models.Enums;
+using Jam.DTOs.JoinPrivateStoryRequestDto;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -86,9 +87,11 @@ public class StoryPlayingController : ControllerBase
         };
 
     [HttpPost("join")]
-    public async Task<IActionResult> JoinPrivateStory(
-        [FromBody] JoinPrivateStoryRequestDto model)
+    public async Task<IActionResult> JoinPrivateStory([FromBody] JoinPrivateStoryRequestDto model)
     {
+         if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+            
         if (string.IsNullOrWhiteSpace(model.Code))
             return BadRequest(new ErrorDto { ErrorTitle = "Code required" });
 
@@ -126,6 +129,8 @@ public class StoryPlayingController : ControllerBase
         int storyId,
         [FromBody] JoinPrivateStoryRequestDto? codeModel = null)
     {
+         if (!ModelState.IsValid)
+            return BadRequest(ModelState);
         try
         {
             var userId = GetCurrentUserId();
@@ -288,6 +293,8 @@ public class StoryPlayingController : ControllerBase
     [HttpPost("answer")]
     public async Task<IActionResult> SubmitAnswer([FromBody] SubmitAnswerRequestDto model)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
         try
         {
             var session = await _playingSessionRepository.GetPlayingSessionById(model.SessionId);

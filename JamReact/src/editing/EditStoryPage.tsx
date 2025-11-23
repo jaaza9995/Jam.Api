@@ -5,6 +5,7 @@ import { useAuth } from "../auth/AuthContext";
 import DeleteModal from "../shared/DeleteModal";
 import "./EditStoryPage.css";
 import { StoryMetadataDto } from "../types/editStory";
+import { parseBackendErrors } from "../utils/parseBackendErrors";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -16,13 +17,24 @@ const EditStoryPage = () => {
 
   const [meta, setMeta] = useState<StoryMetadataDto | null>(null);
   const [questionCount, setQuestionCount] = useState<number | null>(null);
+  const [metaErrors, setMetaErrors] = useState<{ title?: string; description?: string }>({});
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     const load = async () => {
       const res = await getStoryMetadata(Number(storyId));
-      if (!res.ok) return;
+if (!res.ok) {
+  const backend = await res.json().catch(() => null);
+  const parsed = parseBackendErrors(backend);
+
+  setMetaErrors({
+    title: parsed.Title,
+    description: parsed.Description
+  });
+
+  return;
+}
 
       const data = await res.json();
       setMeta(data);
@@ -46,9 +58,7 @@ const EditStoryPage = () => {
   if (!meta) return <div className="pixel-bg">Loading...</div>;
 
   const isPrivate =
-    meta.accessibility === 1 ||
-    meta.accessibility === "Private" ||
-    meta.accessibility === "private";
+    meta.accessibility === 1;
 
   const code = meta.code ?? null;
 

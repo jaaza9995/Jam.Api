@@ -368,7 +368,8 @@ public class SceneRepository : ISceneRepository
 
     public async Task<bool> UpdateQuestionScenes(IEnumerable<QuestionScene> questionScenes)
     {
-        if (!questionScenes.Any())
+        var updatedScenes = questionScenes?.ToList() ?? new List<QuestionScene>();
+        if (!updatedScenes.Any())
         {
             _logger.LogWarning("[SceneRepository -> UpdateQuestionScenes] No QuestionScenes provided");
             return false;
@@ -376,7 +377,7 @@ public class SceneRepository : ISceneRepository
 
         try
         {
-            var storyId = questionScenes.First().StoryId;
+            var storyId = updatedScenes.First().StoryId;
 
             // Hent eksisterende scener
             var existingScenes = await _db.QuestionScenes
@@ -389,7 +390,7 @@ public class SceneRepository : ISceneRepository
             int deletedCount = 0;
 
             // --- Finn og slett scener som er fjernet fra modellen ---
-            var modelIds = questionScenes.Where(q => q.QuestionSceneId != 0)
+            var modelIds = updatedScenes.Where(q => q.QuestionSceneId != 0)
                                          .Select(q => q.QuestionSceneId)
                                          .ToHashSet();
 
@@ -400,8 +401,10 @@ public class SceneRepository : ISceneRepository
                 deletedCount = toDelete.Count;
             }
 
-            // --- Legg til eller oppdater scener ---
-            foreach (var updatedScene in questionScenes)
+            // --- Legg til eller oppdater scener og behold rekkefølgen for lenking ---
+            var trackedInOrder = new List<QuestionScene>();
+
+            foreach (var updatedScene in updatedScenes)
             {
                 if (updatedScene.QuestionSceneId == 0)
                 {
@@ -410,6 +413,7 @@ public class SceneRepository : ISceneRepository
                         answer.QuestionScene = updatedScene;
 
                     _db.QuestionScenes.Add(updatedScene);
+                    trackedInOrder.Add(updatedScene);
                     addedCount++;
                 }
                 else
@@ -430,8 +434,23 @@ public class SceneRepository : ISceneRepository
 
                     existingScene.AnswerOptions = updatedScene.AnswerOptions;
                     _db.QuestionScenes.Update(existingScene);
+                    trackedInOrder.Add(existingScene);
                     updatedCount++;
                 }
+            }
+
+            // Første lagring for å sikre at nye scener får genererte ID-er
+            await _db.SaveChangesAsync();
+
+            // --- Oppdater NextQuestionSceneId slik at alle nye spørsmål lenkes i lagret rekkefølge ---
+            for (int i = 0; i < trackedInOrder.Count; i++)
+            {
+                var nextId = (i < trackedInOrder.Count - 1)
+                    ? trackedInOrder[i + 1].QuestionSceneId
+                    : (int?)null;
+
+                trackedInOrder[i].NextQuestionSceneId = nextId;
+                _db.QuestionScenes.Update(trackedInOrder[i]);
             }
 
             await _db.SaveChangesAsync();
@@ -726,4 +745,3 @@ public class SceneRepository : ISceneRepository
         }
     }
 }
-

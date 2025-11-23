@@ -6,6 +6,7 @@ import { getEndings, updateEndings } from "./storyEditingService";
 import ConfirmUndoModal from "../shared/ConfirmUndoModal";
 import "./EditStoryPage.css";
 import { EndingsDto } from "../types/editStory";
+import { parseBackendErrors } from "../utils/parseBackendErrors";
 
 const EditEndingsPage: React.FC = () => {
   const { storyId } = useParams();
@@ -47,9 +48,17 @@ const EditEndingsPage: React.FC = () => {
 
       const res = await getEndings(Number(storyId));
       if (!res.ok) {
-        setLoading(false);
-        return;
-      }
+      const parsed = parseBackendErrors(await res.json().catch(() => null));
+      
+      setErrors({
+        good: parsed.goodEnding || "",
+        neutral: parsed.neutralEnding || "",
+        bad: parsed.badEnding || "",
+      });
+
+      return;
+    }
+
 
       const data = (await res.json()) as EndingsDto;
 

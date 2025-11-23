@@ -35,7 +35,12 @@ useEffect(() => {
 
       setFirstName(data.firstName || "Player");
       setStories(data.yourStories || []);
-      setRecentlyPlayed(data.recentlyPlayed || []);
+     setRecentlyPlayed(
+        (data.recentlyPlayed || []).sort((a: Story, b: Story) =>
+          new Date(b.lastPlayed as any).getTime() -
+          new Date(a.lastPlayed as any).getTime()
+        )
+      );
 
     } catch (error) {
       console.error("Error loading homepage:", error);

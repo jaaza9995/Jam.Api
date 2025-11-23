@@ -5,6 +5,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import "./EditStoryPage.css";
 import { getQuestions, updateQuestions } from "./storyEditingService";
 import ConfirmUndoModal from "../shared/ConfirmUndoModal";
+import { parseBackendErrors } from "../utils/parseBackendErrors";
+
 
 import {
   QuestionSceneDto as QuestionScene,
@@ -95,10 +97,50 @@ useEffect(() => {
       if (!storyId) return; 
 
       const res = await getQuestions(Number(storyId));
-      if (!res.ok) {
-        setLoading(false);
-        return;
-      }
+    if (!res.ok) {
+    let body: any = null;
+
+    try {
+      body = await res.json();
+    } catch {
+      setBackendError("Unexpected server error.");
+      return;
+    }
+
+    if (body?.errors) {
+      const parsed = parseBackendErrors(body.errors);
+
+      const newErrors: QuestionErrors[] = questions.map(() => ({}));
+
+      Object.entries(parsed).forEach(([key, msg]) => {
+        const match = key.match(/questionScenes\[(\d+)\]\.(.*)/);
+
+        if (!match) return;
+
+        const index = Number(match[1]);
+        const field = match[2].toLowerCase();
+
+        if (field.includes("storytext"))
+          newErrors[index].storyText = msg as string;
+
+        if (field.includes("questiontext"))
+          newErrors[index].questionText = msg as string;
+
+        if (field.includes("answer"))
+          newErrors[index].answers = msg as string;
+
+        if (field.includes("context"))
+          newErrors[index].contextTexts = msg as string;
+
+        if (field.includes("correctanswerindex"))
+          newErrors[index].correct = msg as string;
+      });
+
+      setErrors(newErrors);  // ✔ RIKTIG – array sendes inn
+      return;
+    }
+}
+ 
       
       const data = (await res.json()) as QuestionScene[];
 
@@ -175,45 +217,37 @@ useEffect(() => {
   // -------------------------------
   // SAVE
   // -------------------------------
- const handleSave = async () => {
+
+const handleSave = async () => {
   setBackendError("");
 
   if (!storyId) return;
 
-  // --- No changes? ---
   if (!hasChanges()) {
     setShowNoChangesMsg(true);
     setTimeout(() => setShowNoChangesMsg(false), 3500);
     return;
   }
 
-  // --- Normalize before validating ---
+  // Normalize before validating
   const normalized: QuestionScene[] = questions.map((q) => ({
     ...q,
     answers: normalizeAnswers(q.answers),
   }));
 
-  // --- Validate ---
   if (!validate(normalized)) return;
 
-  // --- Build payload ---
+  // Build payload
   const payload = toBackendPayload(normalized, Number(storyId));
-  console.log("PAYLOAD SENT TO BACKEND:", JSON.stringify(payload, null, 2));
 
-  // --- SEND TO BACKEND ---
   const res = await updateQuestions(Number(storyId), payload as any);
 
-  // =====================================================================
-  // ERROR HANDLING
-  // =====================================================================
-
-// =====================================================================
-// ERROR HANDLING
-// =====================================================================
+  // ----------------------------
+  // BACKEND ERROR HANDLING
+  // ----------------------------
   if (!res.ok) {
     let body: any = null;
 
-    // Try to parse JSON ONE TIME ONLY
     try {
       body = await res.json();
     } catch {
@@ -221,55 +255,65 @@ useEffect(() => {
       return;
     }
 
-    // ASP.NET ModelState errors: { errors: { field: ["msg"] }}
-    if (
-      body &&
-      typeof body === "object" &&
-      body.errors &&
-      typeof body.errors === "object"
-    ) {
-      const errs = body.errors as Record<string, string[]>;
-      const firstError = Object.values(errs)[0][0];
-      setBackendError(firstError);
+    // 1) ModelState errors (per spørsmål)
+    if (body?.errors) {
+      const parsed = parseBackendErrors(body.errors);
+
+      // parsed er i format:
+      // { "questionScenes[1].storyText": "msg", ... }
+
+      const newErrors: QuestionErrors[] = questions.map(() => ({}));
+
+      Object.entries(parsed).forEach(([key, msg]) => {
+        const match = key.match(/questionScenes\[(\d+)\]\.(.*)/);
+
+        if (!match) return;
+
+        const index = Number(match[1]);
+        const field = match[2].toLowerCase();
+
+        if (!newErrors[index]) newErrors[index] = {};
+
+        if (field.includes("storytext")) newErrors[index].storyText = msg as string;
+        if (field.includes("questiontext")) newErrors[index].questionText = msg as string;
+        if (field.includes("answer")) newErrors[index].answers = msg as string;
+        if (field.includes("context")) newErrors[index].contextTexts = msg as string;
+        if (field.includes("correctanswerindex")) newErrors[index].correct = msg as string;
+      });
+
+      setErrors(newErrors);
       return;
     }
 
-    // Custom backend errorMessage: { errorMessage: "text" }
+    // 2) Custom backend error
     if (body?.errorMessage) {
       setBackendError(body.errorMessage);
       return;
     }
 
-    // Fallback
     setBackendError("Something went wrong.");
     return;
   }
 
-  // =====================================================================
-  // SUCCESS — Reload the updated data
-  // =====================================================================
-
+  // ----------------------------
+  // SUCCESS → reload
+  // ----------------------------
   const reloadRes = await getQuestions(Number(storyId));
   if (!reloadRes.ok) {
-    setBackendError("Saved, but failed to reload changes.");
+    setBackendError("Saved, but failed to reload.");
     return;
   }
 
-  const reloadedData = (await reloadRes.json()) as QuestionScene[];
+  const reloaded = (await reloadRes.json()) as QuestionScene[];
 
-  const normalizedReloaded = reloadedData.map((q) => ({
+  const normalizedReload = reloaded.map((q) => ({
     ...q,
     answers: normalizeAnswers(q.answers),
-    questionSceneId: q.questionSceneId,
-    correctAnswerIndex: q.correctAnswerIndex
   }));
 
-  const deepCloneReloaded = JSON.parse(JSON.stringify(normalizedReloaded));
+  setQuestions(normalizedReload);
+  setOriginalQuestions(JSON.parse(JSON.stringify(normalizedReload)));
 
-  setOriginalQuestions(deepCloneReloaded);
-  setQuestions(normalizedReloaded);
-
-  // Show success toast
   setShowSavedMsg(true);
   setTimeout(() => setShowSavedMsg(false), 3500);
 };

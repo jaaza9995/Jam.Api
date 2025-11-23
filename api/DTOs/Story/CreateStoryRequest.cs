@@ -6,9 +6,11 @@ namespace Jam.DTOs.Story
     public class CreateStoryRequestDto
     {
         [Required]
+        [MinLength(3)]
         public string Title { get; set; } = string.Empty;
 
         [Required]
+        [MinLength(10)]
         public string Description { get; set; } = string.Empty;
 
         [Required]
@@ -18,6 +20,7 @@ namespace Jam.DTOs.Story
         public Accessibility Accessibility { get; set; }
 
         [Required]
+        [MinLength(10)]
         public string IntroText { get; set; } = string.Empty;
     }
 }

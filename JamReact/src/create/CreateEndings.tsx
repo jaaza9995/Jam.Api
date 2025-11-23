@@ -5,12 +5,13 @@ import useStoryCreation from "../storyCreation/StoryCreationContext";
 import { saveEndings, finishCreation } from "../storyCreation/StoryCreationService";
 import { EndingDto, EndingErrors } from "../types/createStory";
 import { useToast } from "../shared/ToastContext";
-
+import { parseBackendErrors } from "../utils/parseBackendErrors";
+import FormErrorMessage from "../components/FormErrorMessage";
 
 const CreateEndings = () => {
   const navigate = useNavigate();
-
   const { data, setData } = useStoryCreation();
+  const { showToast } = useToast();
 
   const [good, setGood] = useState(data.endings?.good ?? "");
   const [neutral, setNeutral] = useState(data.endings?.neutral ?? "");
@@ -21,7 +22,6 @@ const CreateEndings = () => {
     neutral: "",
     bad: "",
   });
-const { showToast } = useToast();
 
   const validate = () => {
     const newErrors: EndingErrors = { good: "", neutral: "", bad: "" };
@@ -31,50 +31,58 @@ const { showToast } = useToast();
     if (!bad.trim()) newErrors.bad = "Opps, your forgot to write a bad ending.";
 
     setErrors(newErrors);
-    return !newErrors.good && !newErrors.neutral && !newErrors.bad;
-  };
-const handleFinish = async () => {
-  if (!validate()) return;
-
-  setData((prev) => ({
-    ...prev,
-    endings: { good, neutral, bad },
-  }));
-
-  const payload: EndingDto = {
-    goodEnding: good,
-    neutralEnding: neutral,
-    badEnding: bad,
+    return Object.values(newErrors).every((e) => e === "");
   };
 
-  const res = await saveEndings(payload);
-  if (!res.ok) {
-    console.error("Failed to save endings");
+  const handleFinish = async () => {
+    if (!validate()) return;
+
+    setData((prev) => ({
+      ...prev,
+      endings: { good, neutral, bad },
+    }));
+
+    const payload: EndingDto = {
+      goodEnding: good,
+      neutralEnding: neutral,
+      badEnding: bad,
+    };
+
+    // SAVE ENDINGS (Backend validation)
+    const res = await saveEndings(payload);
+
+    if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    const parsed = parseBackendErrors(body);
+
+    setErrors({
+      good: parsed.goodEnding || "",
+      neutral: parsed.neutralEnding || "",
+      bad: parsed.badEnding || "",
+    });
+
     return;
   }
 
-  const createRes = await finishCreation();
-  if (!createRes.ok) {
-    const body = await createRes.text();
-    console.error("Failed to create story:", body);
-    return;
-  }
+    // COMPLETE CREATION
+    const createRes = await finishCreation();
 
-  showToast("Story created!");
-  navigate("/");
-};
+    if (!createRes.ok) {
+      console.error("Failed to create story:", await createRes.text());
+      return;
+    }
 
+    showToast("Story created!");
+    navigate("/");
+  };
 
-
-  // -----------------------
-  // RENDER
-  // -----------------------
   return (
     <div className="pixel-bg">
       <h1 className="pixel-title">CREATE ENDINGS</h1>
 
       <div className="ending-wrapper">
 
+        {/* GOOD ENDING */}
         <div className="ending-block">
           <h3 className="ending-label">GOOD ENDING</h3>
           <textarea
@@ -83,16 +91,17 @@ const handleFinish = async () => {
             placeholder="Write the good ending for your story..."
             onChange={(e) => {
               setGood(e.target.value);
+              setErrors((prev) => ({ ...prev, good: "" }));
               setData((prev) => ({
                 ...prev,
                 endings: { ...prev.endings, good: e.target.value },
               }));
-              setErrors((prev) => ({ ...prev, good: "" }));
             }}
           />
-          {errors.good && <p className="error-msg">{errors.good}</p>}
+          <FormErrorMessage message={errors.good} />
         </div>
 
+        {/* NEUTRAL ENDING */}
         <div className="ending-block">
           <h3 className="ending-label">NEUTRAL ENDING</h3>
           <textarea
@@ -101,16 +110,17 @@ const handleFinish = async () => {
             placeholder="Write the neutral ending..."
             onChange={(e) => {
               setNeutral(e.target.value);
+              setErrors((prev) => ({ ...prev, neutral: "" }));
               setData((prev) => ({
                 ...prev,
                 endings: { ...prev.endings, neutral: e.target.value },
               }));
-              setErrors((prev) => ({ ...prev, neutral: "" }));
             }}
           />
-          {errors.neutral && <p className="error-msg">{errors.neutral}</p>}
+          <FormErrorMessage message={errors.neutral} />
         </div>
 
+        {/* BAD ENDING */}
         <div className="ending-block">
           <h3 className="ending-label">BAD ENDING</h3>
           <textarea
@@ -119,21 +129,21 @@ const handleFinish = async () => {
             placeholder="Write the BAD ending..."
             onChange={(e) => {
               setBad(e.target.value);
+              setErrors((prev) => ({ ...prev, bad: "" }));
               setData((prev) => ({
                 ...prev,
                 endings: { ...prev.endings, bad: e.target.value },
               }));
-              setErrors((prev) => ({ ...prev, bad: "" }));
             }}
           />
-          {errors.bad && <p className="error-msg">{errors.bad}</p>}
+          <FormErrorMessage message={errors.bad} />
         </div>
 
+        {/* BUTTONS */}
         <div className="ending-buttons">
           <button
             className="pixel-btn pink side-btn"
             onClick={() => {
-              // persist current endings before going back
               setData((prev) => ({
                 ...prev,
                 endings: { good, neutral, bad },
