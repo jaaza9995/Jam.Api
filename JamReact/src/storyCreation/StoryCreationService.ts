@@ -85,13 +85,22 @@ export async function deleteStory(storyId: number) {
 }
 
 // ------------------ CREATION FLOW ------------------
-export const saveIntro = (payload: IntroDto) =>
-  fetch(`${API_URL}/api/storycreation/intro`, {
+export async function saveIntro(payload: IntroDto) {
+  const res = await fetch(`${API_URL}/api/storycreation/intro`, {
     method: "POST",
-    headers: getAuthHeaders(),
-    body: JSON.stringify(payload),
-    credentials: "include", // keep ASP.NET session for creation flow
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
   });
+
+  let data = null;
+  try {
+    data = await res.json();
+  } catch (e) {}
+
+  return { ok: res.ok, status: res.status, data };
+}
 
 export const saveQuestions = (payload: QuestionScenesPayload) =>
   fetch(`${API_URL}/api/storycreation/questions`, {
