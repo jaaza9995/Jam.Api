@@ -52,8 +52,7 @@ public class StoryEditingController : ControllerBase
                 Title = story.Title,
                 Description = story.Description,
                 DifficultyLevel = story.DifficultyLevel,
-                Accessibility = story.Accessibility,
-                Code = story.Code
+                Accessibility = story.Accessibility
             };
             return Ok(dto);
         }
@@ -185,40 +184,19 @@ public class StoryEditingController : ControllerBase
             if (!questionScenes.Any())
                 return NotFound(new ErrorDto { ErrorTitle = "No question scenes found." });
 
-            var dtoList = questionScenes.Select(scene =>
+            var dtoList = questionScenes.Select(scene => new QuestionSceneBaseDto
             {
-                var answersOrdered = scene.AnswerOptions
-                    .OrderBy(a => a.AnswerOptionId)
-                    .ToList();
-
-                var answersDto = answersOrdered
-                    .Select(a => new AnswerOptionInput
-                    {
-                        AnswerOptionId = a.AnswerOptionId,
-                        AnswerText = a.Answer,
-                        ContextText = a.FeedbackText
-                    })
-                    .ToList();
-
-                // finn index for korrekt svar
-                var correctIdx = answersOrdered
-                    .Select((a, idx) => new { a, idx })
-                    .FirstOrDefault(x => x.a.IsCorrect)?.idx ?? 0;
-
-                // sørg for at vi alltid har 4 elementer (pad med tomme hvis nødvendig)
-                while (answersDto.Count < 4)
-                    answersDto.Add(new AnswerOptionInput());
-
-                return new QuestionSceneBaseDto
+                QuestionSceneId = scene.QuestionSceneId,
+                StoryId = scene.StoryId,
+                StoryText = scene.SceneText,
+                QuestionText = scene.Question,
+                Answers = scene.AnswerOptions.Select(a => new AnswerOptionInput
                 {
-                    QuestionSceneId = scene.QuestionSceneId,
-                    StoryId = scene.StoryId,
-                    StoryText = scene.SceneText,
-                    QuestionText = scene.Question,
-                    Answers = answersDto,
-                    CorrectAnswerIndex = correctIdx,
-                    IsEditing = true
-                };
+                    AnswerText = a.Answer,
+                    ContextText = a.FeedbackText
+                }).ToList(),
+                CorrectAnswerIndex = scene.AnswerOptions.FindIndex(a => a.IsCorrect),
+                IsEditing = true
             }).ToList();
 
             return Ok(dtoList);
@@ -230,14 +208,8 @@ public class StoryEditingController : ControllerBase
         }
     }
 
-
-  [HttpPut("{storyId:int}/questions")]
-public async Task<IActionResult> UpdateQuestionScenes(
-    int storyId,
-    [FromBody] List<QuestionSceneBaseDto> model,
-    [FromServices] StoryDbContext db)
-{
-    if (!ModelState.IsValid)
+    [HttpPut("{storyId:int}/questions")]
+    public async Task<IActionResult> UpdateQuestionScenes(int storyId, [FromBody] List<QuestionSceneBaseDto> model)
     {
         var firstModelError = ModelState.Values
             .SelectMany(v => v.Errors)
@@ -340,26 +312,22 @@ public async Task<IActionResult> UpdateQuestionScenes(
                     {
                         Answer = a.AnswerText,
                         FeedbackText = a.ContextText,
-                        IsCorrect = idx == dto.CorrectAnswerIndex
-                    })
-                    .ToList()
-            };
+                        IsCorrect = i == vm.CorrectAnswerIndex
+                    }).ToList()
+                }).ToList();
 
-            await db.QuestionScenes.AddAsync(newScene);
+            var success = await _sceneRepository.UpdateQuestionScenes(questionScenes);
+            if (!success)
+                return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to update question scenes." });
+
+            return Ok(new { message = "Question scenes updated successfully." });
         }
-
-        await db.SaveChangesAsync();
-
-        return Ok(new { message = "Question scenes updated successfully." });
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error updating question scenes");
+            return StatusCode(500, new ErrorDto { ErrorTitle = "Unexpected error while updating question scenes." });
+        }
     }
-    catch (Exception e)
-    {
-        _logger.LogError(e, "Error updating question scenes");
-        return StatusCode(500, new ErrorDto { ErrorTitle = "Unexpected error while updating question scenes." });
-    }
-}
-
-
 
     [HttpDelete("questions/{questionSceneId:int}")]
     public async Task<IActionResult> DeleteQuestion(int questionSceneId)
