@@ -18,5 +18,9 @@ namespace Jam.DTOs.Story
 
         [Required]
         public Accessibility Accessibility { get; set; }
+
+        [Required]
+        [MinLength(10, ErrorMessage = "Intro Text must be at least 10 characters")]
+        public string IntroText { get; set; } = string.Empty;
     }
 }

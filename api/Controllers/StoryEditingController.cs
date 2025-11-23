@@ -105,7 +105,7 @@ public class StoryEditingController : ControllerBase
     }
 
     [HttpPut("{storyId:int}/intro")]
-    public async Task<IActionResult> UpdateIntro(int storyId, [FromBody] EditIntroSceneDto model)
+    public async Task<IActionResult> UpdateIntro(int storyId, [FromBody] IntroSceneDto model)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 

@@ -49,7 +49,7 @@ public class StoryCreationController : ControllerBase
     // =====================================================================
 
     [HttpPost("intro")]
-    public IActionResult SaveIntro([FromBody] CreateStoryRequestDto storyDto)
+    public IActionResult SaveIntro([FromBody] CreateStoryDto storyDto)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
