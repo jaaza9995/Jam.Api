@@ -42,6 +42,7 @@ const EditIntroPage: React.FC = () => {
   } | null>(null);
 
   const [loading, setLoading] = useState<boolean>(true);
+  const [backendError, setBackendError] = useState<string>("");
   const [showUndoConfirm, setShowUndoConfirm] = useState<boolean>(false);
   const [showSavedMsg, setShowSavedMsg] = useState<boolean>(false);
 
@@ -89,30 +90,46 @@ const EditIntroPage: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       if (!storyId || !token) {
-        console.error("Missing token");
+        setBackendError("Missing story or token");
+        setLoading(false);
         return;
       }
 
-      const metaRes = await getStoryMetadata(Number(storyId));
-      const meta = await metaRes.json() as StoryMetadataDto;
+      try {
+        const metaRes = await getStoryMetadata(Number(storyId));
+        if (!metaRes.ok) throw new Error("Failed to load story metadata");
+        const meta = (await metaRes.json()) as StoryMetadataDto;
 
-      const intro = await getIntro(Number(storyId), token);
+        let introTextValue = "";
+        try {
+          const intro = await getIntro(Number(storyId), token);
+          introTextValue = intro.introText ?? "";
+        } catch (introErr) {
+          console.warn("Intro missing, starting empty", introErr);
+        }
 
-      setTitle(meta.title);
-      setDescription(meta.description);
-      setDifficulty(meta.difficultyLevel);
-      setAccessibility(Number(meta.accessibility));
-      setIntroText(intro.introText);
+        const parsedDifficulty = Number(meta.difficultyLevel);
+        const parsedAccessibility = Number(meta.accessibility);
 
-      setOriginal({
-        title: meta.title,
-        description: meta.description,
-        difficulty: meta.difficultyLevel,
-        accessibility: Number(meta.accessibility),
-        intro: intro.introText,
-      });
+        setTitle(meta.title);
+        setDescription(meta.description);
+        setDifficulty(isNaN(parsedDifficulty) ? 1 : parsedDifficulty);
+        setAccessibility(isNaN(parsedAccessibility) ? 0 : parsedAccessibility);
+        setIntroText(introTextValue);
 
-      setLoading(false);
+        setOriginal({
+          title: meta.title,
+          description: meta.description,
+          difficulty: isNaN(parsedDifficulty) ? 1 : parsedDifficulty,
+          accessibility: isNaN(parsedAccessibility) ? 0 : parsedAccessibility,
+          intro: introTextValue,
+        });
+      } catch (err) {
+        console.error(err);
+        setBackendError("Could not load intro. Please try again.");
+      } finally {
+        setLoading(false);
+      }
     };
 
     load();
@@ -136,6 +153,7 @@ const EditIntroPage: React.FC = () => {
   // SAVE
   // ------------------------------------
   const handleSave = async () => {
+    setBackendError("");
 
     // 🔥 NEW: show "no changes" toast
     if (!hasChanges()) {
@@ -144,11 +162,16 @@ const EditIntroPage: React.FC = () => {
       return;
     }
 
+    if (!storyId || !token) {
+      setBackendError("Missing story or token");
+      return;
+    }
+
     // Validation
     if (!validate()) return;
 
     // Save metadata
-    await updateStoryMetadata(Number(storyId), {
+    const metaRes = await updateStoryMetadata(Number(storyId), {
       storyId: Number(storyId),
       title,
       description,
@@ -156,8 +179,23 @@ const EditIntroPage: React.FC = () => {
       accessibility,
     });
 
+    if (!metaRes.ok) {
+      setBackendError("Could not save story details.");
+      return;
+    }
+
     // Save intro text
-    await updateIntroScene(Number(storyId), introText, token!);
+    const introRes = await updateIntroScene(Number(storyId), introText);
+
+    if (!introRes.ok) {
+      let msg = "Could not save intro text.";
+      try {
+        const body = await introRes.json();
+        if (body?.errorTitle) msg = body.errorTitle;
+      } catch { /* ignore parse errors */ }
+      setBackendError(msg);
+      return;
+    }
 
     // Refresh original values
     const updatedMeta = await getStoryMetadata(Number(storyId)).then((res) =>
@@ -211,6 +249,8 @@ const EditIntroPage: React.FC = () => {
       )}
 
       <h1 className="edit-title">Edit Intro</h1>
+
+      {backendError && <p className="error-msg">{backendError}</p>}
 
       {/* TITLE */}
       <label className="edit-label">Title</label>

@@ -1,4 +1,4 @@
-public class StoryCardDto
+public class StoryCardDto //keep
 {
     public int StoryId { get; set; }
     public string Title { get; set; } = string.Empty;

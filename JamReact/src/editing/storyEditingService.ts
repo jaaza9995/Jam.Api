@@ -37,15 +37,11 @@ export async function getIntro(storyId: number, token: string) {
 }
 export async function updateIntroScene(
   storyId: number,
-  introText: string,
-  token: string
+  introText: string
 ) {
   return await fetch(`${API_URL}/api/storyediting/${storyId}/intro`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify({ introText }),
   });
 }

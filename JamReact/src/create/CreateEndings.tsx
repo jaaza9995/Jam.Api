@@ -2,22 +2,26 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Create.css";
 import useStoryCreation from "../storyCreation/StoryCreationContext";
-import { saveEndings } from "../storyCreation/StoryCreationService";
+import { saveEndings, finishCreation } from "../storyCreation/StoryCreationService";
 import { EndingDto, EndingErrors } from "../types/createStory";
+import { useToast } from "../shared/ToastContext";
+
 
 const CreateEndings = () => {
   const navigate = useNavigate();
+
   const { data, setData } = useStoryCreation();
 
-  const [good, setGood] = useState(data.endings.good);
-  const [neutral, setNeutral] = useState(data.endings.neutral);
-  const [bad, setBad] = useState(data.endings.bad);
+  const [good, setGood] = useState(data.endings?.good ?? "");
+  const [neutral, setNeutral] = useState(data.endings?.neutral ?? "");
+  const [bad, setBad] = useState(data.endings?.bad ?? "");
 
   const [errors, setErrors] = useState<EndingErrors>({
     good: "",
     neutral: "",
     bad: "",
   });
+const { showToast } = useToast();
 
   const validate = () => {
     const newErrors: EndingErrors = { good: "", neutral: "", bad: "" };
@@ -29,30 +33,37 @@ const CreateEndings = () => {
     setErrors(newErrors);
     return !newErrors.good && !newErrors.neutral && !newErrors.bad;
   };
+const handleFinish = async () => {
+  if (!validate()) return;
 
-  const handleFinish = async () => {
-    if (!validate()) return;
+  setData((prev) => ({
+    ...prev,
+    endings: { good, neutral, bad },
+  }));
 
-    setData((prev) => ({
-      ...prev,
-      endings: { good, neutral, bad },
-    }));
-
-    const payload: EndingDto = {
-      goodEnding: good,
-      neutralEnding: neutral,
-      badEnding: bad,
-    };
-
-    const res = await saveEndings(payload);
-
-    if (!res.ok) {
-      console.error("Failed to save endings");
-      return;
-    }
-
-    navigate("/");
+  const payload: EndingDto = {
+    goodEnding: good,
+    neutralEnding: neutral,
+    badEnding: bad,
   };
+
+  const res = await saveEndings(payload);
+  if (!res.ok) {
+    console.error("Failed to save endings");
+    return;
+  }
+
+  const createRes = await finishCreation();
+  if (!createRes.ok) {
+    const body = await createRes.text();
+    console.error("Failed to create story:", body);
+    return;
+  }
+
+  showToast("Story created!");
+  navigate("/");
+};
+
 
 
   // -----------------------

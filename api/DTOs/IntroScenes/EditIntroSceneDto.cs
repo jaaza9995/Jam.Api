@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Jam.DTOs.StoryEditing;
+namespace Jam.DTOs.StoryEditing; //put dto 
 
 public class EditIntroSceneDto
 {

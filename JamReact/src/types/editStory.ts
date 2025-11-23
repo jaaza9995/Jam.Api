@@ -4,7 +4,7 @@ export interface StoryMetadataDto {
   title: string;
   description: string;
   difficultyLevel: number; // 1–3
-  accessibility: number | string;   // 0/1 or "Public"/"Private"
+  accessibility: number;  
   code?: string | null;
 }
 

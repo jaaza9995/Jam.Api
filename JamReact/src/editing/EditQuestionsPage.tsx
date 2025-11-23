@@ -27,29 +27,26 @@ const normalizeAnswers = (answers: AnswerOption[] | null | undefined): AnswerOpt
       { answerOptionId: 0, answerText: "", contextText: "" },
       { answerOptionId: 0, answerText: "", contextText: "" }
     ];
-  }
+  } //returnerer fire answer option?
 
-  const list = answers
-    .map((a) => ({
-      answerOptionId: a.answerOptionId ?? 0,
-      answerText: a.answerText ?? "",
-      contextText: a.contextText ?? ""
-    }))
-    .slice(0, 4);
+const list = answers.map(a => ({
+    // Bruk en sjekk for å sikre at selv om AnswerOptionDto i teorien har valgfrie felter, 
+    // så har vi alltid gyldige standarder i UI-tilstanden
+    answerOptionId: a.answerOptionId || 0,
+    answerText: a.answerText || "",
+    contextText: a.contextText || ""
+  })).slice(0, 4); // Trim til maks 4
 
   while (list.length < 4) {
-    list.push({
-      answerOptionId: 0,
-      answerText: "",
-      contextText: ""
-    });
+    list.push({ answerOptionId: 0, answerText: "", contextText: "" });
   }
 
   return list;
 };
 
 
-const emptyQuestion = (): QuestionScene => ({
+
+const emptyQuestion = (): QuestionScene => ({ //add question knappen 
   questionSceneId: 0,
   storyText: "",
   questionText: "",
@@ -93,7 +90,7 @@ const EditQuestionsPage: React.FC = () => {
   // -------------------------------
   // LOAD
   // -------------------------------
-  useEffect(() => {
+useEffect(() => {
     const load = async () => {
       if (!storyId) return; 
 
@@ -102,18 +99,24 @@ const EditQuestionsPage: React.FC = () => {
         setLoading(false);
         return;
       }
-
+      
       const data = (await res.json()) as QuestionScene[];
 
       const normalized = data.map((q) => ({
         ...q,
-        answers: normalizeAnswers(q.answers)
+        answers: normalizeAnswers(q.answers),
       }));
 
+      // 1. Dyp kloning for å sette original tilstand
+      const deepClone = JSON.parse(JSON.stringify(normalized));
+
+      // 2. Initialiser tilstandene
       setQuestions(normalized);
-      setOriginalQuestions(JSON.parse(JSON.stringify(normalized)));
+      setOriginalQuestions(deepClone);
       setErrors(normalized.map(() => ({})));
-      setLoading(false);
+      
+      // 3. Avslutt lasting
+      setLoading(false); // <--- Denne manglet også ved suksess
     };
 
     load();
@@ -172,63 +175,104 @@ const EditQuestionsPage: React.FC = () => {
   // -------------------------------
   // SAVE
   // -------------------------------
-  const handleSave = async () => {
-    setBackendError("");
+ const handleSave = async () => {
+  setBackendError("");
 
-    if (!storyId) return;
+  if (!storyId) return;
 
-    if (!hasChanges()) {
-      setShowNoChangesMsg(true);
-      setTimeout(() => setShowNoChangesMsg(false), 3500);
+  // --- No changes? ---
+  if (!hasChanges()) {
+    setShowNoChangesMsg(true);
+    setTimeout(() => setShowNoChangesMsg(false), 3500);
+    return;
+  }
+
+  // --- Normalize before validating ---
+  const normalized: QuestionScene[] = questions.map((q) => ({
+    ...q,
+    answers: normalizeAnswers(q.answers),
+  }));
+
+  // --- Validate ---
+  if (!validate(normalized)) return;
+
+  // --- Build payload ---
+  const payload = toBackendPayload(normalized, Number(storyId));
+  console.log("PAYLOAD SENT TO BACKEND:", JSON.stringify(payload, null, 2));
+
+  // --- SEND TO BACKEND ---
+  const res = await updateQuestions(Number(storyId), payload as any);
+
+  // =====================================================================
+  // ERROR HANDLING
+  // =====================================================================
+
+// =====================================================================
+// ERROR HANDLING
+// =====================================================================
+  if (!res.ok) {
+    let body: any = null;
+
+    // Try to parse JSON ONE TIME ONLY
+    try {
+      body = await res.json();
+    } catch {
+      setBackendError("Unexpected server error.");
       return;
     }
 
-    const normalized: QuestionScene[] = questions.map((q) => ({
-      ...q,
-      answers: normalizeAnswers(q.answers),
-    }));
-
-    if (!validate(normalized)) return;
-
-    const payload = toBackendPayload(normalized, Number(storyId));
-    console.log("PAYLOAD SENT TO BACKEND:", JSON.stringify(payload, null, 2));
-    const res = await updateQuestions(Number(storyId), payload as any);
-
-    if (!res.ok) {
-      try {
-        const body = await res.json();
-
-        if (
-          body &&
-          typeof body === "object" &&
-          "errors" in body &&
-          body.errors
-        ) {
-          const errs = body.errors as Record<string, string[]>;
-          const first = Object.values(errs)[0][0];
-          setBackendError(first);
-          return;
-        }
-
-        if (body?.errorMessage) {
-          setBackendError(body.errorMessage);
-          return;
-        }
-
-        setBackendError("Something went wrong.");
-      } catch {
-        setBackendError("Unexpected server error.");
-      }
+    // ASP.NET ModelState errors: { errors: { field: ["msg"] }}
+    if (
+      body &&
+      typeof body === "object" &&
+      body.errors &&
+      typeof body.errors === "object"
+    ) {
+      const errs = body.errors as Record<string, string[]>;
+      const firstError = Object.values(errs)[0][0];
+      setBackendError(firstError);
       return;
     }
 
-    // Success
-    setOriginalQuestions(JSON.parse(JSON.stringify(normalized)));
-    setQuestions(normalized);
+    // Custom backend errorMessage: { errorMessage: "text" }
+    if (body?.errorMessage) {
+      setBackendError(body.errorMessage);
+      return;
+    }
 
-    setShowSavedMsg(true);
-    setTimeout(() => setShowSavedMsg(false), 3500);
-  };
+    // Fallback
+    setBackendError("Something went wrong.");
+    return;
+  }
+
+  // =====================================================================
+  // SUCCESS — Reload the updated data
+  // =====================================================================
+
+  const reloadRes = await getQuestions(Number(storyId));
+  if (!reloadRes.ok) {
+    setBackendError("Saved, but failed to reload changes.");
+    return;
+  }
+
+  const reloadedData = (await reloadRes.json()) as QuestionScene[];
+
+  const normalizedReloaded = reloadedData.map((q) => ({
+    ...q,
+    answers: normalizeAnswers(q.answers),
+    questionSceneId: q.questionSceneId,
+    correctAnswerIndex: q.correctAnswerIndex
+  }));
+
+  const deepCloneReloaded = JSON.parse(JSON.stringify(normalizedReloaded));
+
+  setOriginalQuestions(deepCloneReloaded);
+  setQuestions(normalizedReloaded);
+
+  // Show success toast
+  setShowSavedMsg(true);
+  setTimeout(() => setShowSavedMsg(false), 3500);
+};
 
   // -------------------------------
   // ADD / DELETE
@@ -331,7 +375,7 @@ const EditQuestionsPage: React.FC = () => {
                 value={a.answerText}
                 onChange={(e) => {
                   const updated = [...questions];
-                  const answers = normalizeAnswers(updated[i].answers);
+                  const answers = [...updated[i].answers];
                   answers[idx] = { ...answers[idx], answerText: e.target.value };
                   updated[i] = { ...updated[i], answers };
                   setQuestions(updated);
@@ -375,7 +419,7 @@ const EditQuestionsPage: React.FC = () => {
               value={a.contextText}
               onChange={(e) => {
                 const updated = [...questions];
-                const answers = normalizeAnswers(updated[i].answers);
+                const answers = [...updated[i].answers];
                 answers[idx] = { ...answers[idx], contextText: e.target.value };
                 updated[i] = { ...updated[i], answers };
                 setQuestions(updated);
