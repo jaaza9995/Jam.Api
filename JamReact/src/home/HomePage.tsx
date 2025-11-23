@@ -60,16 +60,16 @@ useEffect(() => {
 
       <div className="homepage-buttons">
         <button
-          className="btn-green"
+          className="btn-makeNewGame"
           onClick={() => navigate("/create/intro")}
         >
           MAKE NEW GAME
         </button>
         <button
-          className="btn-pink"
+          className="btn-playNewGame"
           onClick={() => navigate("/browse")}
         >
-          ADD NEW GAME
+          PLAY NEW GAME
         </button>
       </div>
 

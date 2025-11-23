@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Create.css";
 import useStoryCreation from "../storyCreation/StoryCreationContext";
 import { saveIntro } from "../storyCreation/StoryCreationService";
 import { IntroDto, IntroErrors } from "../types/createStory";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
 import FormErrorMessage from "../components/FormErrorMessage";
+import "../App.css";
 
 const CreateIntro = () => {
   const navigate = useNavigate();
@@ -88,7 +88,7 @@ const handleNext = async () => {
 
   return (
     <div className="pixel-bg">
-      <h1 className="intro-title">CREATE NEW GAME</h1>
+      <h1 className="title">CREATE NEW GAME</h1>
 
       <div className="form-section">
 
@@ -165,11 +165,11 @@ const handleNext = async () => {
         <FormErrorMessage message={errors.accessibility} />
 
         {/* BUTTONS */}
-        <div className="button-row-intro">
-          <button className="pixel-btn pink" onClick={() => navigate("/")}>
+        <div className="button-row">
+          <button className="pixel-btn pixel-btn-back" onClick={() => navigate("/")}>
             BACK
           </button>
-          <button className="pixel-btn teal" onClick={handleNext}>
+          <button className="pixel-btn pixel-btn-next" onClick={handleNext}>
             NEXT
           </button>
         </div>

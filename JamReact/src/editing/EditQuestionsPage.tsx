@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import "./EditStoryPage.css";
+import "./Edit.css";
 import { getQuestions, updateQuestions } from "./storyEditingService";
 import ConfirmUndoModal from "../shared/ConfirmUndoModal";
 import { parseBackendErrors } from "../utils/parseBackendErrors";

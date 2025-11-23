@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { getStoryMetadata } from "./storyEditingService";
 import { useAuth } from "../auth/AuthContext";
 import DeleteModal from "../shared/DeleteModal";
-import "./EditStoryPage.css";
+import "./Edit.css";
 import { StoryMetadataDto } from "../types/editStory";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
 
@@ -76,50 +76,75 @@ if (!res.ok) {
   };
 
   return (
-    <div className="pixel-bg edit-dashboard">
+  <div className="pixel-bg edit-dashboard">
 
-      {showDeleteModal && (
-        <DeleteModal
-          storyTitle={meta.title}
-          onConfirm={handleDelete}
-          onCancel={() => setShowDeleteModal(false)}
-        />
-      )}
+    {showDeleteModal && (
+      <DeleteModal
+        storyTitle={meta.title}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteModal(false)}
+      />
+    )}
+     <h2 className="title">EDIT GAMES</h2>
 
-      <div className="story-card">
+    <div className="edit-layout">
+
+      {/* VENSTRE – METADATA-KORTET */}
+      <div className="story-card left-card">
         <h1 className="story-title">{meta.title}</h1>
-
         <p className="story-description">{meta.description}</p>
 
         <div className="story-meta-grid">
           <p><strong>Difficulty:</strong> {difficultyLabel(meta.difficultyLevel)}</p>
           <p><strong>Accessibility:</strong> {isPrivate ? "Private" : "Public"}</p>
-
           {isPrivate && (
-            <p className="story-meta">
-              <strong>Code:</strong> {code || "No code generated yet"}
-            </p>
+            <p><strong>Code:</strong> {code || "No code generated yet"}</p>
           )}
-
           <p><strong>Questions:</strong> {questionCount ?? "Loading..."}</p>
         </div>
       </div>
 
-      <div className="edit-dashboard-buttons">
-        <button className="pixel-btn teal" onClick={() => navigate(`/edit/${storyId}/intro`)}>Edit Intro</button>
-        <button className="pixel-btn teal" onClick={() => navigate(`/edit/${storyId}/questions`)}>Edit Questions</button>
-        <button className="pixel-btn teal" onClick={() => navigate(`/edit/${storyId}/endings`)}>Edit Endings</button>
 
-        <button className="pixel-btn pink" onClick={() => setShowDeleteModal(true)}>
-          Delete Game
+      {/* HØYRE – KNAPPER UNDER HVERANDRE */}
+      <div className="right-buttons">
+        <button className="edit-btn"
+          onClick={() => navigate(`/edit/${storyId}/intro`)}
+        >
+          Edit Intro
         </button>
 
-        <button className="pixel-btn blue" onClick={() => navigate("/")}>Back to Home</button>
+        <button className="edit-btn"
+          onClick={() => navigate(`/edit/${storyId}/questions`)}
+        >
+          Edit Questions
+        </button>
+
+        <button className="edit-btn"
+          onClick={() => navigate(`/edit/${storyId}/endings`)}
+        >
+          Edit Endings
+        </button>
+
+        <button className="delete-btn"
+          onClick={() => setShowDeleteModal(true)}
+        >
+          Delete Game
+        </button>
       </div>
 
     </div>
-  );
-};
+
+    {/* BACK KNAPP HELT NEDERST VENSTRE */}
+    <button className="pixel-btn blue back-btn"
+      onClick={() => navigate("/")}
+    >
+      Back to Home
+    </button>
+
+  </div>
+);
+}
+
 
 export default EditStoryPage;
 

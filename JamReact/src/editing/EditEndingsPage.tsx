@@ -4,7 +4,8 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getEndings, updateEndings } from "./storyEditingService";
 import ConfirmUndoModal from "../shared/ConfirmUndoModal";
-import "./EditStoryPage.css";
+import "./Edit.css";
+import "../App.css";
 import { EndingsDto } from "../types/editStory";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
 

@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Create.css";
 import useStoryCreation from "../storyCreation/StoryCreationContext";
 import { saveEndings, finishCreation } from "../storyCreation/StoryCreationService";
 import { EndingDto, EndingErrors } from "../types/createStory";
 import { useToast } from "../shared/ToastContext";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
 import FormErrorMessage from "../components/FormErrorMessage";
+import "../App.css";
 
 const CreateEndings = () => {
   const navigate = useNavigate();
@@ -78,7 +78,7 @@ const CreateEndings = () => {
 
   return (
     <div className="pixel-bg">
-      <h1 className="pixel-title">CREATE ENDINGS</h1>
+      <h1 className="title">CREATE ENDINGS</h1>
 
       <div className="ending-wrapper">
 
@@ -99,10 +99,10 @@ const CreateEndings = () => {
             }}
           />
           <FormErrorMessage message={errors.good} />
-        </div>
+
 
         {/* NEUTRAL ENDING */}
-        <div className="ending-block">
+
           <h3 className="ending-label">NEUTRAL ENDING</h3>
           <textarea
             className="ending-input"
@@ -118,10 +118,10 @@ const CreateEndings = () => {
             }}
           />
           <FormErrorMessage message={errors.neutral} />
-        </div>
+
 
         {/* BAD ENDING */}
-        <div className="ending-block">
+
           <h3 className="ending-label">BAD ENDING</h3>
           <textarea
             className="ending-input"
@@ -140,9 +140,9 @@ const CreateEndings = () => {
         </div>
 
         {/* BUTTONS */}
-        <div className="ending-buttons">
+        <div className="button-row">
           <button
-            className="pixel-btn pink side-btn"
+            className="pixel-btn pixel-btn-back"
             onClick={() => {
               setData((prev) => ({
                 ...prev,
@@ -154,7 +154,7 @@ const CreateEndings = () => {
             BACK
           </button>
 
-          <button className="pixel-btn teal side-btn" onClick={handleFinish}>
+          <button className="pixel-btn pixel-btn-finish" onClick={handleFinish}>
             FINISH
           </button>
         </div>

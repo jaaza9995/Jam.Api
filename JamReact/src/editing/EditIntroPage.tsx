@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-import "./EditStoryPage.css";
+import "./Edit.css";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
 
 import {

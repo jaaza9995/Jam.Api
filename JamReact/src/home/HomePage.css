@@ -1,6 +1,6 @@
 .homepage-title {
   color: #7ad3ff;
-  font-size: 32px;
+  font-size: 50px;
   margin-top: 40px;
   margin-bottom: 40px;
   text-shadow: 0 0 4px #7ad3ff;
@@ -135,4 +135,22 @@
   gap: 20px;
   justify-content: center;
   margin-top: auto;
+}
+
+.btn-makeNewGame, 
+.btn-playNewGame{
+  border-radius: 5px;
+  font-size: 30px;
+  
+}
+
+.btn-makeNewGame{
+  background-color: rgb(236, 64, 141);
+  border-color: rgb(255, 177, 212);
+
+}
+
+.btn-playNewGame{
+  background-color: rgb(19, 163, 163);
+  border-color: rgb(69, 255, 255) ;
 }

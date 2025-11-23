@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Create.css";
 import useStoryCreation from "../storyCreation/StoryCreationContext";
 import { saveQuestions } from "../storyCreation/StoryCreationService";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
+import "../App.css";
 
 import {
   QuestionSceneDto,
@@ -149,7 +149,7 @@ const CreateQuestions = () => {
   // -----------------------------
   return (
     <div className="pixel-bg">
-      <h1 className="pixel-title">CREATE QUESTIONS</h1>
+      <h1 className="title">CREATE QUESTIONS</h1>
 
       <div className="questions-wrapper">
         {questions.map((q, i) => (
@@ -160,6 +160,7 @@ const CreateQuestions = () => {
             <textarea
               className="pixel-input"
               value={q.storyText}
+              placeholder={`Write The Story Context...`}
               onChange={(e) => update(i, { ...q, storyText: e.target.value })}
             />
             {errors[i]?.storyText && <p className="error-msg">{errors[i].storyText}</p>}
@@ -169,16 +170,22 @@ const CreateQuestions = () => {
             <textarea
               className="pixel-input"
               value={q.questionText}
+              placeholder={`Write Your Question here...`}
               onChange={(e) => update(i, { ...q, questionText: e.target.value })}
             />
             {errors[i]?.questionText && <p className="error-msg">{errors[i].questionText}</p>}
 
             {/* ANSWERS */}
+           {/* ANSWERS */}
             <h3 className="question-label">ANSWER OPTIONS</h3>
+
             {q.answers.map((a, ai) => (
               <div className="answer-row" key={ai}>
+
+                {/* Answer text */}
                 <input
                   className="pixel-input-small"
+                  placeholder={`Write Answer ${ai + 1}...`}
                   value={a.answerText}
                   onChange={(e) => {
                     const list = [...q.answers];
@@ -187,54 +194,59 @@ const CreateQuestions = () => {
                   }}
                 />
 
+                {/* Context text */}
+                <input
+                  className="pixel-input-small"
+                  placeholder={`Write Context ${ai + 1}...`}
+                  value={a.contextText}
+                  onChange={(e) => {
+                    const list = [...q.answers];
+                    list[ai].contextText = e.target.value;
+                    update(i, { ...q, answers: list });
+                  }}
+                />
+
+                {/* Correct button */}
                 <button
-                  className={`correct-btn ${q.correctAnswerIndex === ai ? "selected" : ""}`}
-                  onClick={() => update(i, { ...q, correctAnswerIndex: ai })}
+                  className={`correct-btn ${
+                    q.correctAnswerIndex === ai ? "selected" : ""
+                  }`}
+                  onClick={() =>
+                    update(i, { ...q, correctAnswerIndex: ai })
+                  }
                 >
                   ✔
                 </button>
               </div>
             ))}
+
+            {/* ERRORS for answer list */}
             {errors[i]?.answers && <p className="error-msg">{errors[i].answers}</p>}
             {errors[i]?.correct && <p className="error-msg">{errors[i].correct}</p>}
 
-            {/* CONTEXT TEXTS */}
-            <h3 className="question-label">CONTEXT TEXTS</h3>
-            {q.answers.map((a, ai) => (
-              <textarea
-                key={ai}
-                className="pixel-input"
-                value={a.contextText}
-                onChange={(e) => {
-                  const list = [...q.answers];
-                  list[ai].contextText = e.target.value;
-                  update(i, { ...q, answers: list });
-                }}
-              />
-            ))}
+            {/* ERROR for context texts */}
             {errors[i]?.contextTexts && (
               <p className="error-msg">{errors[i].contextTexts}</p>
             )}
 
             <button
-              className="pixel-btn pink small-remove"
+              className="pixel-btn pixel-btn-delete"
               onClick={() => remove(i)}
             >
               DELETE QUESTION
             </button>
           </div>
+          
         ))}
-
-        <button className="pixel-btn blue wide-btn" onClick={add}>
+      </div>
+          <button className="pixel-btn pixel-btn-addQuestion" onClick={add}>
           + ADD QUESTION
         </button>
 
-        <button className="pixel-btn teal wide-btn" onClick={handleNext}>
-          NEXT
-        </button>
-
+        
+        <div className="button-row">
         <button
-          className="pixel-btn pink small-btn"
+          className="pixel-btn pixel-btn-back"
           onClick={() => {
             setData(prev => ({ ...prev, questions }));
             navigate("/create/intro");
@@ -242,7 +254,12 @@ const CreateQuestions = () => {
         >
           BACK
         </button>
-      </div>
+         
+        <button className="pixel-btn pixel-btn-next" onClick={handleNext}>
+          NEXT
+        </button>
+
+        </div>
     </div>
   );
 };
