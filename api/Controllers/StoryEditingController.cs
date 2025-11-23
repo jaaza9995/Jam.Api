@@ -8,6 +8,7 @@ using Jam.DTOs.UpdateEndingScenes;
 using Jam.DTOs.StoryEditing;
 using Jam.Models;
 using Jam.Models.Enums;
+using Jam.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Jam.Api.Controllers;
@@ -18,20 +19,21 @@ public class StoryEditingController : ControllerBase
 {
     private readonly IStoryRepository _storyRepository;
     private readonly ISceneRepository _sceneRepository;
-    private readonly IAnswerOptionRepository _answerOptionRepository;
     private readonly ILogger<StoryEditingController> _logger;
+    private readonly StoryCodeService _codeService;
 
-    public StoryEditingController(
-        IStoryRepository storyRepository,
-        ISceneRepository sceneRepository,
-        IAnswerOptionRepository answerOptionRepository,
-        ILogger<StoryEditingController> logger)
-    {
-        _storyRepository = storyRepository;
-        _sceneRepository = sceneRepository;
-        _answerOptionRepository = answerOptionRepository;
-        _logger = logger;
-    }
+   public StoryEditingController(
+    IStoryRepository repo,
+    ISceneRepository sceneRepository,
+    StoryCodeService codeService,
+    ILogger<StoryEditingController> logger
+)
+{
+    _storyRepository = repo;
+    _sceneRepository = sceneRepository;
+    _codeService = codeService;
+    _logger = logger;
+}
 
     // =====================================================================
     // STORY METADATA
@@ -61,16 +63,18 @@ public class StoryEditingController : ControllerBase
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var story = await _storyRepository.GetStoryById(storyId);
-        if (story == null) return NotFound(new ErrorDto { ErrorTitle = "Story not found." });
+        if (story == null) 
+            return NotFound(new ErrorDto { ErrorTitle = "Story not found." });
 
         story.Title = model.Title;
         story.Description = model.Description;
         story.DifficultyLevel = model.DifficultyLevel;
 
+        // If accessibility changed:
         if (story.Accessibility != model.Accessibility)
         {
             story.Code = (model.Accessibility == Accessibility.Private)
-                ? await GenerateUniqueStoryCodeAsync()
+                ? await _codeService.GenerateUniqueStoryCodeAsync()   // ← BRUK DEN HER!
                 : null;
         }
 
@@ -80,18 +84,6 @@ public class StoryEditingController : ControllerBase
             return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to update story metadata." });
 
         return Ok(new { message = "Story updated successfully." });
-    }
-
-    private async Task<string> GenerateUniqueStoryCodeAsync()
-    {
-        string code;
-        bool exists;
-        do
-        {
-            code = Guid.NewGuid().ToString("N")[..8].ToUpper();
-            exists = await _storyRepository.DoesCodeExist(code);
-        } while (exists);
-        return code;
     }
 
     // =====================================================================

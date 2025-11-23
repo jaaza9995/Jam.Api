@@ -77,7 +77,8 @@ const EditIntroPage: React.FC = () => {
     if (!introText.trim())
       newErrors.introText = "You must write an Intro Text for your game";
 
-    if (!difficulty) newErrors.difficulty = "Please choose difficulty.";
+    if (difficulty !== 0 && difficulty !== 1 && difficulty !== 2)
+      newErrors.difficulty = "Please choose difficulty.";
     if (accessibility !== 0 && accessibility !== 1)
       newErrors.accessibility = "Please choose accessibility.";
 
@@ -310,10 +311,11 @@ if (!metaRes.ok) {
         value={difficulty}
         onChange={(e) => setDifficulty(Number(e.target.value))}
       >
-        <option value={1}>Easy</option>
-        <option value={2}>Medium</option>
-        <option value={3}>Hard</option>
+        <option value={0}>Easy</option>
+        <option value={1}>Medium</option>
+        <option value={2}>Hard</option>
       </select>
+      {errors.difficulty && <p className="error-msg">{errors.difficulty}</p>}
 
       {/* ACCESSIBILITY */}
       <label className="edit-label">Accessibility</label>
@@ -325,6 +327,7 @@ if (!metaRes.ok) {
         <option value={0}>Public</option>
         <option value={1}>Private</option>
       </select>
+      {errors.accessibility && <p className="error-msg">{errors.accessibility}</p>}
 
       {/* INTRO TEXT */}
       <label className="edit-label">Introduction</label>

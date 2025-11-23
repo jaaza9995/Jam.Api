@@ -44,47 +44,47 @@ const CreateIntro = () => {
     return Object.values(newErrors).every(v => v === "");
   };
 
-  const handleNext = async () => {
-    if (!validate()) return;
+const handleNext = async () => {
+  if (!validate()) return;
 
-    // Update context
-    setData(prev => ({
-      ...prev,
-      intro: {
-        title,
-        description,
-        introText,
-        difficulty,
-        accessibility,
-      },
-    }));
-
-    const payload: IntroDto = {
+  setData(prev => ({
+    ...prev,
+    intro: {
       title,
       description,
       introText,
-      difficultyLevel: Number(difficulty),
-      accessibility: Number(accessibility),
-    };
+      difficulty,
+      accessibility,
+    },
+  }));
 
-    const res = await saveIntro(payload);
-
-    if (!res.ok) {
-      const parsed = parseBackendErrors(res.data);
-
-      setErrors({
-        title: parsed.title || "",
-        description: parsed.description || "",
-        introText: parsed.introText || "",
-        difficulty: parsed.difficultyLevel || "",
-        accessibility: parsed.accessibility || "",
-      });
-
-      return;
-    }
-
-    navigate("/create/questions");
+  const payload: IntroDto = {
+    title,
+    description,
+    introText,
+    difficultyLevel: Number(difficulty),
+    accessibility: Number(accessibility),
   };
+
+  const res = await saveIntro(payload);
+
+  if (!res.ok) {
+    const parsed = parseBackendErrors(res.data);
+
+    setErrors({
+      title: parsed.title || "",
+      description: parsed.description || "",
+      introText: parsed.introText || "",
+      difficulty: parsed.difficultyLevel || "",
+      accessibility: parsed.accessibility || "",
+    });
+
+    return;
+  }
+
+  navigate("/create/questions");
+}
+
 
   return (
     <div className="pixel-bg">

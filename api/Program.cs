@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.OpenApi.Models;
+using  Jam.Api.Services;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -102,6 +103,8 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IPlayingSessionRepository, PlayingSessionRepository>();
 builder.Services.AddScoped<ISceneRepository, SceneRepository>();
 builder.Services.AddScoped<IStoryRepository, StoryRepository>();
+
+builder.Services.AddScoped<StoryCodeService>();
 
 builder.Services.AddAuthorization(options =>
 {

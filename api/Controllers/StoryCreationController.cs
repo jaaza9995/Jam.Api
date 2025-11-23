@@ -11,6 +11,10 @@ using Jam.Models;
 using Jam.Models.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Jam.Api.Services;
+using Jam.DTOs.StoryCreationSession;
+
+
 
 namespace Jam.Api.Controllers;
 
@@ -19,25 +23,27 @@ namespace Jam.Api.Controllers;
 public class StoryCreationController : ControllerBase
 {
     private readonly IStoryRepository _storyRepo;
+    private readonly StoryCodeService _codeService;
+    private readonly UserManager<AuthUser> _userManager;
     private readonly ISceneRepository _sceneRepo;
     private readonly IAnswerOptionRepository _answerRepo;
-    private readonly UserManager<AuthUser> _userManager;
     private readonly ILogger<StoryCreationController> _logger;
 
-    public StoryCreationController(
-        IStoryRepository storyRepo,
-        ISceneRepository sceneRepo,
-        IAnswerOptionRepository answerRepo,
-        UserManager<AuthUser> userManager,
-        ILogger<StoryCreationController> logger)
-    {
-        _storyRepo = storyRepo;
-        _sceneRepo = sceneRepo;
-        _answerRepo = answerRepo;
-        _userManager = userManager;
-        _logger = logger;
-    }
-
+   public StoryCreationController(
+    IStoryRepository storyRepo,
+    ISceneRepository sceneRepo,
+    IAnswerOptionRepository answerRepo,
+    StoryCodeService codeService,
+    UserManager<AuthUser> userManager,
+    ILogger<StoryCreationController> logger)
+{
+    _storyRepo = storyRepo;
+    _sceneRepo = sceneRepo;
+    _answerRepo = answerRepo;
+    _codeService = codeService;
+    _userManager = userManager;
+    _logger = logger;
+}
     // =====================================================================
     // STEP 1 — STORY + INTRO
     // =====================================================================
@@ -163,8 +169,9 @@ public class StoryCreationController : ControllerBase
         });
     }
 
+
     [HttpPost("endings")]
-    public async Task<IActionResult> SaveEndings([FromBody] UpdateEndingSceneDto dto)
+    public IActionResult SaveEndings([FromBody] UpdateEndingSceneDto dto)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -181,6 +188,7 @@ public class StoryCreationController : ControllerBase
 
         return Ok(new { message = "Endings saved." });
     }
+
 
     // =====================================================================
     // FINAL STEP — CREATE STORY IN DATABASE
@@ -226,7 +234,7 @@ public class StoryCreationController : ControllerBase
 
         if (story.Accessibility == Accessibility.Private)
         {
-            story.Code = await GenerateUniqueStoryCodeAsync();
+            story.Code = await _codeService.GenerateUniqueStoryCodeAsync();
         }
 
         var saved = await _storyRepo.AddFullStory(story);
@@ -238,36 +246,7 @@ public class StoryCreationController : ControllerBase
         return Ok(new { message = "Story created!", storyId = story.StoryId });
     }
 
-    private async Task<string> GenerateUniqueStoryCodeAsync()
-    {
-        string code;
-        bool exists;
-        do
-        {
-            code = Guid.NewGuid().ToString("N")[..8].ToUpper();
-            exists = await _storyRepo.DoesCodeExist(code);
-        } while (exists);
-
-        return code;
-    }
-}
-
 // =====================================================================
 // INTERNAL: Session DTO used only inside the controller
 // =====================================================================
-
-public class StoryCreationSession
-{
-    public string Title { get; set; } = "";
-    public string Description { get; set; } = "";
-    public DifficultyLevel DifficultyLevel { get; set; }
-    public Accessibility Accessibility { get; set; }
-
-    public string IntroText { get; set; } = "";
-
-    public List<QuestionSceneDto> QuestionScenes { get; set; } = new();
-
-    public string GoodEnding { get; set; } = "";
-    public string NeutralEnding { get; set; } = "";
-    public string BadEnding { get; set; } = "";
 }

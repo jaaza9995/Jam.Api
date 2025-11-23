@@ -34,13 +34,14 @@ export async function getIntro(storyId: number) {
   return await res.json();
 }
 
-export async function updateIntroScene(storyId: number, introText: string) {
-  return await fetch(`${API_URL}/api/storyediting/${storyId}/intro`, {
+
+export const updateIntroScene = (storyId: number, introText: string) =>
+  fetch(`${API_URL}/api/storyediting/${storyId}/intro`, {
     method: "PUT",
     headers: getAuthHeaders(),
     body: JSON.stringify({ introText }),
   });
-}
+
 
 // ------------------ QUESTIONS ------------------
 export const getQuestions = (storyId: number): Promise<Response> =>
