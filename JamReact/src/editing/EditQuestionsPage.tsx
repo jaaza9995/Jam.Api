@@ -21,6 +21,45 @@ type QuestionErrors = {
   correct?: string;
 };
 
+const mapParsedErrors = (
+  parsed: Record<string, string>,
+  existingLength: number
+): QuestionErrors[] => {
+  let maxIndex = existingLength - 1;
+  const entries = Object.entries(parsed);
+
+  entries.forEach(([key]) => {
+    const match = key.match(/questionScenes\[(\d+)\]/i);
+    if (match) {
+      const idx = Number(match[1]);
+      if (!Number.isNaN(idx)) maxIndex = Math.max(maxIndex, idx);
+    }
+  });
+
+  const newErrors: QuestionErrors[] = Array.from(
+    { length: Math.max(0, maxIndex + 1) },
+    () => ({})
+  );
+
+  entries.forEach(([key, msg]) => {
+    const match = key.match(/questionScenes\[(\d+)\]\.(.*)/i);
+    if (!match) return;
+
+    const index = Number(match[1]);
+    const field = match[2].toLowerCase();
+
+    if (!newErrors[index]) newErrors[index] = {};
+
+    if (field.includes("storytext")) newErrors[index].storyText = msg;
+    if (field.includes("questiontext")) newErrors[index].questionText = msg;
+    if (field.includes("answer")) newErrors[index].answers = msg;
+    if (field.includes("context")) newErrors[index].contextTexts = msg;
+    if (field.includes("correctanswerindex")) newErrors[index].correct = msg;
+  });
+
+  return newErrors;
+};
+
 const normalizeAnswers = (answers: AnswerOption[] | null | undefined): AnswerOption[] => {
   if (!answers || answers.length === 0) {
     return [
@@ -97,51 +136,28 @@ useEffect(() => {
       if (!storyId) return; 
 
       const res = await getQuestions(Number(storyId));
-    if (!res.ok) {
-    let body: any = null;
+      if (!res.ok) {
+        let body: any = null;
 
-    try {
-      body = await res.json();
-    } catch {
-      setBackendError("Unexpected server error.");
-      return;
-    }
+        try {
+          body = await res.json();
+        } catch {
+          setBackendError("Unexpected server error.");
+          setLoading(false);
+          return;
+        }
 
-    if (body?.errors) {
-      const parsed = parseBackendErrors(body.errors);
+        const parsed = parseBackendErrors(body);
+        const newErrors = mapParsedErrors(parsed, questions.length);
 
-      const newErrors: QuestionErrors[] = questions.map(() => ({}));
+        if (body?.errorTitle) setBackendError(body.errorTitle);
+        else if (Object.keys(parsed).length === 0) setBackendError("Failed to load questions.");
 
-      Object.entries(parsed).forEach(([key, msg]) => {
-        const match = key.match(/questionScenes\[(\d+)\]\.(.*)/);
+        setErrors(newErrors);
+        setLoading(false);
+        return;
+      }
 
-        if (!match) return;
-
-        const index = Number(match[1]);
-        const field = match[2].toLowerCase();
-
-        if (field.includes("storytext"))
-          newErrors[index].storyText = msg as string;
-
-        if (field.includes("questiontext"))
-          newErrors[index].questionText = msg as string;
-
-        if (field.includes("answer"))
-          newErrors[index].answers = msg as string;
-
-        if (field.includes("context"))
-          newErrors[index].contextTexts = msg as string;
-
-        if (field.includes("correctanswerindex"))
-          newErrors[index].correct = msg as string;
-      });
-
-      setErrors(newErrors);  // ✔ RIKTIG – array sendes inn
-      return;
-    }
-}
- 
-      
       const data = (await res.json()) as QuestionScene[];
 
       const normalized = data.map((q) => ({
@@ -255,43 +271,24 @@ const handleSave = async () => {
       return;
     }
 
-    // 1) ModelState errors (per spørsmål)
-    if (body?.errors) {
-      const parsed = parseBackendErrors(body.errors);
+    const parsed = parseBackendErrors(body);
 
-      // parsed er i format:
-      // { "questionScenes[1].storyText": "msg", ... }
-
-      const newErrors: QuestionErrors[] = questions.map(() => ({}));
-
-      Object.entries(parsed).forEach(([key, msg]) => {
-        const match = key.match(/questionScenes\[(\d+)\]\.(.*)/);
-
-        if (!match) return;
-
-        const index = Number(match[1]);
-        const field = match[2].toLowerCase();
-
-        if (!newErrors[index]) newErrors[index] = {};
-
-        if (field.includes("storytext")) newErrors[index].storyText = msg as string;
-        if (field.includes("questiontext")) newErrors[index].questionText = msg as string;
-        if (field.includes("answer")) newErrors[index].answers = msg as string;
-        if (field.includes("context")) newErrors[index].contextTexts = msg as string;
-        if (field.includes("correctanswerindex")) newErrors[index].correct = msg as string;
-      });
-
+    // ModelState errors per spørsmål
+    if (Object.keys(parsed).length > 0) {
+      const newErrors = mapParsedErrors(parsed, questions.length);
       setErrors(newErrors);
+      if (body?.errorTitle) setBackendError(body.errorTitle);
       return;
     }
 
-    // 2) Custom backend error
+    // Custom backend error
     if (body?.errorMessage) {
       setBackendError(body.errorMessage);
       return;
     }
 
-    setBackendError("Something went wrong.");
+    if (body?.errorTitle) setBackendError(body.errorTitle);
+    else setBackendError("Something went wrong.");
     return;
   }
 
