@@ -157,7 +157,7 @@ const EditIntroPage: React.FC = () => {
 const handleSave = async () => {
   setBackendError("");
 
-  // 🔥 NEW: show "no changes" toast
+  // NEW: no change toast
   if (!hasChanges()) {
     setShowNoChangesMsg(true);
     setTimeout(() => setShowNoChangesMsg(false), 4000);
@@ -169,7 +169,6 @@ const handleSave = async () => {
     return;
   }
 
-  // Local validation
   if (!validate()) return;
 
   // -----------------------------
@@ -183,55 +182,51 @@ const handleSave = async () => {
     accessibility,
   });
 
-  if (!metaRes.ok) {
-    let body = null;
-    try {
-      body = await metaRes.json();
-    } catch {}
+if (!metaRes.ok) {
+  const body = await metaRes.json().catch(() => null);
+  const parsed = parseBackendErrors(body);
 
-    const parsed = parseBackendErrors(body);
+  setErrors(prev => ({
+    ...prev,
+    title: parsed.title || "",
+    description: parsed.description || "",
+    introText: parsed.introText || "",
+    difficulty: parsed.difficultyLevel || "",
+    accessibility: parsed.accessibility || "",
+  }));
 
-    setErrors((prev) => ({
-      ...prev,
-      title: parsed.title || "",
-      description: parsed.description || "",
-      difficulty: parsed.difficultyLevel || "",
-      accessibility: parsed.accessibility || "",
-    }));
+  // global feilmelding kun hvis ingen felt-feil
+  if (body?.errorTitle) setBackendError(body.errorTitle);
+  else if (Object.keys(parsed).length === 0)
+    setBackendError("Failed to save metadata");
+  return;
+}
 
-    if (body?.errorTitle) setBackendError(body.errorTitle);
-    return;
-  }
 
   // -----------------------------
-  // SAVE INTRO TEXT
+  // SAVE INTRO
   // -----------------------------
   const introRes = await updateIntroScene(Number(storyId), introText);
 
   if (!introRes.ok) {
-    let body = null;
-    try {
-      body = await introRes.json();
-    } catch {}
-
+    const body = await introRes.json().catch(() => null);
     const parsed = parseBackendErrors(body);
 
-    setErrors((prev) => ({
+    setErrors(prev => ({
       ...prev,
       introText: parsed.introText || "",
     }));
 
     if (body?.errorTitle) setBackendError(body.errorTitle);
-
+    else if (Object.keys(parsed).length === 0)
+      setBackendError("Failed to save intro");
     return;
   }
 
   // -----------------------------
-  // REFRESH ORIGINAL SAVED DATA
+  // SUCCESS
   // -----------------------------
-  const updatedMeta = await getStoryMetadata(Number(storyId)).then((res) =>
-    res.json()
-  );
+  const updatedMeta = await getStoryMetadata(Number(storyId)).then(r => r.json());
 
   setOriginal({
     title: updatedMeta.title,
@@ -244,6 +239,7 @@ const handleSave = async () => {
   setShowSavedMsg(true);
   setTimeout(() => setShowSavedMsg(false), 5000);
 };
+
 
   // ------------------------------------
   // BACK BUTTON

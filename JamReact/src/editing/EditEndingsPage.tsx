@@ -117,25 +117,24 @@ const EditEndingsPage: React.FC = () => {
       neutralEnding: neutral,
       badEnding: bad,
     };
+const res = await updateEndings(Number(storyId), payload);
 
-    const res = await updateEndings(Number(storyId), payload);
+if (!res.ok) {
+  const body = await res.json().catch(() => null);
+  const parsed = parseBackendErrors(body);
 
-    if (!res.ok) {
-      let msg = "Something went wrong.";
+  setErrors({
+    good: parsed.goodEnding || "",
+    neutral: parsed.neutralEnding || "",
+    bad: parsed.badEnding || "",
+  });
 
-      try {
-        const body: { errors?: Record<string, string[]> } = await res.json();
-        if (body.errors) {
-          const first = Object.values(body.errors)[0][0];
-          msg = first;
-        }
-      } catch {
-        msg = "Unexpected server error.";
-      }
+  // Global feilmelding (frivillig)
+  setBackendError(Object.values(parsed)[0] || "");
 
-      setBackendError(msg);
-      return;
-    }
+  return;
+}
+
 
     // Update original
     setOriginal(payload);
@@ -179,8 +178,6 @@ const EditEndingsPage: React.FC = () => {
       )}
 
       <h1 className="edit-title">Edit Endings</h1>
-
-      {backendError && <p className="error-msg">{backendError}</p>}
 
       {/* GOOD */}
       <div className="ending-block">

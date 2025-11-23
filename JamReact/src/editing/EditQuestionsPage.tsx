@@ -29,11 +29,14 @@ const mapParsedErrors = (
   const entries = Object.entries(parsed);
 
   entries.forEach(([key]) => {
-    const match = key.match(/questionScenes\[(\d+)\]/i);
-    if (match) {
-      const idx = Number(match[1]);
-      if (!Number.isNaN(idx)) maxIndex = Math.max(maxIndex, idx);
-    }
+    const match =
+      key.match(/questionScenes\[(\d+)\]/i) ||
+      key.match(/^\[(\d+)\]/); // backend uses "[0].field" for List<UpdateQuestionSceneDto>
+
+    if (!match) return;
+
+    const idx = Number(match[1]);
+    if (!Number.isNaN(idx)) maxIndex = Math.max(maxIndex, idx);
   });
 
   const newErrors: QuestionErrors[] = Array.from(
@@ -42,7 +45,9 @@ const mapParsedErrors = (
   );
 
   entries.forEach(([key, msg]) => {
-    const match = key.match(/questionScenes\[(\d+)\]\.(.*)/i);
+    const match =
+      key.match(/questionScenes\[(\d+)\]\.(.*)/i) ||
+      key.match(/^\[(\d+)\]\.(.*)/);
     if (!match) return;
 
     const index = Number(match[1]);
@@ -150,8 +155,13 @@ useEffect(() => {
         const parsed = parseBackendErrors(body);
         const newErrors = mapParsedErrors(parsed, questions.length);
 
-        if (body?.errorTitle) setBackendError(body.errorTitle);
-        else if (Object.keys(parsed).length === 0) setBackendError("Failed to load questions.");
+        if (body?.errorTitle) {
+          setBackendError(body.errorTitle);
+        } else if (Object.keys(parsed).length > 0) {
+          setBackendError(Object.values(parsed)[0]);
+        } else {
+          setBackendError("Failed to load questions.");
+        }
 
         setErrors(newErrors);
         setLoading(false);
@@ -277,7 +287,9 @@ const handleSave = async () => {
     if (Object.keys(parsed).length > 0) {
       const newErrors = mapParsedErrors(parsed, questions.length);
       setErrors(newErrors);
+
       if (body?.errorTitle) setBackendError(body.errorTitle);
+      else setBackendError(Object.values(parsed)[0]);
       return;
     }
 
