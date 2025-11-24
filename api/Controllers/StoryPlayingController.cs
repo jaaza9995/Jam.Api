@@ -13,7 +13,6 @@ using System.Security.Claims;
 
 namespace Jam.Api.Controllers;
 
-[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class StoryPlayingController : ControllerBase

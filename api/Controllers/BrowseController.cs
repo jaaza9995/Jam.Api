@@ -101,7 +101,6 @@ public class BrowseController : ControllerBase
     // PUBLIC GAMES
     // --------------------------
     [HttpGet("public")]
-    [Authorize]
     public async Task<IActionResult> GetPublicGames()
     {
         try
@@ -138,7 +137,6 @@ public class BrowseController : ControllerBase
     // PRIVATE GAME BY CODE
     // --------------------------
     [HttpGet("private/{code}")]
-    [Authorize]
     public async Task<IActionResult> GetPrivateGame(string code)
     {
         try
