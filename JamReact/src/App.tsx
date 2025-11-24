@@ -23,7 +23,6 @@ import RegisterPage from "./auth/RegisterPage";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import { AuthProvider } from "./auth/AuthContext";
 
-
 import './App.css';
 
 // Wrapper that converts :storyId from the URL to a number for StoryPlayer
@@ -90,6 +89,11 @@ const App: React.FC = () => {
               <Route path="/play/:storyId" element={<StoryPlayerWrapper />} />
 
             </Route>
+
+            <Route 
+              path="/play/:storyId" 
+              element={<StoryPlayerWrapper />}
+            />
 
             {/* ---------------- CATCH ALL ---------------- */}
             <Route path="*" element={<Navigate to="/" replace />} />
