@@ -1,5 +1,5 @@
+using Jam.Api.Models;
 using Microsoft.EntityFrameworkCore;
-using Jam.Models;
 
 namespace Jam.Api.DAL;
 

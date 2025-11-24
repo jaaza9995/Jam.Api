@@ -1,6 +1,6 @@
+using Jam.Api.Models.Enums;
+using Jam.Api.Models;
 using Microsoft.EntityFrameworkCore;
-using Jam.Models.Enums;
-using Jam.Models;
 
 namespace Jam.Api.DAL.PlayingSessionDAL;
 

@@ -1,6 +1,6 @@
-using Jam.Models.Enums;
+using Jam.Api.Models.Enums;
 
-namespace Jam.Models;
+namespace Jam.Api.Models;
 
 public class PlayingSession
 {
@@ -15,5 +15,4 @@ public class PlayingSession
     public int StoryId { get; set; }
     public Story Story { get; set; } = null!; // Navigation property
     public string? UserId { get; set; } // Foreign key to User, nullable to allow User deletion without deleting playingsessions
-    //public AuthUser? User { get; set; } = null!;// Navigation property 
 }

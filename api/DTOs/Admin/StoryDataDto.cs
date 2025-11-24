@@ -1,4 +1,4 @@
-using Jam.Models.Enums;
+using Jam.Api.Models.Enums;
 
 namespace Jam.Api.DTOs.Admin;
 

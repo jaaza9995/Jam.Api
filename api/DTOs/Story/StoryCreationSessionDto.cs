@@ -1,9 +1,7 @@
-using Jam.Models.Enums;
-using Jam.DTOs.QuestionScenes;
+using Jam.Api.Models.Enums;
+using Jam.Api.DTOs.QuestionScenes;
 
-namespace Jam.DTOs.StoryCreationSession;
-
-
+namespace Jam.Api.DTOs.Story;
 
 public class StoryCreationSession
 {

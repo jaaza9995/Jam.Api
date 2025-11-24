@@ -1,3 +1,5 @@
+namespace Jam.Api.DTOs.Story;
+
 public class StorySelectionDto
 {
     public IEnumerable<StoryCardDto> PublicStories { get; set; } = new List<StoryCardDto>();

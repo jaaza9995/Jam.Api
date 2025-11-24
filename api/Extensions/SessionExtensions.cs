@@ -1,7 +1,6 @@
-
 using System.Text.Json;
 
-namespace Jam.Extensions;
+namespace Jam.Api.Extensions;
 
 public static class SessionExtensions
 {

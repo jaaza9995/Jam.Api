@@ -1,20 +1,17 @@
 using Jam.Api.DAL.AnswerOptionDAL;
 using Jam.Api.DAL.SceneDAL;
 using Jam.Api.DAL.StoryDAL;
-using Jam.DTOs.Story;
-using Jam.DTOs.IntroScenes;
-using Jam.DTOs.QuestionScenes;
-using Jam.DTOs.UpdateEndingScenes;
-using Jam.DTOs;
-using Jam.Extensions;
-using Jam.Models;
-using Jam.Models.Enums;
+using Jam.Api.DAL.Services;
+using Jam.Api.DTOs.Story;
+using Jam.Api.DTOs.IntroScenes;
+using Jam.Api.DTOs.QuestionScenes;
+using Jam.Api.DTOs.EndingScenes;
+using Jam.Api.DTOs.Shared;
+using Jam.Api.Extensions;
+using Jam.Api.Models;
+using Jam.Api.Models.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Jam.Api.Services;
-using Jam.DTOs.StoryCreationSession;
-
-
 
 namespace Jam.Api.Controllers;
 

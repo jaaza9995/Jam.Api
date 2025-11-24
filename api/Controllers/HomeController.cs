@@ -1,14 +1,8 @@
 using Jam.Api.DAL.StoryDAL;
-using Jam.Models;
-using Microsoft.AspNetCore.Authorization;
+using Jam.Api.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Jam.DTOs.JoinPrivateStoryRequestDto;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
-using Microsoft.IdentityModel.Tokens;
-
 
 namespace Jam.Api.Controllers;
 
