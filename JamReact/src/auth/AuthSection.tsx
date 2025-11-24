@@ -12,7 +12,7 @@ const AuthSection: React.FC = () => {
             {user ? (
                 <Dropdown align="end">
                     <Dropdown.Toggle as={Nav.Link} id="dropdown-user">
-                        Welcome, {user.given_name}
+                        Welcome, {user.sub}
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
                         <Dropdown.Item onClick={logout}>Logout</Dropdown.Item>

@@ -2,7 +2,6 @@ export interface User {
     userId: number;
     // subject/ username
     sub: string;
-    password: string;
     // (JWT ID):id for JWT to prevenet replay attacks
     jti: string;
     // (Issued At):timestamp when token was issued
