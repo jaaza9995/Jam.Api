@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
-using Jam.Models;
+using Jam.Api.Models;
 using Microsoft.AspNetCore.Identity;
 using Jam.Api.DAL;
 using Jam.Api.DAL.AnswerOptionDAL;
@@ -11,9 +11,8 @@ using Jam.Api.DAL.StoryDAL;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.OpenApi.Models;
-using  Jam.Api.Services;
+using Jam.Api.DAL.Services;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {

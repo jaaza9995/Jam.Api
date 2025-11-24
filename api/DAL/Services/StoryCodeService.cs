@@ -1,29 +1,28 @@
 using Jam.Api.DAL.StoryDAL;
 
-namespace Jam.Api.Services
+namespace Jam.Api.DAL.Services;
+
+public class StoryCodeService
 {
-    public class StoryCodeService
+    private readonly IStoryRepository _storyRepository;
+
+    public StoryCodeService(IStoryRepository storyRepository)
     {
-        private readonly IStoryRepository _storyRepository;
+        _storyRepository = storyRepository;
+    }
 
-        public StoryCodeService(IStoryRepository storyRepository)
+    public async Task<string> GenerateUniqueStoryCodeAsync()
+    {
+        string code;
+        bool exists;
+
+        do
         {
-            _storyRepository = storyRepository;
+            code = Guid.NewGuid().ToString("N")[..8].ToUpper();
+            exists = await _storyRepository.DoesCodeExist(code);
         }
+        while (exists);
 
-        public async Task<string> GenerateUniqueStoryCodeAsync()
-        {
-            string code;
-            bool exists;
-
-            do
-            {
-                code = Guid.NewGuid().ToString("N")[..8].ToUpper();
-                exists = await _storyRepository.DoesCodeExist(code);
-            }
-            while (exists);
-
-            return code;
-        }
+        return code;
     }
 }

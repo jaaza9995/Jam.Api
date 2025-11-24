@@ -1,6 +1,6 @@
+using Jam.Api.Models;
+using Jam.Api.Models.Enums;
 using Microsoft.EntityFrameworkCore;
-using Jam.Models;
-using Jam.Models.Enums;
 
 namespace Jam.Api.DAL.SceneDAL;
 

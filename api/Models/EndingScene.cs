@@ -1,6 +1,6 @@
-using Jam.Models.Enums;
+using Jam.Api.Models.Enums;
 
-namespace Jam.Models;
+namespace Jam.Api.Models;
 
 public class EndingScene
 {

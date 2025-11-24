@@ -1,4 +1,4 @@
-using Jam.Models;
+using Jam.Api.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

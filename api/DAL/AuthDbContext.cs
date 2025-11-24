@@ -1,6 +1,6 @@
+using Jam.Api.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Jam.Models;
 
 namespace Jam.Api.DAL;
 

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Jam.DTOs.QuestionScenes;
+namespace Jam.Api.DTOs.QuestionScenes;
 
 public class UpdateQuestionSceneDto //put dto 
 {

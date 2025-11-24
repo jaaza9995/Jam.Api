@@ -2,14 +2,14 @@ using Jam.Api.DAL.AnswerOptionDAL;
 using Jam.Api.DAL.PlayingSessionDAL;
 using Jam.Api.DAL.SceneDAL;
 using Jam.Api.DAL.StoryDAL;
-using Jam.DTOs;
-using Jam.Models;
-using Jam.Models.Enums;
+using Jam.Api.DTOs.StoryPlaying;
+using Jam.Api.DTOs.Shared;
+using Jam.Api.Models;
+using Jam.Api.Models.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Jam.Api.DTOs.StoryPlaying;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Jam.Api.Controllers;
 
