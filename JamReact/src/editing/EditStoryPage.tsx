@@ -9,7 +9,7 @@ import { parseBackendErrors } from "../utils/parseBackendErrors";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-const EditStoryPage = () => {
+const EditStoryPage: React.FC = () => {
   const { storyId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
