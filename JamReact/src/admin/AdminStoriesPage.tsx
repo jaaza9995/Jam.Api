@@ -3,13 +3,7 @@ import { Table, Button, Alert, Spinner } from 'react-bootstrap';
 import { useAuth } from '../auth/AuthContext'; 
 import { getAdminStories } from './AdminService';
 import { StoryDataDto } from '../types/admin';
-import { Accessibility } from '../types/enums';
-
-// Converts accessibility number (0 | 1) to string ("Public" | "Private")
-const getAccessibilityString = (value: number): string => {
-    const name = Accessibility[value]; 
-    return name || "Ukjent"; 
-};
+import { getAccessibilityString } from '../utils/enumHelpers';
 
 const AdminStoriesPage: React.FC = () => {
     const { token } = useAuth();

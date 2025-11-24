@@ -88,22 +88,22 @@ useEffect(() => {
 
                     {/* DIFFICULTY */}
                     <span className="difficulty"> 
-                      {(s.difficultyLevel === "Easy" || s.difficultyLevel === 0) && (
+                      {(s.difficultyLevel === 0) && (
                         <button className="difficulty easy">Easy</button>
                       )}  
 
-                      {(s.difficultyLevel === "Medium" || s.difficultyLevel === 1) && (
+                      {(s.difficultyLevel === 1) && (
                         <button className="difficulty medium">Medium</button>
                       )}  
 
-                      {(s.difficultyLevel === "Hard" || s.difficultyLevel === 2) && (
+                      {(s.difficultyLevel === 2) && (
                         <button className="difficulty hard">Hard</button>
                       )}  
                     </span>
                   </div>
 
                   {/* PRIVATE CODE */}
-                  {(s.accessibility === "Private" || s.accessibility === 1) && (
+                  {(s.accessibility === 1) && (
                     <p className="private-code">Game Code: {s.code}</p>
                   )}
                 </div>
@@ -152,21 +152,21 @@ useEffect(() => {
                     </span>
                     {/* DIFFICULTY */}
                     <span className="difficulty"> 
-                      {(s.difficultyLevel === "Easy" || s.difficultyLevel === 0) && (
+                      {(s.difficultyLevel === 0) && (
                         <button className="difficulty easy">Easy</button>
                       )}  
 
-                      {(s.difficultyLevel === "Medium" || s.difficultyLevel === 1) && (
+                      {(s.difficultyLevel === 1) && (
                         <button className="difficulty medium">Medium</button>
                       )}  
 
-                      {(s.difficultyLevel === "Hard" || s.difficultyLevel === 2) && (
+                      {(s.difficultyLevel === 2) && (
                         <button className="difficulty hard">Hard</button>
                       )}  
                     </span>
                   </div>
                   {/* PRIVATE CODE */}
-                  {(s.accessibility === "Private" || s.accessibility === 1) && (
+                  {(s.accessibility === 1) && (
                     <p className="private-code">Game Code: {s.code}</p>
                   )}
                 </div>

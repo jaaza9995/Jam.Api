@@ -13,26 +13,33 @@ export interface IAnswerFeedback {
 }
 
 export interface IPlayScene {
-    
 	sessionId: number;
 	sceneId: number;
 	sceneType: SceneType; // Intro || Question || Ending
 	sceneText: string;
 
-    // For QuestionScenes
+	// For QuestionScenes
 	question: string | null;
 	answerOptions: AnswerOption[] | null;
 
-    nextSceneAfterIntroId: number | null; // To navigate from IntroScene to first QuestionScene
+	nextSceneAfterIntroId: number | null; // To navigate from IntroScene to first QuestionScene
 
-    // Playing stats
+	// Playing stats
 	currentScore: number;
 	maxScore: number;
 	currentLevel: number;
 }
 
 export interface IStartSessionResponse {
-    sessionId: number;
-    sceneId: number;
-    sceneType: SceneType;
+	sessionId: number;
+	sceneId: number;
+	sceneType: SceneType;
+}
+
+export interface SessionState {
+	sessionId: number | null;
+	currentSceneId: number | null;
+	currentSceneType: SceneType | null;
+	score: number;
+	level: number;
 }
