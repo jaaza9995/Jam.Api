@@ -21,7 +21,8 @@ public class BrowseController : ControllerBase
         _storyRepository = storyRepository;
         _logger = logger;
     }
-      [HttpGet("stories")]
+    
+    [HttpGet("stories")]
     public async Task<IActionResult> GetStories([FromQuery] string? search = null)
     {
         try
