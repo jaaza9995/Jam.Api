@@ -46,13 +46,7 @@ const App: React.FC = () => {
 							{/* HOME */}
 							<Route
 								path="/"
-								element={
-									!localStorage.getItem("token") ? (
-										<Navigate to="/login" replace />
-									) : (
-										<HomePage />
-									)
-								}
+								element={<HomePage />}
 							/>
 
 							{/* CREATE FLOW */}

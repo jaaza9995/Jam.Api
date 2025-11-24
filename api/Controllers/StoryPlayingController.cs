@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Jam.Api.Controllers;
 
-[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class StoryPlayingController : ControllerBase
