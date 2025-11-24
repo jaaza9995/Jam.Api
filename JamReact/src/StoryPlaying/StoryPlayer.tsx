@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { IPlayScene } from "../types/storyPlaying";
 import { SceneType } from "../types/enums";
 import { AnswerOption } from "../types/answerOption";
+import { SessionState } from "../types/storyPlaying";
 import { useNavigate } from "react-router-dom";
 import {
 	startSession as startSessionService,
@@ -10,14 +11,6 @@ import {
 	submitAnswer as submitAnswerService,
 	AnswerResult,
 } from "./StoryPlayingService";
-
-interface SessionState {
-	sessionId: number | null;
-	currentSceneId: number | null;
-	currentSceneType: SceneType | null;
-	score: number;
-	level: number;
-}
 
 export const StoryPlayer: React.FC = () => {
 

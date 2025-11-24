@@ -1,5 +1,3 @@
-import { Accessibility } from "./enums";
-
 export interface UserDataDto {
 	id: string;
 	userName: string;
