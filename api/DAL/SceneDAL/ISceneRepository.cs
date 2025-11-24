@@ -1,6 +1,6 @@
 using Jam.Models;
 
-namespace Jam.DAL.SceneDAL;
+namespace Jam.Api.DAL.SceneDAL;
 
 public interface ISceneRepository
 {
@@ -17,10 +17,11 @@ public interface ISceneRepository
     Task<IEnumerable<QuestionScene>> GetQuestionScenesByStoryId(int storyId);
     Task<QuestionScene?> GetFirstQuestionSceneByStoryId(int storyId);
     Task<QuestionScene?> GetQuestionSceneById(int questionSceneId); 
+    Task<QuestionScene?> GetNextQuestionSceneById(int currentQuestionSceneId); // new method for playing mode
     Task<QuestionScene?> GetQuestionSceneWithAnswerOptionsById(int questionSceneId); 
     Task<bool> AddQuestionScene(QuestionScene questionScene);
     Task<bool> UpdateQuestionScene(QuestionScene questionScene);
-    Task<bool> UpdateQuestionScenes(IEnumerable<QuestionScene> questionScenes); // new method for StoryEditingController
+    Task<bool> UpdateQuestionScenes(IEnumerable<QuestionScene> questionScenes); 
     Task<bool> DeleteQuestionScene(int questionSceneId, int? previousSceneId = null);
     
     

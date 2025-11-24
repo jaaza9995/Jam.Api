@@ -1,4 +1,3 @@
-
 export interface AnswerOption {
     answerOptionId?: number;
     answer: string;

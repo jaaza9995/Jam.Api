@@ -136,21 +136,3 @@
   justify-content: center;
   margin-top: auto;
 }
-
-.btn-makeNewGame, 
-.btn-playNewGame{
-  border-radius: 5px;
-  font-size: 30px;
-  
-}
-
-.btn-makeNewGame{
-  background-color: rgb(236, 64, 141);
-  border-color: rgb(255, 177, 212);
-
-}
-
-.btn-playNewGame{
-  background-color: rgb(19, 163, 163);
-  border-color: rgb(69, 255, 255) ;
-}

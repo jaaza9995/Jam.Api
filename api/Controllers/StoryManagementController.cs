@@ -1,4 +1,4 @@
-using Jam.DAL.StoryDAL;
+using Jam.Api.DAL.StoryDAL;
 using Jam.DTOs;
 using Jam.Models;
 using Microsoft.AspNetCore.Authorization;

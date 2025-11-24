@@ -10,6 +10,7 @@ interface AuthContextType { // Define the shape of the auth context
     login: (credentials: LoginDto) => Promise<void>;
     logout: () => void;
     isLoading: boolean;
+    isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,6 +19,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [user, setUser] = useState<User | null>(null);
     const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
     const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    // --- NY LOGIKK: Beregne Admin-status ---
+    // Sjekker om brukeren finnes, og om rollen inkluderer "Admin"
+    const isAdmin = !!user && (
+        Array.isArray(user.role) // Hvis rollen er en array
+            ? user.role.includes("Admin")
+            : user.role === "Admin" // Hvis rollen er en enkelt streng
+    );
+    // ---------- Slutt på ny logikk ----------
 
     useEffect(() => { // Check token validity on mount and when token changes
         if (token) {
@@ -46,6 +56,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         localStorage.setItem('token', token);
         const decodedUser: User = jwtDecode(token);
         // console.log(token); // Debugging line to check the token
+        // --- LEGG TIL DENNE LOGGEN MIDLERTIDIG ---
+        console.log("DECODED USER OBJECT:", decodedUser); 
+        // ------------------------------------------
         setUser(decodedUser);
         setToken(token);
     };
@@ -57,7 +70,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     return ( // Provide context to children
-        <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
+        <AuthContext.Provider value={{ user, token, login, logout, isLoading, isAdmin }}>
             {!isLoading && children}
         </AuthContext.Provider>
     );

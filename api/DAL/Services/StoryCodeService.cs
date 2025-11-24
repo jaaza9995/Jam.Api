@@ -1,4 +1,4 @@
-using Jam.DAL.StoryDAL;
+using Jam.Api.DAL.StoryDAL;
 
 namespace Jam.Api.Services
 {

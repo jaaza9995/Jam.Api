@@ -5,11 +5,6 @@
   --text-color: #f0f0f0;
   --card-bg: #1a1a3d;
   --accent-color: #61dafb;
-  --next-btn: #27d8bd;
-  --delete-btn: #d54b4b;
-  --back-btn: #ff72d0;
-  --addQuestion-btn: #7FFF00;
-  --finish-btn: #FFD700;
 }
 
 /* GLOBAL APP */
@@ -37,6 +32,7 @@ body {
   text-align: center;
 
 }
+
 .title {
   margin-bottom: 60px;  /* øk etter behov */
   color: #7ad3ff;
@@ -45,7 +41,6 @@ body {
   margin-bottom: 40px;
   text-shadow: 0 0 4px #7ad3ff;
 }
-
 
 /* Buttons */
 .pixel-btn {
@@ -65,6 +60,7 @@ body {
 .play { background: #ba1ddd; }
 .edit { background: #2fcea4; }
 .next { background: #4c9df3; }
+
 .back{ background: #ff72d0;}
 .addQuestion{ background-color: #FF8C00;}
 
@@ -116,7 +112,7 @@ h1, h2, h3 {
 }
 
 /* =========================================================
-   GLOBAL FORM ELEMENTS (used in Create + Edit modes)
+   GLOBAL FORM ELEMENTS (used in Create + Edit modes) jara
    ========================================================= */
 
 /* Page titles for form pages */

@@ -172,6 +172,7 @@ namespace Jam.Api.Migrations.AuthDb
                     Failed = table.Column<int>(type: "INTEGER", nullable: false),
                     Dnf = table.Column<int>(type: "INTEGER", nullable: false),
                     UserId = table.Column<string>(type: "TEXT", nullable: true),
+                    QuestionCount = table.Column<int>(type: "INTEGER", nullable: false),
                     AuthUserId = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>

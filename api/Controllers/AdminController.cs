@@ -1,7 +1,7 @@
-using System.Threading.Tasks;
-using Jam.DAL;
-using Jam.DAL.PlayingSessionDAL;
-using Jam.DAL.StoryDAL;
+using Jam.Api.DAL;
+using Jam.Api.DAL.PlayingSessionDAL;
+using Jam.Api.DAL.StoryDAL;
+using Jam.Api.DTOs.Admin;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,7 +14,7 @@ public class AdminController : ControllerBase
 {
     private readonly UserService _userService;
     private readonly IStoryRepository _storyRepository;
-    
+
     private readonly IPlayingSessionRepository _playingSessionRepository;
     private readonly ILogger<AdminController> _logger;
 
@@ -38,7 +38,17 @@ public class AdminController : ControllerBase
         try
         {
             var users = await _userService.GetAllUsersAsync();
-            return Ok(users);
+
+            // Mapping AuthUser to UserDto
+            // Not including user attributes like password hash for security reasons
+            var userData = users.Select(u => new UserDataDto
+            {
+                Id = u.Id,
+                UserName = u.UserName ?? string.Empty,
+                Email = u.Email ?? string.Empty,
+            }).ToList();
+
+            return Ok(userData);
         }
         catch (Exception e)
         {
@@ -62,7 +72,7 @@ public class AdminController : ControllerBase
 
             if (!deleted)
                 _logger.LogWarning("[AdminController -> DeleteUser] No user found with ID {userId}", id);
-                return NotFound(new { message = $"No user found with ID {id}" });
+            return NotFound(new { message = $"No user found with ID {id}" });
         }
 
         catch (Exception e)
@@ -79,7 +89,15 @@ public class AdminController : ControllerBase
         try
         {
             var stories = await _storyRepository.GetAllStories();
-            return Ok(stories);
+
+            var storyData = stories.Select(s => new StoryDataDto
+            {
+                Id = s.StoryId,
+                Title = s.Title,
+                Accessibility = s.Accessibility,
+                UserId = s.UserId ?? string.Empty,
+            }).ToList();
+            return Ok(storyData);
         }
         catch (Exception e)
         {
