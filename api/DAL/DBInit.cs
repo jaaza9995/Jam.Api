@@ -16,8 +16,8 @@ public static class DBInit
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AuthUser>>();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-        await authContext.Database.MigrateAsync();   // Identity tables
-        await storyContext.Database.MigrateAsync();  // Story tables
+        //await authContext.Database.MigrateAsync();   // Identity tables
+        //await storyContext.Database.MigrateAsync();  // Story tables
 
         // Reset AuthDb
         await authContext.Database.EnsureDeletedAsync();

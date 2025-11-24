@@ -26,7 +26,8 @@ namespace Jam.Api.Migrations.StoryDb
                     Finished = table.Column<int>(type: "INTEGER", nullable: false),
                     Failed = table.Column<int>(type: "INTEGER", nullable: false),
                     Dnf = table.Column<int>(type: "INTEGER", nullable: false),
-                    UserId = table.Column<string>(type: "TEXT", nullable: true)
+                    UserId = table.Column<string>(type: "TEXT", nullable: true),
+                    QuestionCount = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {

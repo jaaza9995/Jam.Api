@@ -1,9 +1,6 @@
 using Jam.Api.DAL.AnswerOptionDAL;
 using Jam.Api.DAL.SceneDAL;
 using Jam.Api.DAL.StoryDAL;
-using Jam.DAL.StoryDAL;
-using Jam.DAL.SceneDAL;
-using Jam.DAL.AnswerOptionDAL;
 using Jam.DTOs.Story;
 using Jam.DTOs.IntroScenes;
 using Jam.DTOs.QuestionScenes;

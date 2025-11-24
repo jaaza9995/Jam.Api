@@ -11,13 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Jam.Api.Migrations.AuthDb
 {
     [DbContext(typeof(AuthDbContext))]
-<<<<<<<< HEAD:api/Migrations/AuthDb/20251122121844_InitialAuthDb.Designer.cs
-    [Migration("20251122121844_InitialAuthDb")]
+    [Migration("20251124125628_InitialAuthDb")]
     partial class InitialAuthDb
-========
-    [Migration("20251122122103_InitAuthDb")]
-    partial class InitAuthDb
->>>>>>>> Michael:api/Migrations/AuthDb/20251122122103_InitAuthDb.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -266,6 +261,9 @@ namespace Jam.Api.Migrations.AuthDb
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Played")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("QuestionCount")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Title")

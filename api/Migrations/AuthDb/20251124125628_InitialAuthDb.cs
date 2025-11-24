@@ -6,11 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Jam.Api.Migrations.AuthDb
 {
     /// <inheritdoc />
-<<<<<<<< HEAD:api/Migrations/AuthDb/20251122121844_InitialAuthDb.cs
     public partial class InitialAuthDb : Migration
-========
-    public partial class InitAuthDb : Migration
->>>>>>>> Michael:api/Migrations/AuthDb/20251122122103_InitAuthDb.cs
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -176,6 +172,7 @@ namespace Jam.Api.Migrations.AuthDb
                     Failed = table.Column<int>(type: "INTEGER", nullable: false),
                     Dnf = table.Column<int>(type: "INTEGER", nullable: false),
                     UserId = table.Column<string>(type: "TEXT", nullable: true),
+                    QuestionCount = table.Column<int>(type: "INTEGER", nullable: false),
                     AuthUserId = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>

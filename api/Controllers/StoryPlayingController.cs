@@ -40,62 +40,10 @@ public class StoryPlayingController : ControllerBase
         _userManager = userManager;
         _logger = logger;
     }
-
-    // ============================================================
-    // 1. Story selection / join private
-    // ============================================================
-
-    [HttpGet("stories")]
-    public async Task<IActionResult> GetStories([FromQuery] string? search = null)
-    {
-        try
-        {
-            var publicStories = await _storyRepository.GetAllPublicStories();
-            var privateStories = await _storyRepository.GetAllPrivateStories();
-
-            if (!string.IsNullOrWhiteSpace(search))
-                publicStories = publicStories
-                    .Where(s => s.Title.Contains(search, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-
-            var dto = new StorySelectionDto
-            {
-                PublicStories = publicStories,
-                PrivateStories = privateStories
-            };
-
-            return Ok(dto);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error while fetching stories");
-            return StatusCode(500, new ErrorDto { ErrorTitle = "Error loading stories" });
-        }
-    }
-
-    [HttpPost("join")]
-    public async Task<IActionResult> JoinPrivateStory([FromBody] StartPrivateStoryDto model)
-    {
-        if (string.IsNullOrWhiteSpace(model.Code))
-            return BadRequest(new ErrorDto { ErrorTitle = "Code required" });
-
-        try
-        {
-            var story = await _storyRepository.GetPrivateStoryByCode(model.Code.Trim().ToUpper());
-            if (story == null)
-                return NotFound(new ErrorDto { ErrorTitle = "No story found with that code" });
-
-            return Ok(new { StoryId = story.StoryId, story.Title, story.Description });
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Failed to join private story");
-            return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to join story" });
-        }
-    }
+    
 
     // ==================================================================================
-    // 2. Start Story, begin PlayingSession
+    // 1. Start Story, begin PlayingSession
     // ==================================================================================
 
     [HttpPost("start/{storyId}")]
@@ -168,7 +116,7 @@ public class StoryPlayingController : ControllerBase
     }
 
     // ==================================================================================
-    // 3. Play Scene
+    // 2. Play Scene
     // ==================================================================================
 
     [HttpGet("scene")]
@@ -282,7 +230,7 @@ public class StoryPlayingController : ControllerBase
     }
 
     // ==================================================================================
-    // 4. Answer feedback and transitions
+    // 3. Answer feedback and transitions
     // ==================================================================================
 
     [HttpPost("answer")]

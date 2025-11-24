@@ -260,6 +260,9 @@ namespace Jam.Api.Migrations.AuthDb
                     b.Property<int>("Played")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("QuestionCount")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("TEXT");
