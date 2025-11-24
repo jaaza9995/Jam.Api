@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Jam.Api.Migrations.StoryDb
 {
     [DbContext(typeof(StoryDbContext))]
-    [Migration("20251124125710_InitialStoryDb")]
+    [Migration("20251124142726_InitialStoryDb")]
     partial class InitialStoryDb
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace Jam.Api.Migrations.StoryDb
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
 
-            modelBuilder.Entity("Jam.Models.AnswerOption", b =>
+            modelBuilder.Entity("Jam.Api.Models.AnswerOption", b =>
                 {
                     b.Property<int>("AnswerOptionId")
                         .ValueGeneratedOnAdd()
@@ -47,7 +47,7 @@ namespace Jam.Api.Migrations.StoryDb
                     b.ToTable("AnswerOptions");
                 });
 
-            modelBuilder.Entity("Jam.Models.EndingScene", b =>
+            modelBuilder.Entity("Jam.Api.Models.EndingScene", b =>
                 {
                     b.Property<int>("EndingSceneId")
                         .ValueGeneratedOnAdd()
@@ -70,7 +70,7 @@ namespace Jam.Api.Migrations.StoryDb
                     b.ToTable("EndingScenes");
                 });
 
-            modelBuilder.Entity("Jam.Models.IntroScene", b =>
+            modelBuilder.Entity("Jam.Api.Models.IntroScene", b =>
                 {
                     b.Property<int>("IntroSceneId")
                         .ValueGeneratedOnAdd()
@@ -91,7 +91,7 @@ namespace Jam.Api.Migrations.StoryDb
                     b.ToTable("IntroScenes");
                 });
 
-            modelBuilder.Entity("Jam.Models.PlayingSession", b =>
+            modelBuilder.Entity("Jam.Api.Models.PlayingSession", b =>
                 {
                     b.Property<int>("PlayingSessionId")
                         .ValueGeneratedOnAdd()
@@ -131,7 +131,7 @@ namespace Jam.Api.Migrations.StoryDb
                     b.ToTable("PlayingSessions");
                 });
 
-            modelBuilder.Entity("Jam.Models.QuestionScene", b =>
+            modelBuilder.Entity("Jam.Api.Models.QuestionScene", b =>
                 {
                     b.Property<int>("QuestionSceneId")
                         .ValueGeneratedOnAdd()
@@ -161,7 +161,7 @@ namespace Jam.Api.Migrations.StoryDb
                     b.ToTable("QuestionScenes");
                 });
 
-            modelBuilder.Entity("Jam.Models.Story", b =>
+            modelBuilder.Entity("Jam.Api.Models.Story", b =>
                 {
                     b.Property<int>("StoryId")
                         .ValueGeneratedOnAdd()
@@ -192,9 +192,6 @@ namespace Jam.Api.Migrations.StoryDb
                     b.Property<int>("Played")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("QuestionCount")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -207,9 +204,9 @@ namespace Jam.Api.Migrations.StoryDb
                     b.ToTable("Stories");
                 });
 
-            modelBuilder.Entity("Jam.Models.AnswerOption", b =>
+            modelBuilder.Entity("Jam.Api.Models.AnswerOption", b =>
                 {
-                    b.HasOne("Jam.Models.QuestionScene", "QuestionScene")
+                    b.HasOne("Jam.Api.Models.QuestionScene", "QuestionScene")
                         .WithMany("AnswerOptions")
                         .HasForeignKey("QuestionSceneId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -218,9 +215,9 @@ namespace Jam.Api.Migrations.StoryDb
                     b.Navigation("QuestionScene");
                 });
 
-            modelBuilder.Entity("Jam.Models.EndingScene", b =>
+            modelBuilder.Entity("Jam.Api.Models.EndingScene", b =>
                 {
-                    b.HasOne("Jam.Models.Story", "Story")
+                    b.HasOne("Jam.Api.Models.Story", "Story")
                         .WithMany("EndingScenes")
                         .HasForeignKey("StoryId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -229,20 +226,20 @@ namespace Jam.Api.Migrations.StoryDb
                     b.Navigation("Story");
                 });
 
-            modelBuilder.Entity("Jam.Models.IntroScene", b =>
+            modelBuilder.Entity("Jam.Api.Models.IntroScene", b =>
                 {
-                    b.HasOne("Jam.Models.Story", "Story")
+                    b.HasOne("Jam.Api.Models.Story", "Story")
                         .WithOne("IntroScene")
-                        .HasForeignKey("Jam.Models.IntroScene", "StoryId")
+                        .HasForeignKey("Jam.Api.Models.IntroScene", "StoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Story");
                 });
 
-            modelBuilder.Entity("Jam.Models.PlayingSession", b =>
+            modelBuilder.Entity("Jam.Api.Models.PlayingSession", b =>
                 {
-                    b.HasOne("Jam.Models.Story", "Story")
+                    b.HasOne("Jam.Api.Models.Story", "Story")
                         .WithMany("PlayingSessions")
                         .HasForeignKey("StoryId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -251,14 +248,14 @@ namespace Jam.Api.Migrations.StoryDb
                     b.Navigation("Story");
                 });
 
-            modelBuilder.Entity("Jam.Models.QuestionScene", b =>
+            modelBuilder.Entity("Jam.Api.Models.QuestionScene", b =>
                 {
-                    b.HasOne("Jam.Models.QuestionScene", "NextQuestionScene")
+                    b.HasOne("Jam.Api.Models.QuestionScene", "NextQuestionScene")
                         .WithMany()
                         .HasForeignKey("NextQuestionSceneId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("Jam.Models.Story", "Story")
+                    b.HasOne("Jam.Api.Models.Story", "Story")
                         .WithMany("QuestionScenes")
                         .HasForeignKey("StoryId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -269,12 +266,12 @@ namespace Jam.Api.Migrations.StoryDb
                     b.Navigation("Story");
                 });
 
-            modelBuilder.Entity("Jam.Models.QuestionScene", b =>
+            modelBuilder.Entity("Jam.Api.Models.QuestionScene", b =>
                 {
                     b.Navigation("AnswerOptions");
                 });
 
-            modelBuilder.Entity("Jam.Models.Story", b =>
+            modelBuilder.Entity("Jam.Api.Models.Story", b =>
                 {
                     b.Navigation("EndingScenes");
 

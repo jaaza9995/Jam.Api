@@ -3,7 +3,7 @@ export interface StoryMetadataDto {
   storyId: number;
   title: string;
   description: string;
-  difficultyLevel: number; // 1–3
+  difficultyLevel: number;
   accessibility: number;  
   code?: string | null;
 }

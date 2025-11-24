@@ -101,21 +101,28 @@ const handlePrivateSearch = async () => {
           <ul className="browse-list">
             {filtered.length > 0 ? (
               filtered.map((g) => (
-               <li
-                key={g.storyId}
-                className="browse-card"
-                onClick={() => openModal(g)}
-              >
+               <li key={g.storyId} className="browse-card">
                 <h3>{g.title}</h3>
                 <p>{g.description}</p>
 
-                {/* NEW: show difficulty, accessibility, question count */}
                 <div className="browse-meta">
                   <p><strong>Questions:</strong> {g.questionCount}</p>
                   <p><strong>Difficulty:</strong> {g.difficultyLevel}</p>
                   <p><strong>Accessibility:</strong> {g.accessibility}</p>
                 </div>
+
+                {/* PLAY BUTTON */}
+                <button
+                  className="pixel-btn play"
+                  onClick={(e) => {
+                    e.stopPropagation(); // unngår at hele kortet trigges
+                    openModal(g);
+                  }}
+                >
+                  Play
+                </button>
               </li>
+
               ))
             ) : (
               <p className="empty-msg">No games match your search.</p>

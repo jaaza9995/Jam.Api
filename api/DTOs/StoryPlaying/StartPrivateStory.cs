@@ -1,4 +1,4 @@
-using Jam.Models.Enums;
+using Jam.Api.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace Jam.Api.DTOs.StoryPlaying;

@@ -1,12 +1,12 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Jam.Models;
+using Jam.Api.Models;
+using Jam.Api.DTOs.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using Jam.DTOs;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace Jam.Api.Controllers;
 
@@ -81,7 +81,6 @@ public class AuthController : ControllerBase
     }
 
     // ---------------- JWT GENERATION ----------------
-    [AllowAnonymous]
     private async Task<string> GenerateJwtToken(AuthUser user)
     {
         var jwtKey = _config["Jwt:Key"]; // The secret key used for the signature
@@ -96,7 +95,7 @@ public class AuthController : ControllerBase
         var claims = new List<Claim>
         {
                 // Put user Id in "sub" to avoid inbound claim mapping overriding it with username
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserName!), // Subject of the token (used as NameIdentifier by default mapping)
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id), // Subject of the token (used as NameIdentifier by default mapping)
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName ?? string.Empty), // Username
                 new Claim(ClaimTypes.NameIdentifier, user.Id), // Explicit Id claim
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // Unique identifier for the token
@@ -108,7 +107,7 @@ public class AuthController : ControllerBase
         foreach (var userRole in userRoles)
         {
             // Use a simple "role" claim name so the token payload contains "role": "Admin"
-            claims.Add(new Claim("role", userRole, ClaimValueTypes.String)); 
+           claims.Add(new Claim("role", userRole));
         }
 
         var token = new JwtSecurityToken(

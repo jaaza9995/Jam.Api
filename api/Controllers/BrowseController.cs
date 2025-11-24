@@ -1,11 +1,10 @@
 using Jam.Api.DAL.StoryDAL;
-using Jam.Models;
+using Jam.Api.Models;
+using Jam.Api.DTOs.StoryPlaying;
+using Jam.Api.DTOs.Shared;
+using Jam.Api.DTOs.Story;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Jam.DTOs.JoinPrivateStoryRequestDto;
-using Jam.DTOs;
-
 
 namespace Jam.Api.Controllers;
 
@@ -102,7 +101,6 @@ public class BrowseController : ControllerBase
     // PUBLIC GAMES
     // --------------------------
     [HttpGet("public")]
-    [Authorize]
     public async Task<IActionResult> GetPublicGames()
     {
         try
@@ -139,7 +137,6 @@ public class BrowseController : ControllerBase
     // PRIVATE GAME BY CODE
     // --------------------------
     [HttpGet("private/{code}")]
-    [Authorize]
     public async Task<IActionResult> GetPrivateGame(string code)
     {
         try

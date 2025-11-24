@@ -1,5 +1,4 @@
-
-namespace Jam.DTOs;
+namespace Jam.Api.DTOs.Shared;
 
 public class ErrorDto
 {

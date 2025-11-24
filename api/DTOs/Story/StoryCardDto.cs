@@ -1,3 +1,5 @@
+namespace Jam.Api.DTOs.Story;
+
 public class StoryCardDto //keep
 {
     public int StoryId { get; set; }
@@ -6,5 +8,5 @@ public class StoryCardDto //keep
     public int QuestionCount { get; set; }
     public string DifficultyLevel { get; set; } = string.Empty;
     public string Accessibility { get; set; } = string.Empty;
-    public string Code { get; set; } = string.Empty;  // ✔ Viktig!
+    public string Code { get; set; } = string.Empty;  // Viktig!
 }

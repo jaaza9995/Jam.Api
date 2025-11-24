@@ -1,5 +1,4 @@
-
-namespace Jam.Models;
+namespace Jam.Api.Models;
 
 public class AnswerOption
 {

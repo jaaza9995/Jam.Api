@@ -63,7 +63,9 @@ useEffect(() => {
         >
           MAKE NEW GAME
         </button>
-        <button className="btn-bigHome add">ADD NEW GAME</button>
+        <button className="btn-bigHome add"
+        onClick={() => navigate("/browse")}
+        >ADD NEW GAME</button>
       </div>
 
       {/* ================= YOUR GAMES ================ */}
@@ -88,22 +90,22 @@ useEffect(() => {
 
                     {/* DIFFICULTY */}
                     <span className="difficulty"> 
-                      {(s.difficultyLevel === "Easy" || s.difficultyLevel === 0) && (
+                      {(s.difficultyLevel === 0) && (
                         <button className="difficulty easy">Easy</button>
                       )}  
 
-                      {(s.difficultyLevel === "Medium" || s.difficultyLevel === 1) && (
+                      {(s.difficultyLevel === 1) && (
                         <button className="difficulty medium">Medium</button>
                       )}  
 
-                      {(s.difficultyLevel === "Hard" || s.difficultyLevel === 2) && (
+                      {(s.difficultyLevel === 2) && (
                         <button className="difficulty hard">Hard</button>
                       )}  
                     </span>
                   </div>
 
                   {/* PRIVATE CODE */}
-                  {(s.accessibility === "Private" || s.accessibility === 1) && (
+                  {(s.accessibility === 1) && (
                     <p className="private-code">Game Code: {s.code}</p>
                   )}
                 </div>
@@ -112,14 +114,14 @@ useEffect(() => {
                 <div className="story-buttons">
                   <button
                     className="pixel-btn edit"
-                    onClick={() => navigate(`/play/${s.storyId}`)}
+                    onClick={() => navigate(`/edit/${s.storyId}`)}
                   >
                     EDIT
                   </button>
 
                   <button
                     className="pixel-btn play"
-                    onClick={() => navigate(`/edit/${s.storyId}/intro`)}
+                    onClick={() => navigate(`/play/${s.storyId}`)}
                   >
                     PLAY
                   </button>
@@ -152,21 +154,21 @@ useEffect(() => {
                     </span>
                     {/* DIFFICULTY */}
                     <span className="difficulty"> 
-                      {(s.difficultyLevel === "Easy" || s.difficultyLevel === 0) && (
+                      {(s.difficultyLevel === 0) && (
                         <button className="difficulty easy">Easy</button>
                       )}  
 
-                      {(s.difficultyLevel === "Medium" || s.difficultyLevel === 1) && (
+                      {(s.difficultyLevel === 1) && (
                         <button className="difficulty medium">Medium</button>
                       )}  
 
-                      {(s.difficultyLevel === "Hard" || s.difficultyLevel === 2) && (
+                      {(s.difficultyLevel === 2) && (
                         <button className="difficulty hard">Hard</button>
                       )}  
                     </span>
                   </div>
                   {/* PRIVATE CODE */}
-                  {(s.accessibility === "Private" || s.accessibility === 1) && (
+                  {(s.accessibility === 1) && (
                     <p className="private-code">Game Code: {s.code}</p>
                   )}
                 </div>

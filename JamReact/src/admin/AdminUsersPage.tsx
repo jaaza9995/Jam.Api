@@ -57,7 +57,6 @@ const AdminUsersPage: React.FC = () => {
 						<tr key={u.id}>
 							<td>{u.id.substring(0, 8)}...</td>
 							<td>{u.userName}</td>
-							<td>{u.email}</td>
 							<td>
 								{/* Vi implementerer sletting senere */}
 								<Button

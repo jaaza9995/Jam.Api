@@ -1,4 +1,4 @@
-using Jam.Models;
+using Jam.Api.Models;
 
 namespace Jam.Api.DAL.AnswerOptionDAL;
 

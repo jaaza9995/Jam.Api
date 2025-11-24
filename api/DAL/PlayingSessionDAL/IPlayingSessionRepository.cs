@@ -1,5 +1,5 @@
-using Jam.Models;
-using Jam.Models.Enums;
+using Jam.Api.Models;
+using Jam.Api.Models.Enums;
 
 namespace Jam.Api.DAL.PlayingSessionDAL;
 

@@ -1,6 +1,7 @@
-using Jam.Models;
-using Jam.Models.Enums;
+using Jam.Api.Models;
+using Jam.Api.Models.Enums;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Jam.Api.DAL;
 

@@ -1,4 +1,4 @@
-namespace Jam.Models.Enums;
+namespace Jam.Api.Models.Enums;
 
 public enum Accessibility
 {

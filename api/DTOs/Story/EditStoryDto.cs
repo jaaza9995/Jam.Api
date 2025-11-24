@@ -1,7 +1,7 @@
+using Jam.Api.Models.Enums;
 using System.ComponentModel.DataAnnotations; //keep
-using Jam.Models.Enums;
 
-namespace Jam.DTOs.StoryEditing;
+namespace Jam.Api.DTOs.Story;
 
 public class EditStoryDto
 {
