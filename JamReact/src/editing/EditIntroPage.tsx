@@ -276,14 +276,14 @@ if (!metaRes.ok) {
         <div className="nochanges-toast">No changes have been done</div>
       )}
 
-      <h1 className="edit-title">Edit Intro</h1>
+      <h1 className="title">Edit Intro</h1>
 
       {backendError && <p className="error-msg">{backendError}</p>}
 
       {/* TITLE */}
-      <label className="edit-label">Title</label>
+      <label className="input-label">Title</label>
       <input
-        className="pixel-input"
+        className="pixel-textarea"
         value={title}
         onChange={(e) => {
           setTitle(e.target.value);
@@ -293,9 +293,9 @@ if (!metaRes.ok) {
       {errors.title && <p className="error-msg">{errors.title}</p>}
 
       {/* DESCRIPTION */}
-      <label className="edit-label">Description</label>
+      <label className="input-label">Description</label>
       <textarea
-        className="pixel-input"
+        className="pixel-textarea"
         value={description}
         onChange={(e) => {
           setDescription(e.target.value);
@@ -304,10 +304,22 @@ if (!metaRes.ok) {
       />
       {errors.description && <p className="error-msg">{errors.description}</p>}
 
+        {/* INTRO TEXT */}
+      <label className="input-label">Introduction</label>
+      <textarea
+        className="pixel-textarea"
+        value={introText}
+        onChange={(e) => {
+          setIntroText(e.target.value);
+          setErrors((prev) => ({ ...prev, introText: "" }));
+        }}
+      />
+      {errors.introText && <p className="error-msg">{errors.introText}</p>}
+
       {/* DIFFICULTY */}
-      <label className="edit-label">Difficulty</label>
+      <label className="input-label">Difficulty</label>
       <select
-        className="pixel-input"
+        className="pixel-textarea"
         value={difficulty}
         onChange={(e) => setDifficulty(Number(e.target.value))}
       >
@@ -318,9 +330,9 @@ if (!metaRes.ok) {
       {errors.difficulty && <p className="error-msg">{errors.difficulty}</p>}
 
       {/* ACCESSIBILITY */}
-      <label className="edit-label">Accessibility</label>
+      <label className="input-label">Accessibility</label>
       <select
-        className="pixel-input"
+        className="pixel-textarea"
         value={accessibility}
         onChange={(e) => setAccessibility(Number(e.target.value))}
       >
@@ -329,25 +341,13 @@ if (!metaRes.ok) {
       </select>
       {errors.accessibility && <p className="error-msg">{errors.accessibility}</p>}
 
-      {/* INTRO TEXT */}
-      <label className="edit-label">Introduction</label>
-      <textarea
-        className="pixel-input edit-textarea"
-        value={introText}
-        onChange={(e) => {
-          setIntroText(e.target.value);
-          setErrors((prev) => ({ ...prev, introText: "" }));
-        }}
-      />
-      {errors.introText && <p className="error-msg">{errors.introText}</p>}
-
       <div className="edit-buttons">
-        <button className="pixel-btn teal" onClick={handleSave}>
-          Save Changes
+        <button className="pixel-btn pixel-btn-back" onClick={handleBack}>
+          Back
         </button>
 
-        <button className="pixel-btn blue" onClick={handleBack}>
-          Back
+        <button className="pixel-btn pixel-btn-saveChanges" onClick={handleSave}>
+          Save Changes
         </button>
       </div>
     </div>

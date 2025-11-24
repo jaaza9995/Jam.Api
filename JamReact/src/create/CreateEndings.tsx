@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useStoryCreation from "../storyCreation/StoryCreationContext";
-import { saveEndings, finishCreation } from "../storyCreation/StoryCreationService";
+import useStoryCreation from "./StoryCreationContext";
+import { saveEndings, finishCreation } from "./StoryCreationService";
 import { EndingDto, EndingErrors } from "../types/createStory";
 import { useToast } from "../shared/ToastContext";
 import { parseBackendErrors } from "../utils/parseBackendErrors";

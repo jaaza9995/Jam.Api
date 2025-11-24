@@ -125,7 +125,7 @@ if (!res.ok) {
           Edit Endings
         </button>
 
-        <button className="delete-btn"
+        <button className="pixel-btn-delete"
           onClick={() => setShowDeleteModal(true)}
         >
           Delete Game
@@ -135,7 +135,7 @@ if (!res.ok) {
     </div>
 
     {/* BACK KNAPP HELT NEDERST VENSTRE */}
-    <button className="pixel-btn blue back-btn"
+    <button className="pixel-btn  pixel-btn-back"
       onClick={() => navigate("/")}
     >
       Back to Home

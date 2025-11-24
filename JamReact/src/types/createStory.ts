@@ -2,11 +2,12 @@ export interface Story {
   storyId: number;
   title: string;
   description: string;
-  difficultyLevel: number;
+  difficultyLevel: number | string;
   accessibility: number | string;
   questionCount: number;
   code?: string;
   lastPlayed: string;
+  //userId: string;
 }
 export interface EndingDto {
   goodEnding: string;

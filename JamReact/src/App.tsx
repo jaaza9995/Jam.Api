@@ -9,7 +9,7 @@ import BrowsePage from "./browse/BrowsePage";
 import CreateIntro from "./create/CreateIntro";
 import CreateQuestions from "./create/CreateQuestions";
 import CreateEndings from "./create/CreateEndings";
-import { StoryCreationProvider } from "./storyCreation/StoryCreationContext";
+import { StoryCreationProvider } from "./create/StoryCreationContext";
 
 // EDIT
 import EditStoryPage from "./editing/EditStoryPage";

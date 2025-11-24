@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useStoryCreation from "../storyCreation/StoryCreationContext";
-import { saveIntro } from "../storyCreation/StoryCreationService";
+import useStoryCreation from "./StoryCreationContext";
+import { saveIntro } from "./StoryCreationService";
 import { IntroDto, IntroErrors } from "../types/createStory";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
 import FormErrorMessage from "../components/FormErrorMessage";

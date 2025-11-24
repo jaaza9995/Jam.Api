@@ -126,28 +126,36 @@ public class StoryCreationController : ControllerBase
         return Ok(session.QuestionScenes);
     }
 
-    [HttpPost("questions")]
-    public IActionResult SaveQuestions([FromBody] QuestionScenesPayload payload)
+   [HttpPost("questions")]
+public IActionResult SaveQuestions([FromBody] QuestionScenesPayload payload)
+{
+    if (!ModelState.IsValid)
+        return BadRequest(ModelState);
+
+    var session = HttpContext.Session.GetObject<StoryCreationSession>("CreateStory")
+                ?? new StoryCreationSession();
+
+    session.QuestionScenes = payload.QuestionScenes.Select(q => new QuestionSceneDto
     {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+        QuestionSceneId = q.QuestionSceneId,
+        StoryText = q.StoryText,
+        QuestionText = q.QuestionText,
+        CorrectAnswerIndex = q.CorrectAnswerIndex,
+        Answers = q.Answers
+    }).ToList();
 
-        var session = HttpContext.Session.GetObject<StoryCreationSession>("CreateStory")
-                    ?? new StoryCreationSession();
+    HttpContext.Session.SetObject("CreateStory", session);
 
-        session.QuestionScenes = payload.QuestionScenes.Select(q => new QuestionSceneDto
-        {
-            QuestionSceneId = q.QuestionSceneId,
-            StoryText = q.StoryText,
-            QuestionText = q.QuestionText,
-            CorrectAnswerIndex = q.CorrectAnswerIndex,
-            Answers = q.Answers
-        }).ToList();
+    // 🔥 Samme logikk som i HomeController, men uten per-question felt
+    var questionCount = session.QuestionScenes.Count;
 
-        HttpContext.Session.SetObject("CreateStory", session);
+    return Ok(new 
+    { 
+        message = "Questions saved.",
+        questionCount
+    });
+}
 
-        return Ok(new { message = "Questions saved." });
-    }
 
 
     // =====================================================================

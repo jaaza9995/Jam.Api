@@ -47,79 +47,6 @@ public class StoryPlayingController : ControllerBase
     // 1. STORY LIST / PRIVATE LOGIN
     // =====================================================================
 
-    [HttpGet("stories")]
-    public async Task<IActionResult> GetStories([FromQuery] string? search = null)
-    {
-        try
-        {
-            var publicStories = await _storyRepository.GetAllPublicStories();
-            var privateStories = await _storyRepository.GetAllPrivateStories();
-
-            if (!string.IsNullOrWhiteSpace(search))
-                publicStories = publicStories
-                    .Where(s => s.Title.Contains(search, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-
-            var dto = new StorySelectionDto
-            {
-                PublicStories = publicStories.Select(ToCardDto).ToList(),
-                PrivateStories = privateStories.Select(ToCardDto).ToList()
-            };
-
-            return Ok(dto);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error loading stories");
-            return StatusCode(500, new ErrorDto { ErrorTitle = "Error loading stories" });
-        }
-    }
-
-    private StoryCardDto ToCardDto(Story s) =>
-        new StoryCardDto
-        {
-            StoryId = s.StoryId,
-            Title = s.Title,
-            Description = s.Description,
-            QuestionCount = s.QuestionCount,
-            Accessibility = s.Accessibility.ToString(),
-            Code = s.Code ?? ""
-        };
-
-    [HttpPost("join")]
-    public async Task<IActionResult> JoinPrivateStory([FromBody] JoinPrivateStoryRequestDto model)
-    {
-         if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-            
-        if (string.IsNullOrWhiteSpace(model.Code))
-            return BadRequest(new ErrorDto { ErrorTitle = "Code required" });
-
-        try
-        {
-            var story = await _storyRepository.GetPrivateStoryByCode(
-                model.Code.Trim().ToUpper());
-
-            if (story == null)
-                return NotFound(new ErrorDto { ErrorTitle = "Invalid code" });
-
-            return Ok(new StoryCardDto
-            {
-                StoryId = story.StoryId,
-                Title = story.Title,
-                Description = story.Description,
-                QuestionCount = story.QuestionCount,
-                Accessibility = story.Accessibility.ToString(),
-                Code = story.Code ?? ""
-            });
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error joining private story");
-            return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to join story" });
-        }
-    }
-
     // =====================================================================
     // 2. START PLAYING
     // =====================================================================
@@ -353,19 +280,27 @@ public class StoryPlayingController : ControllerBase
     [HttpGet("calculate-ending/{sessionId}")]
     public async Task<IActionResult> CalculateEnding(int sessionId)
     {
-        var session = await _playingSessionRepository.GetPlayingSessionById(sessionId);
-        if (session == null)
-            return NotFound(new ErrorDto { ErrorTitle = "Session not found" });
-
-        int max = session.MaxScore;
-        int score = session.Score;
-
-        var ending = await GetEndingSceneAsync(session.StoryId, score, max);
-
-        return Ok(new CalculateEndingResponseDto
+        try
         {
-            EndingSceneId = ending.EndingSceneId
-        });
+            var session = await _playingSessionRepository.GetPlayingSessionById(sessionId);
+            if (session == null)
+                return NotFound(new ErrorDto { ErrorTitle = "Session not found" });
+
+            int max = session.MaxScore;
+            int score = session.Score;
+
+            var ending = await GetEndingSceneAsync(session.StoryId, score, max);
+
+            return Ok(new CalculateEndingResponseDto
+            {
+                EndingSceneId = ending.EndingSceneId
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[StoryPlayingController -> CalculateEnding] Failed for session {sessionId}", sessionId);
+            return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to calculate ending" });
+        }
     }
 
     private async Task<EndingScene> GetEndingSceneAsync(int storyId, int score, int max)
@@ -393,19 +328,27 @@ public class StoryPlayingController : ControllerBase
     [HttpGet("finish/{sessionId}")]
     public async Task<IActionResult> FinishStory(int sessionId)
     {
-        var session = await _playingSessionRepository.GetPlayingSessionById(sessionId);
-        if (session == null)
-            return NotFound(new ErrorDto { ErrorTitle = "Session not found" });
-
-        var story = await _storyRepository.GetStoryById(session.StoryId);
-        if (story == null)
-            return NotFound(new ErrorDto { ErrorTitle = "Story not found" });
-
-        return Ok(new FinishStoryDto
+        try
         {
-            StoryTitle = story.Title,
-            FinalScore = session.Score,
-            MaxScore = session.MaxScore
-        });
+            var session = await _playingSessionRepository.GetPlayingSessionById(sessionId);
+            if (session == null)
+                return NotFound(new ErrorDto { ErrorTitle = "Session not found" });
+
+            var story = await _storyRepository.GetStoryById(session.StoryId);
+            if (story == null)
+                return NotFound(new ErrorDto { ErrorTitle = "Story not found" });
+
+            return Ok(new FinishStoryDto
+            {
+                StoryTitle = story.Title,
+                FinalScore = session.Score,
+                MaxScore = session.MaxScore
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[StoryPlayingController -> FinishStory] Failed for session {sessionId}", sessionId);
+            return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to finish story" });
+        }
     }
 }

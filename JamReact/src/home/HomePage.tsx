@@ -3,6 +3,7 @@ import { useAuth } from "../auth/AuthContext";
 import "./HomePage.css";
 import { useNavigate } from "react-router-dom";
 import { Story } from "../types/createStory";
+import { fetchHomePageData } from "./homePageService";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -14,49 +15,44 @@ const HomePage: React.FC = () => {
   const [recentlyPlayed, setRecentlyPlayed] = useState<Story[]>([]);
   const [firstName, setFirstName] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
 useEffect(() => {
-  const fetchHomePage = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/home/homepage`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+  const load = async () => {
+    setLoading(true);
+    setError(null);
 
-      if (!response.ok) {
-        console.error("Home API error:", response.status);
-        return;
-      }
+    const { data, error } = await fetchHomePageData(token!);
 
-      const data = await response.json();
-      console.log("Home API data:", data);
-
-      setFirstName(data.firstName || "Player");
-      setStories(data.yourStories || []);
-     setRecentlyPlayed(
-        (data.recentlyPlayed || []).sort((a: Story, b: Story) =>
-          new Date(b.lastPlayed as any).getTime() -
-          new Date(a.lastPlayed as any).getTime()
-        )
-      );
-
-    } catch (error) {
-      console.error("Error loading homepage:", error);
-    } finally {
+    if (error || !data) {
+      setError(error ?? "Failed to load homepage.");
       setLoading(false);
+      return;
     }
+
+    setFirstName(data.firstName || "Player");
+    setStories(data.yourStories || []);
+
+    setRecentlyPlayed(
+      (data.recentlyPlayed || []).sort((a: Story, b: Story) =>
+        new Date(b.lastPlayed as any).getTime() -
+        new Date(a.lastPlayed as any).getTime()
+      )
+    );
+
+    setLoading(false);
   };
 
-  fetchHomePage();
+  load();
 }, [token]);
+
 
 
   return (
     <div className="homepage-container">
 
       <h1 className="homepage-title">WELCOME TO MATH UNIVERSE</h1>
+      {error && <p className="error-text">{error}</p>}
 
       <div className="homepage-buttons">
         <button

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useStoryCreation from "../storyCreation/StoryCreationContext";
-import { saveQuestions } from "../storyCreation/StoryCreationService";
+import useStoryCreation from "./StoryCreationContext";
+import { saveQuestions } from "./StoryCreationService";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
 import "../App.css";
 

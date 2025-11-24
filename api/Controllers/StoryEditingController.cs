@@ -42,19 +42,27 @@ public class StoryEditingController : ControllerBase
     [HttpGet("{storyId:int}")]
     public async Task<IActionResult> GetStoryForEdit(int storyId)
     {
-        var story = await _storyRepository.GetStoryById(storyId);
-        if (story == null)
-            return NotFound(new ErrorDto { ErrorTitle = "Story not found." });
-
-        return Ok(new EditStoryDto
+        try
         {
-            StoryId = story.StoryId,
-            Title = story.Title,
-            Description = story.Description,
-            DifficultyLevel = story.DifficultyLevel,
-            Accessibility = story.Accessibility,
-            Code = story.Code
-        });
+            var story = await _storyRepository.GetStoryById(storyId);
+            if (story == null)
+                return NotFound(new ErrorDto { ErrorTitle = "Story not found." });
+
+            return Ok(new EditStoryDto
+            {
+                StoryId = story.StoryId,
+                Title = story.Title,
+                Description = story.Description,
+                DifficultyLevel = story.DifficultyLevel,
+                Accessibility = story.Accessibility,
+                Code = story.Code
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[StoryEditingController -> GetStoryForEdit] Failed for storyId {storyId}", storyId);
+            return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to load story." });
+        }
     }
 
     [HttpPut("{storyId:int}")]
@@ -62,28 +70,36 @@ public class StoryEditingController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var story = await _storyRepository.GetStoryById(storyId);
-        if (story == null) 
-            return NotFound(new ErrorDto { ErrorTitle = "Story not found." });
-
-        story.Title = model.Title;
-        story.Description = model.Description;
-        story.DifficultyLevel = model.DifficultyLevel;
-
-        // If accessibility changed:
-        if (story.Accessibility != model.Accessibility)
+        try
         {
-            story.Code = (model.Accessibility == Accessibility.Private)
-                ? await _codeService.GenerateUniqueStoryCodeAsync()   // ← BRUK DEN HER!
-                : null;
+            var story = await _storyRepository.GetStoryById(storyId);
+            if (story == null) 
+                return NotFound(new ErrorDto { ErrorTitle = "Story not found." });
+
+            story.Title = model.Title;
+            story.Description = model.Description;
+            story.DifficultyLevel = model.DifficultyLevel;
+
+            // If accessibility changed:
+            if (story.Accessibility != model.Accessibility)
+            {
+                story.Code = (model.Accessibility == Accessibility.Private)
+                    ? await _codeService.GenerateUniqueStoryCodeAsync()
+                    : null;
+            }
+
+            story.Accessibility = model.Accessibility;
+
+            if (!await _storyRepository.UpdateStory(story))
+                return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to update story metadata." });
+
+            return Ok(new { message = "Story updated successfully." });
         }
-
-        story.Accessibility = model.Accessibility;
-
-        if (!await _storyRepository.UpdateStory(story))
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[StoryEditingController -> UpdateStory] Failed for storyId {storyId}", storyId);
             return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to update story metadata." });
-
-        return Ok(new { message = "Story updated successfully." });
+        }
     }
 
     // =====================================================================
@@ -157,33 +173,41 @@ public class StoryEditingController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        // 1. Delete scenes marked for deletion
-        var toDelete = model.Where(m => m.MarkedForDeletion && m.QuestionSceneId != 0).ToList();
-        foreach (var del in toDelete)
-            await _sceneRepository.DeleteQuestionScene(del.QuestionSceneId);
+        try
+        {
+            // 1. Delete scenes marked for deletion
+            var toDelete = model.Where(m => m.MarkedForDeletion && m.QuestionSceneId != 0).ToList();
+            foreach (var del in toDelete)
+                await _sceneRepository.DeleteQuestionScene(del.QuestionSceneId);
 
-        // 2. Create/update remaining scenes
-        var scenes = model
-            .Where(q => !q.MarkedForDeletion)
-            .Select(q => new QuestionScene
-            {
-                QuestionSceneId = q.QuestionSceneId,
-                StoryId = storyId,
-                SceneText = q.StoryText,
-                Question = q.QuestionText,
-                AnswerOptions = q.Answers.Select((a, idx) => new AnswerOption
+            // 2. Create/update remaining scenes
+            var scenes = model
+                .Where(q => !q.MarkedForDeletion)
+                .Select(q => new QuestionScene
                 {
-                    AnswerOptionId = a.AnswerOptionId,
-                    Answer = a.AnswerText,
-                    FeedbackText = a.ContextText,
-                    IsCorrect = idx == q.CorrectAnswerIndex
-                }).ToList()
-            }).ToList();
+                    QuestionSceneId = q.QuestionSceneId,
+                    StoryId = storyId,
+                    SceneText = q.StoryText,
+                    Question = q.QuestionText,
+                    AnswerOptions = q.Answers.Select((a, idx) => new AnswerOption
+                    {
+                        AnswerOptionId = a.AnswerOptionId,
+                        Answer = a.AnswerText,
+                        FeedbackText = a.ContextText,
+                        IsCorrect = idx == q.CorrectAnswerIndex
+                    }).ToList()
+                }).ToList();
 
-        if (!await _sceneRepository.UpdateQuestionScenes(scenes))
+            if (!await _sceneRepository.UpdateQuestionScenes(scenes))
+                return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to update question scenes." });
+
+            return Ok(new { message = "Questions updated successfully." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[StoryEditingController -> UpdateQuestions] Failed for storyId {storyId}", storyId);
             return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to update question scenes." });
-
-        return Ok(new { message = "Questions updated successfully." });
+        }
     }
 
     // =====================================================================
@@ -213,25 +237,33 @@ public class StoryEditingController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var endings = await _sceneRepository.GetEndingScenesByStoryId(storyId);
-        if (!endings.Any())
-            return NotFound(new ErrorDto { ErrorTitle = "Ending scenes not found." });
-
-        foreach (var e in endings)
+        try
         {
-            e.EndingText = e.EndingType switch
+            var endings = await _sceneRepository.GetEndingScenesByStoryId(storyId);
+            if (!endings.Any())
+                return NotFound(new ErrorDto { ErrorTitle = "Ending scenes not found." });
+
+            foreach (var e in endings)
             {
-                EndingType.Good => model.GoodEnding,
-                EndingType.Neutral => model.NeutralEnding,
-                EndingType.Bad => model.BadEnding,
-                _ => e.EndingText
-            };
+                e.EndingText = e.EndingType switch
+                {
+                    EndingType.Good => model.GoodEnding,
+                    EndingType.Neutral => model.NeutralEnding,
+                    EndingType.Bad => model.BadEnding,
+                    _ => e.EndingText
+                };
+            }
+
+            if (!await _sceneRepository.UpdateEndingScenes(endings))
+                return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to update endings." });
+
+            return Ok(new { message = "Endings updated successfully." });
         }
-
-        if (!await _sceneRepository.UpdateEndingScenes(endings))
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[StoryEditingController -> UpdateEndings] Failed for storyId {storyId}", storyId);
             return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to update endings." });
-
-        return Ok(new { message = "Endings updated successfully." });
+        }
     }
 
     // =====================================================================
@@ -241,9 +273,17 @@ public class StoryEditingController : ControllerBase
     [HttpDelete("{storyId:int}")]
     public async Task<IActionResult> DeleteStory(int storyId)
     {
-        if (!await _storyRepository.DeleteStory(storyId))
-            return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to delete story." });
+        try
+        {
+            if (!await _storyRepository.DeleteStory(storyId))
+                return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to delete story." });
 
-        return Ok(new { message = "Story deleted successfully." });
+            return Ok(new { message = "Story deleted successfully." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[StoryEditingController -> DeleteStory] Failed for storyId {storyId}", storyId);
+            return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to delete story." });
+        }
     }
 }

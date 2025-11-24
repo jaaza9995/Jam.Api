@@ -3,6 +3,10 @@ import { useAuth } from "../auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 import PlayConfirmModal from "../shared/PlayConfirmModal";
 import "./BrowsePage.css";
+import "../App.css"
+import { StoryCard } from "../types/storyCard";
+import { fetchPublicStories, fetchPrivateStory } from "./BrowsePageService";
+
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -10,14 +14,15 @@ const BrowsePage: React.FC = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
 
-  const [publicGames, setPublicGames] = useState<any[]>([]);
+  const [publicGames, setPublicGames] = useState<StoryCard[]>([]);
   const [publicSearch, setPublicSearch] = useState("");
 
   const [privateCode, setPrivateCode] = useState("");
-  const [privateMatch, setPrivateMatch] = useState<any>(null);
+  const [privateMatch, setPrivateMatch] = useState<StoryCard | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const [showModal, setShowModal] = useState(false);
-  const [selectedGame, setSelectedGame] = useState<any>(null);
+  const [selectedGame, setSelectedGame] = useState<StoryCard | null>(null);
 
   const openModal = (game: any) => {
     setSelectedGame(game);
@@ -30,70 +35,57 @@ const BrowsePage: React.FC = () => {
   };
 
   const confirmPlay = () => {
-    navigate(`/play/${selectedGame.storyId}`);
+    navigate(`/play/${selectedGame!.storyId}`);
   };
 
   // ---------------------------
   // FETCH PUBLIC GAMES
   // ---------------------------
-  useEffect(() => {
-    const fetchPublic = async () => {
-      try {
-        const res = await fetch(`${API_URL}/api/browse/public`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!res.ok) return;
-
-        const data = await res.json();
-        setPublicGames(data || []);
-      } catch (e) {
-        console.error("Error loading public games", e);
-      }
-    };
-
-    fetchPublic();
-  }, [token]);
+useEffect(() => {
+  const load = async () => {
+    setError(null);
+    const { data, error } = await fetchPublicStories(token!);
+    if (error) {
+      setError(error);
+    }
+    setPublicGames(data ?? []);
+  };
+  load();
+}, [token]);
 
   // ---------------------------
   // PUBLIC SEARCH
   // ---------------------------
-  const filtered = publicGames.filter((g: any) => {
-    const title = (g?.title || "").toLowerCase();
-    return title.includes(publicSearch.toLowerCase());
-  });
+  const filtered = publicGames.filter((g: StoryCard) => {
+  const title = g.title.toLowerCase();
+  return title.includes(publicSearch.toLowerCase());
+});
 
   // ---------------------------
   // PRIVATE CODE SEARCH
   // ---------------------------
-  const handlePrivateSearch = async () => {
-    if (!privateCode.trim()) return;
+const handlePrivateSearch = async () => {
+  if (!privateCode.trim()) return;
 
-    const res = await fetch(`${API_URL}/api/browse/private/${privateCode}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  setError(null);
+  const { data, error } = await fetchPrivateStory(token!, privateCode);
+  
+  if (data) {
+    setPrivateMatch(data);
+    openModal(data);
+  } else {
+    setError(error ?? "No game found with this code.");
+    setPrivateMatch(null);
+  }
+};
 
-    if (res.ok) {
-      const game = await res.json();
-      setPrivateMatch(game);
-      openModal(game);
-    } else {
-      alert("No game found with this code.");
-      setPrivateMatch(null);
-    }
-  };
 
   return (
     <div className="browse-container">
       <h1 className="browse-title">Find a Game</h1>
 
       <div className="browse-sections">
+        {error && <p className="error-text">{error}</p>}
 
         {/* PUBLIC GAMES */}
         <div className="browse-block">
@@ -109,14 +101,21 @@ const BrowsePage: React.FC = () => {
           <ul className="browse-list">
             {filtered.length > 0 ? (
               filtered.map((g) => (
-                <li
-                  key={g.storyId}
-                  className="browse-card"
-                  onClick={() => openModal(g)}
-                >
-                  <h3>{g.title}</h3>
-                  <p>{g.description}</p>
-                </li>
+               <li
+                key={g.storyId}
+                className="browse-card"
+                onClick={() => openModal(g)}
+              >
+                <h3>{g.title}</h3>
+                <p>{g.description}</p>
+
+                {/* NEW: show difficulty, accessibility, question count */}
+                <div className="browse-meta">
+                  <p><strong>Questions:</strong> {g.questionCount}</p>
+                  <p><strong>Difficulty:</strong> {g.difficultyLevel}</p>
+                  <p><strong>Accessibility:</strong> {g.accessibility}</p>
+                </div>
+              </li>
               ))
             ) : (
               <p className="empty-msg">No games match your search.</p>
@@ -139,7 +138,9 @@ const BrowsePage: React.FC = () => {
             Search
           </button>
         </div>
+        
       </div>
+      
 
       {/* MODAL */}
       <PlayConfirmModal
@@ -148,7 +149,16 @@ const BrowsePage: React.FC = () => {
         onConfirm={confirmPlay}
         onCancel={closeModal}
       />
-    </div>
+     {/* BACK KNAPP HELT NEDERST VENSTRE */}
+    <button className="pixel-btn pixel-btn-back"
+      onClick={() => navigate("/")}
+    >
+      Back to Home
+    </button>
+
+  </div>
+
+    
   );
 };
 
