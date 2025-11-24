@@ -81,7 +81,6 @@ public class AuthController : ControllerBase
     }
 
     // ---------------- JWT GENERATION ----------------
-    [AllowAnonymous]
     private async Task<string> GenerateJwtToken(AuthUser user)
     {
         var jwtKey = _config["Jwt:Key"]; // The secret key used for the signature
@@ -108,7 +107,7 @@ public class AuthController : ControllerBase
         foreach (var userRole in userRoles)
         {
             // Use a simple "role" claim name so the token payload contains "role": "Admin"
-            claims.Add(new Claim("role", userRole, ClaimValueTypes.String)); 
+           claims.Add(new Claim("role", userRole));
         }
 
         var token = new JwtSecurityToken(

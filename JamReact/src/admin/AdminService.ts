@@ -5,7 +5,8 @@ import { StoryDataDto } from "../types/admin";
 const API_URL = import.meta.env.VITE_API_URL;
 
 const getAuthHeaders = () => {
-	const token = localStorage.getItem("token");
+	// Token is stored in sessionStorage (not localStorage) in AuthContext
+	const token = sessionStorage.getItem("token") || localStorage.getItem("token");
 	const headers: HeadersInit = {
 		"Content-Type": "application/json",
 	};

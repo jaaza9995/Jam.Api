@@ -61,7 +61,9 @@ useEffect(() => {
         >
           MAKE NEW GAME
         </button>
-        <button className="btn-bigHome add">ADD NEW GAME</button>
+        <button className="btn-bigHome add"
+        onClick={() => navigate("/browse")}
+        >ADD NEW GAME</button>
       </div>
 
       {/* ================= YOUR GAMES ================ */}
@@ -110,14 +112,14 @@ useEffect(() => {
                 <div className="story-buttons">
                   <button
                     className="pixel-btn edit"
-                    onClick={() => navigate(`/play/${s.storyId}`)}
+                    onClick={() => navigate(`/edit/${s.storyId}`)}
                   >
                     EDIT
                   </button>
 
                   <button
                     className="pixel-btn play"
-                    onClick={() => navigate(`/edit/${s.storyId}/intro`)}
+                    onClick={() => navigate(`/play/${s.storyId}`)}
                   >
                     PLAY
                   </button>

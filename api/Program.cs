@@ -153,6 +153,44 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Ensure Admin role/user exists (idempotent, no data reset)
+async Task EnsureAdminUserAsync(WebApplication app)
+{
+    using var scope = app.Services.CreateScope();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AuthUser>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+    const string adminRole = "Admin";
+    const string adminUserName = "AdminUser";
+    const string adminPassword = "AdminPassword123!";
+
+    if (!await roleManager.RoleExistsAsync(adminRole))
+    {
+        await roleManager.CreateAsync(new IdentityRole(adminRole));
+    }
+
+    var admin = await userManager.FindByNameAsync(adminUserName);
+    if (admin == null)
+    {
+        admin = new AuthUser
+        {
+            UserName = adminUserName,
+            EmailConfirmed = true
+        };
+        var createResult = await userManager.CreateAsync(admin, adminPassword);
+        if (!createResult.Succeeded)
+        {
+            throw new InvalidOperationException($"Could not create admin user: {string.Join(", ", createResult.Errors.Select(e => e.Description))}");
+        }
+    }
+
+    if (!await userManager.IsInRoleAsync(admin, adminRole))
+    {
+        await userManager.AddToRoleAsync(admin, adminRole);
+    }
+}
+
+await EnsureAdminUserAsync(app);
 
 app.UseStaticFiles();
 
