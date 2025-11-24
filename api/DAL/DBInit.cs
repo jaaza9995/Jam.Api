@@ -1,9 +1,8 @@
-using Microsoft.EntityFrameworkCore;
 using Jam.Models;
 using Jam.Models.Enums;
 using Microsoft.AspNetCore.Identity;
 
-namespace Jam.DAL;
+namespace Jam.Api.DAL;
 
 public static class DBInit
 {
@@ -348,20 +347,20 @@ public static class DBInit
             {
                 StartTime = DateTime.Now.AddMinutes(-8),
                 EndTime = DateTime.Now,
-                Score = 25,
-                MaxScore = 40,
+                Score = 20,
+                MaxScore = 20,
                 CurrentLevel = 3,
-                CurrentSceneId = neutralEnding.EndingSceneId,
+                CurrentSceneId = goodEnding.EndingSceneId,
                 CurrentSceneType = SceneType.Ending,
-                Story = stories[1],
+                Story = stories[0],
                 UserId = barry!.Id,
             };
 
             var smithyPlayingSession = new PlayingSession
             {
                 StartTime = DateTime.Now.AddMinutes(-15),
-                Score = 10,
-                MaxScore = 40,
+                Score = 5,
+                MaxScore = 20,
                 CurrentLevel = 3,
                 CurrentSceneId = questionScene2.QuestionSceneId,
                 CurrentSceneType = SceneType.Question,

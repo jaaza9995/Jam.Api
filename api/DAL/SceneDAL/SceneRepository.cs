@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Jam.Models;
 using Jam.Models.Enums;
 
-namespace Jam.DAL.SceneDAL;
+namespace Jam.Api.DAL.SceneDAL;
 
 // Might want to consider avoiding logging entire EF entities
 // Consider adding AsNoTracking() to read-only queries for performance boost
@@ -28,7 +28,7 @@ public class SceneRepository : ISceneRepository
 
     // --------------------------------- INTRO SCENE ---------------------------------
 
-  
+
     public async Task<IntroScene?> GetIntroSceneByStoryId(int storyId)
     {
         if (storyId <= 0)
@@ -275,9 +275,9 @@ public class SceneRepository : ISceneRepository
 
         try
         {
-             var questionScene = await _db.QuestionScenes
-                .AsNoTracking()
-                .FirstOrDefaultAsync(q => q.QuestionSceneId == questionSceneId);
+            var questionScene = await _db.QuestionScenes
+               .AsNoTracking()
+               .FirstOrDefaultAsync(q => q.QuestionSceneId == questionSceneId);
 
             if (questionScene == null)
             {
@@ -289,6 +289,36 @@ public class SceneRepository : ISceneRepository
         catch (Exception e)
         {
             _logger.LogError(e, "[SceneRepository -> GetQuestionSceneById] Error retrieving QuestionScene with id {questionSceneId}", questionSceneId);
+            return null;
+        }
+    }
+
+    public async Task<QuestionScene?> GetNextQuestionSceneById(int currentQuestionSceneId)
+    {
+        if (currentQuestionSceneId <= 0)
+        {
+            _logger.LogWarning("[SceneRepository -> GetQuestionSceneById] Invalid QuestionSceneId provided: {currentQuestionSceneId}", currentQuestionSceneId);
+            return null;
+        }
+
+        try
+        {
+            var currentScene = await _db.QuestionScenes
+                .AsNoTracking()
+                .Include(q => q.NextQuestionScene)
+                .FirstOrDefaultAsync(q => q.QuestionSceneId == currentQuestionSceneId);
+
+            if (currentScene == null)
+            {
+                _logger.LogWarning("[SceneRepository -> GetNextQuestionScene] Current QuestionScene with id {currentQuestionSceneId} not found.", currentQuestionSceneId);
+                return null;
+            }
+
+            return currentScene.NextQuestionScene;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[SceneRepository -> GetNextQuestionSceneById] Error retrieving next QuestionScene with id {currentQuestionSceneId}", currentQuestionSceneId);
             return null;
         }
     }
@@ -575,9 +605,9 @@ public class SceneRepository : ISceneRepository
 
         try
         {
-           var ending = await _db.EndingScenes
-            .AsNoTracking()
-            .FirstOrDefaultAsync(e => e.EndingSceneId == endingSceneId);
+            var ending = await _db.EndingScenes
+             .AsNoTracking()
+             .FirstOrDefaultAsync(e => e.EndingSceneId == endingSceneId);
 
             if (ending == null)
             {

@@ -1,7 +1,7 @@
 
 using Jam.Models.Enums;
 
-namespace Jam.DTOs.StoryPlaying;
+namespace Jam.Api.DTOs.StoryPlaying;
 
 public class AnswerFeedbackDto
 {

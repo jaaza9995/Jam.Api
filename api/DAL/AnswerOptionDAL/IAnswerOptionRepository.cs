@@ -1,6 +1,6 @@
 using Jam.Models;
 
-namespace Jam.DAL.AnswerOptionDAL;
+namespace Jam.Api.DAL.AnswerOptionDAL;
 
 public interface IAnswerOptionRepository
 {

@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Jam.Models;
 using Jam.Models.Enums;
 
-namespace Jam.DAL.StoryDAL;
+namespace Jam.Api.DAL.StoryDAL;
 
 // Consider adding AsNoTracking where appropriate for read-only queries
 // to improve performance by disabling change tracking 
@@ -28,9 +28,7 @@ public class StoryRepository : IStoryRepository
     {
         try
         {
-            return await _db.Stories
-                //.Include(s => s.User) // eager load owner
-                .ToListAsync();
+            return await _db.Stories.ToListAsync();
         }
         catch (Exception e)
         {
