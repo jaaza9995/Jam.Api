@@ -1,6 +1,6 @@
 using Jam.Models;
 
-namespace Jam.DAL.StoryDAL;
+namespace Jam.Api.DAL.StoryDAL;
 
 public interface IStoryRepository
 {

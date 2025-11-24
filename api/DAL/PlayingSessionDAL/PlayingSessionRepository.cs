@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Jam.Models.Enums;
 using Jam.Models;
 
-namespace Jam.DAL.PlayingSessionDAL;
+namespace Jam.Api.DAL.PlayingSessionDAL;
 
 // Consider adding AsNoTracking() to read-only queries for performance boost
 
@@ -26,10 +26,7 @@ public class PlayingSessionRepository : IPlayingSessionRepository
     {
         try
         {
-            return await _db.PlayingSessions
-                //.Include(s => s.User) // eager load player
-                //.Include(s => s.Story) // eager load story
-                .ToListAsync();
+            return await _db.PlayingSessions.ToListAsync();
         }
         catch (Exception e)
         {
@@ -196,26 +193,25 @@ public class PlayingSessionRepository : IPlayingSessionRepository
     // --------------------------------------- Update ---------------------------------------
 
     // When user goes from IntroScene to first QuestionScene
-    public async Task<bool> MoveToNextScene(int playingSessionId, int nextSceneId, SceneType newSceneType)
+    public async Task<bool> TransitionFromIntroToFirstQuestion(int playingSessionId, int nextSceneId, SceneType newSceneType)
     {
         if (playingSessionId <= 0 || nextSceneId <= 0)
         {
-            _logger.LogWarning("[PlayingSessionRepository -> MoveToNextScene] Invalid playingSessionId: {playingSessionId} or nextSceneId: {nextSceneId}", playingSessionId, nextSceneId);
+            _logger.LogWarning("[PlayingSessionRepository -> TransitionFromIntroToFirstQuestion] Invalid playingSessionId: {playingSessionId} or nextSceneId: {nextSceneId}", playingSessionId, nextSceneId);
             return false;
         }
 
         if (newSceneType != SceneType.Question)
         {
-            _logger.LogWarning("[PlayingSessionRepository -> MoveToNextScene] Invalid sceneType: {sceneType} for nextSceneId: {nextSceneId}", newSceneType, nextSceneId);
+            _logger.LogWarning("[PlayingSessionRepository -> TransitionFromIntroToFirstQuestion] Invalid sceneType: {sceneType} for nextSceneId: {nextSceneId}", newSceneType, nextSceneId);
             return false;
         }
 
         return await UpdateSessionProgressAsync(playingSessionId, nextSceneId, newSceneType); // private method (see below)
     }
 
-    // When user goes from a QuestionScene to another QuestionScene, or
-    // when user goes from the last QuestionScene to an EndingScene
-    public async Task<bool> AnswerQuestion(int playingSessionId, int nextSceneId, SceneType newSceneType, int newScore, int newLevel)
+    // When user goes from a QuestionScene to another QuestionScene
+    public async Task<bool> AnswerQuestion(int playingSessionId, int? nextSceneId, SceneType newSceneType, int newScore, int newLevel)
     {
         if (playingSessionId <= 0 || nextSceneId <= 0)
         {
@@ -293,9 +289,13 @@ public class PlayingSessionRepository : IPlayingSessionRepository
             if (newCurrentLevel.HasValue)
                 session.CurrentLevel = newCurrentLevel.Value;
 
-            // If nextSceneId is null, the game has ended
-            if (nextSceneId == null)
+            // Set EndTime if:
+            // 1. The scene type is ENDING (Successful End of a PlayingSession), OR
+            // 2. There is no next scene ID (Level 1 Loss / user experiences 'Game Over')
+            if (newSceneType == SceneType.Ending || nextSceneId == null)
+            {
                 session.EndTime = DateTime.UtcNow;
+            }
 
             await _db.SaveChangesAsync();
             return true;

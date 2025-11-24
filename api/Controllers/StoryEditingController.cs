@@ -1,6 +1,6 @@
-using Jam.DAL.AnswerOptionDAL;
-using Jam.DAL.SceneDAL;
-using Jam.DAL.StoryDAL;
+using Jam.Api.DAL.AnswerOptionDAL;
+using Jam.Api.DAL.SceneDAL;
+using Jam.Api.DAL.StoryDAL;
 using Jam.DTOs;
 using Jam.DTOs.StoryEditing;
 using Jam.Models;
@@ -8,7 +8,7 @@ using Jam.Models.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Jam.DAL;
+using Jam.Api.DAL;
 
 namespace Jam.Api.Controllers;
 

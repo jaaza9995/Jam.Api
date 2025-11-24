@@ -1,17 +1,19 @@
-using Jam.DAL.AnswerOptionDAL;
-using Jam.DAL.PlayingSessionDAL;
-using Jam.DAL.SceneDAL;
-using Jam.DAL.StoryDAL;
+using Jam.Api.DAL.AnswerOptionDAL;
+using Jam.Api.DAL.PlayingSessionDAL;
+using Jam.Api.DAL.SceneDAL;
+using Jam.Api.DAL.StoryDAL;
 using Jam.DTOs;
 using Jam.Models;
 using Jam.Models.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Jam.DTOs.StoryPlaying;
+using Jam.Api.DTOs.StoryPlaying;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Jam.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class StoryPlayingController : ControllerBase
@@ -92,9 +94,9 @@ public class StoryPlayingController : ControllerBase
         }
     }
 
-    // ============================================================
-    // 2. Start / confirm playing session
-    // ============================================================
+    // ==================================================================================
+    // 2. Start Story, begin PlayingSession
+    // ==================================================================================
 
     [HttpPost("start/{storyId}")]
     public async Task<IActionResult> StartStory(int storyId, [FromBody] StartPrivateStoryDto? model = null)
@@ -104,13 +106,7 @@ public class StoryPlayingController : ControllerBase
             // 1. Get UserId
             var userId = GetCurrentUserId();
 
-            if (string.IsNullOrEmpty(userId))
-            {
-                // Dette skal teknisk sett ikke skje hvis [Authorize] er på, 
-                // men det er en god sjekk.
-                return Unauthorized(new ErrorDto { ErrorTitle = "User not authenticated." });
-            }
-
+            // 2. Get Story and validate access
             var story = await _storyRepository.GetStoryById(storyId);
             if (story == null)
                 return NotFound(new ErrorDto { ErrorTitle = "Story not found" });
@@ -121,7 +117,8 @@ public class StoryPlayingController : ControllerBase
                     return BadRequest(new ErrorDto { ErrorTitle = "Invalid code" });
             }
 
-            var session = await BeginPlayingSessionAsync(story, userId);
+            // 3. Begin PlayingSession with private method
+            var session = await BeginPlayingSessionAsync(story, userId!);
 
             return Ok(new
             {
@@ -145,7 +142,7 @@ public class StoryPlayingController : ControllerBase
             ?? throw new Exception("IntroScene missing");
 
         var amountOfQuestions = await _storyRepository.GetAmountOfQuestionsForStory(story.StoryId) ?? 0;
-        var maxScore = Math.Max(amountOfQuestions * 10, 0);
+        var maxScore = Math.Max(amountOfQuestions * 5, 0);
 
         var session = new PlayingSession
         {
@@ -170,9 +167,9 @@ public class StoryPlayingController : ControllerBase
         return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     }
 
-    // ============================================================
+    // ==================================================================================
     // 3. Play Scene
-    // ============================================================
+    // ==================================================================================
 
     [HttpGet("scene")]
     public async Task<IActionResult> GetScene(int sceneId, SceneType sceneType, int sessionId)
@@ -222,6 +219,28 @@ public class StoryPlayingController : ControllerBase
                 dto.NextSceneAfterIntroId = firstQuestionScene?.QuestionSceneId;
             }
 
+            // --- TRANSITION LOGIC: Intro -> First QuestionScene ---
+            // Criterion 1: Are we entering a QuestionScene?
+            if (sceneType == SceneType.Question)
+            {
+                // Criterion 2: Check if PlayingSession in DB still points to IntroScene.
+                // (This indicates that this is the first time we are retrieving QuestionScene data)
+                if (session.CurrentSceneType == SceneType.Intro)
+                {
+                    // Update PlayingSession in DB
+                    bool success = await _playingSessionRepository.TransitionFromIntroToFirstQuestion(
+                        sessionId,
+                        sceneId,
+                        SceneType.Question
+                    );
+
+                    if (!success)
+                    {
+                        _logger.LogWarning("Failed to update session progress (Intro -> Q) for SessionId: {sessionId}", sessionId);
+                    }
+                }
+            }
+
             return Ok(dto);
         }
         catch (Exception e)
@@ -262,9 +281,9 @@ public class StoryPlayingController : ControllerBase
         }
     }
 
-    // ============================================================
+    // ==================================================================================
     // 4. Answer feedback and transitions
-    // ============================================================
+    // ==================================================================================
 
     [HttpPost("answer")]
     public async Task<IActionResult> SubmitAnswer([FromBody] AnswerFeedbackDto model)
@@ -286,18 +305,61 @@ public class StoryPlayingController : ControllerBase
                 ? Math.Min(session.CurrentLevel + 1, 3)
                 : Math.Max(session.CurrentLevel - 1, 1);
 
+            // Get the next QuestionScene
+            int currentQuestionSceneId = session.CurrentSceneId.GetValueOrDefault();
+            var nextScene = await _sceneRepository.GetNextQuestionSceneById(currentQuestionSceneId);
+
+            int? nextSceneId = nextScene?.QuestionSceneId; // can be null if it is the last QuestionScene
+            SceneType nextSceneType = nextScene != null ? SceneType.Question : SceneType.Ending;
+
+            // 4. Håndtering av Game Over (Level 1 Fail)
             if (!isCorrect && session.CurrentLevel == 1)
             {
+                // Vi trenger ikke å oppdatere nextSceneId/Type i DB, kun FinishSession
                 await _playingSessionRepository.FinishSession(model.SessionId, newScore, newLevel);
                 await _storyRepository.IncrementFailed(session.StoryId);
                 return Ok(new { message = "Game over", score = newScore });
             }
 
+            if (!nextSceneId.HasValue) // Vi er på siste QuestionScene -> Skal til EndingScene
+            {
+                // 1. Beregn hvilken Ending Scene ID brukeren får basert på poeng
+                var finalEndingScene = await GetEndingSceneAsync(session.StoryId, newScore, session.MaxScore);
+
+                if (finalEndingScene != null)
+                {
+                    nextSceneId = finalEndingScene.EndingSceneId; // Sett den FAKTISKE Ending Scene ID-en
+                    nextSceneType = SceneType.Ending; // Sikkerhetssteg, men burde være satt
+                    await _storyRepository.IncrementFinished(session.StoryId);
+                }
+                else
+                {
+                    // Feil: Finner ikke sluttscenen, logg og returner feil.
+                    _logger.LogError("Could not find an appropriate ending scene for story {StoryId} at score {Score}.", session.StoryId, newScore);
+                    return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to fin the right ending scene." });
+                }
+            }
+
+            // 5. Oppdater PlayingSession i databasen (flytter fremgang)
+            if (nextSceneId.HasValue)
+            {
+                await _playingSessionRepository.AnswerQuestion(
+                    model.SessionId,
+                    nextSceneId,        // has either QuestionSceneId or EndingSceneId
+                    nextSceneType,      // has either Question or Ending as SceneType
+                    newScore,
+                    newLevel
+                );
+            }
+
+            // 6. Returner Feedback til Frontend (Inkluderer neste scene for å trigge fetchScene)
             var feedback = new AnswerFeedbackDto
             {
                 SceneText = selectedAnswer.FeedbackText,
                 NewScore = newScore,
-                NewLevel = newLevel
+                NewLevel = newLevel,
+                NextSceneId = nextSceneId,
+                NextSceneType = nextSceneType
             };
 
             return Ok(feedback);
@@ -313,32 +375,7 @@ public class StoryPlayingController : ControllerBase
         level switch { 3 => 5, 2 => 3, 1 => 1, _ => 0 };
 
 
-
-    // ============================================================
-    // 5. Get EndingScene
-    // ============================================================
-
-    [HttpGet("calculate-ending/{sessionId}")]
-    public async Task<IActionResult> CalculateEnding(int sessionId)
-    {
-        var session = await _playingSessionRepository.GetPlayingSessionById(sessionId);
-        if (session == null)
-            return NotFound(new ErrorDto { ErrorTitle = "Session not found" });
-
-        // Hent MaxScore (du må sørge for at MaxScore er tilgjengelig, enten i session eller Story)
-        int maxScore = session.MaxScore; // Antar den er lagret i PlayingSession
-
-        // Bruk din eksisterende logikk til å velge EndingScene (implementert privat i Controller/Service)
-        var finalEndingScene = await GetEndingSceneAsync(session.StoryId, session.Score, maxScore);
-
-        // VIKTIG: Lagre den valgte ID-en i databasen for å låse resultatet.
-        //await _playingSessionRepository.SetFinalEndingScene(sessionId, finalEndingScene.EndingSceneId);
-
-        // Returner kun ID-en til Frontend
-        return Ok(new CalculateEndingResponseDto { EndingSceneId = finalEndingScene.EndingSceneId });
-    }
-
-    // Private method to decide which Ending Scene the user sees at the end of the story
+    // Private method to calculate the appropriate EndingScene based on score percentage
     private async Task<EndingScene?> GetEndingSceneAsync(int storyId, int score, int maxScore)
     {
         if (maxScore <= 0)
@@ -348,8 +385,8 @@ public class StoryPlayingController : ControllerBase
 
         EndingScene? endingScene = percentage switch
         {
-            >= 80 => await _sceneRepository.GetGoodEndingSceneByStoryId(storyId),
-            >= 40 => await _sceneRepository.GetNeutralEndingSceneByStoryId(storyId),
+            >= 70 => await _sceneRepository.GetGoodEndingSceneByStoryId(storyId),
+            >= 20 => await _sceneRepository.GetNeutralEndingSceneByStoryId(storyId),
             _ => await _sceneRepository.GetBadEndingSceneByStoryId(storyId)
         };
 
@@ -357,42 +394,5 @@ public class StoryPlayingController : ControllerBase
             throw new InvalidOperationException($"No ending scene found for story {storyId} (score {score}/{maxScore}).");
 
         return endingScene;
-    }
-
-
-
-
-
-    // ============================================================
-    // 6. Finish story
-    // ============================================================
-
-    [HttpGet("finish/{sessionId:int}")]
-    public async Task<IActionResult> FinishStory(int sessionId)
-    {
-        try
-        {
-            var session = await _playingSessionRepository.GetPlayingSessionById(sessionId);
-            if (session == null)
-                return NotFound(new ErrorDto { ErrorTitle = "Session not found" });
-
-            var story = await _storyRepository.GetStoryById(session.StoryId);
-            if (story == null)
-                return NotFound(new ErrorDto { ErrorTitle = "Story not found" });
-
-            var dto = new FinishStoryDto
-            {
-                StoryTitle = story.Title,
-                FinalScore = session.Score,
-                MaxScore = session.MaxScore
-            };
-
-            return Ok(dto);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error finishing story");
-            return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to finish story" });
-        }
     }
 }

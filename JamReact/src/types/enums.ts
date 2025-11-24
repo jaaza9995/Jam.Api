@@ -1,4 +1,3 @@
-
 export enum DifficultyLevel {
     Easy = 0,
     Medium = 1,
@@ -20,4 +19,4 @@ export enum EndingType {
     Good = 0,
     Neutral = 1,
     Bad = 2
-} 
+}

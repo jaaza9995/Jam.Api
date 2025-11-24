@@ -1,6 +1,6 @@
 using Jam.Models;
 
-namespace Jam.DTOs.StoryPlaying;
+namespace Jam.Api.DTOs.StoryPlaying;
 
 public class StorySelectionDto
 {

@@ -1,28 +1,15 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { IPlayScene } from "./PlayScene";
-import { IAnswerFeedback } from "./AnswerFeedback";
-import { IStartSessionResponse } from "./StartSessionResponse";
-import { ICalculateEndingResponse } from "./CalculateEndingResponse";
-import { SceneType } from "./enums";
-import { AnswerOption } from "./AnswerOption";
-import { IErrorDto } from "./ErrorDto";
-
-const API_URL = import.meta.env.VITE_API_URL;
-
-const getAuthHeaders = () => {
-	const token = localStorage.getItem("token");
-	const headers: HeadersInit = {
-		"Content-Type": "application/json",
-	};
-	if (token) {
-		headers["Authorization"] = `Bearer ${token}`;
-	}
-	return headers;
-};
-
-interface StoryPlayerProps {
-	storyId: number;
-}
+import { useParams } from "react-router-dom";
+import { IPlayScene } from "../types/storyPlaying";
+import { SceneType } from "../types/enums";
+import { AnswerOption } from "../types/answerOption";
+import { useNavigate } from "react-router-dom";
+import {
+	startSession as startSessionService,
+	fetchScene as fetchSceneService,
+	submitAnswer as submitAnswerService,
+	AnswerResult,
+} from "./StoryPlayingService";
 
 interface SessionState {
 	sessionId: number | null;
@@ -32,16 +19,27 @@ interface SessionState {
 	level: number;
 }
 
-export const StoryPlayer: React.FC<StoryPlayerProps> = ({
-	storyId,
-}: StoryPlayerProps) => {
+export const StoryPlayer: React.FC = () => {
+
+    // --- NY LOGIKK: Hente ID internt ---
+    const { storyId } = useParams<{ storyId: string }>();
+
+    // Konvertere streng til tall
+    const storyIdNumber = parseInt(storyId || "0", 10); 
+    
+    // Initial validitetssjekk
+    if (!storyIdNumber) {
+        return <div>Feil: Story ID missing or invalid.</div>;
+    }
+    // --- SLUTT PÅ NY LOGIKK ---
+
 	// 1. Game State (keys for API-call)
 	const [session, setSession] = useState<SessionState>({
 		sessionId: null,
 		currentSceneId: null,
 		currentSceneType: null,
 		score: 0,
-		level: 3, // user always starts at level 3
+		level: 3,
 	});
 
 	// 2. Data for the current scene (the content to be displayed)
@@ -53,34 +51,38 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
 
-	// 4. Temporary state to display the feedback text after user has chosen an AnswerOption
+	// 4. User's chosen AnswerOption
+	const [selectedOption, setSelectedOption] = useState<AnswerOption | null>(
+		null
+	);
+
+	// 5. Temporary state to display the feedback text after user has chosen an AnswerOption
 	const [feedbackText, setFeedbackText] = useState<string | null>(null);
 
-	// 5. Condition to mark that the game is finished
+	// 6. Condition to mark that the game is finished
 	const [isGameOver, setIsGameOver] = useState<boolean>(false);
 
-	// 6. Ref to prevent double calls in Strict Mode (NEW)
+	// 7. Ref to prevent double calls in Strict Mode
 	const sessionStarted = useRef(false);
 
-	// Denne funksjonen må nå ta inn state-verdier som avhengigheter hvis de brukes.
+	const [nextSceneKeys, setNextSceneKeys] = useState<{
+		id: number | null;
+		type: SceneType | null;
+	} | null>(null);
+
+	const navigate = useNavigate();
+
+	// Function to start a new game session
 	const startSession = useCallback(async () => {
-		// Sjekk om økten allerede har startet (ekstra sikkerhet, men useRef fikser problemet i useEffect)
+		// Check if the session has already started (extra security, but useRef fixes the problem in useEffect)
 		if (session.sessionId) return;
 
 		setIsLoading(true);
 		setError(null);
 
 		try {
-			const response = await fetch(
-				`${API_URL}/api/StoryPlaying/start/${storyId}`,
-				{
-					method: "POST",
-					headers: getAuthHeaders(),
-				}
-			);
-			// ... (resten av logikken er den samme) ...
-
-			const data: IStartSessionResponse = await response.json();
+			// Call the service layer
+			const data = await startSessionService(storyIdNumber);
 
 			setSession((prev: SessionState) => ({
 				...prev,
@@ -93,22 +95,72 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
 		} finally {
 			setIsLoading(false);
 		}
-	}, [storyId, session.sessionId]); // Avhengigheter: storyId og session.sessionId (for sjekken)
+	}, [storyId, session.sessionId]);
 
-	// --- useEffect 1: Starter spillet (Kjører én gang) ---
-	useEffect(() => {
-		// Sikrer at vi har en storyId og at vi ikke har kjørt startSession før
-		if (storyId && !sessionStarted.current) {
-			sessionStarted.current = true; // Setter flagget til true FØR vi kaller funksjonen
-			startSession(); // Kaller funksjonen som setter sessionId i state
+    // Function to start the first QuestionScene after the IntroScene
+	const startFirstQuestion = () => {
+		// Checks if we have data and are in the IntroScene
+		if (!currentSceneData || currentSceneData.sceneType !== SceneType.Intro)
+			return;
+
+		// Get the ID provided by the API
+		const nextId = currentSceneData.nextSceneAfterIntroId;
+
+		if (!nextId) {
+			setError("Unable to start the game, story is incomplete.");
+			console.error(
+				"DEVELOPER ERROR: First question ID (nextSceneAfterIntroId) was missing after IntroScene."
+			);
+			return;
 		}
 
-		// Denne avhenger av storyId, session.sessionId (hvis den skal sjekkes i useCallback) og startSession
+		// Updates state: This automatically triggers fetchScene via useEffect
+		setSession((prev: SessionState) => ({
+			...prev,
+			currentSceneId: nextId,
+			currentSceneType: SceneType.Question as SceneType,
+		}));
+	};
+
+	// Function to navigate to the next scene after feedback
+	const goToNextScene = () => {
+		if (
+			!nextSceneKeys ||
+			nextSceneKeys.id === null ||
+			nextSceneKeys.type === null
+		) {
+			setError("Unable to continue the game. Game progress is broken.");
+			console.error(
+				"DEVELOPER ERROR: Next Scene ID/Type missing after successful response."
+			);
+			return;
+		}
+
+		// Reset feedback and navigation keys
+		setFeedbackText(null);
+		setSelectedOption(null);
+		setNextSceneKeys(null);
+
+		// Set new session to trigger fetchScene
+		setSession((prev: SessionState) => ({
+			...prev,
+			currentSceneId: nextSceneKeys.id,
+			currentSceneType: nextSceneKeys.type,
+		}));
+	};
+
+	// --- useEffect 1: Starts the game (runs once) ---
+	useEffect(() => {
+		// Ensures we have a storyId and that we haven't run startSession before
+		if (storyId && !sessionStarted.current) {
+			sessionStarted.current = true;
+			startSession();
+		}
 	}, [storyId, startSession]);
 
-	// --- useEffect 2: Henter sceneinnhold (Kjører ved endring i scenenøkler) ---
+	// --- useEffect 2: Gets scene content (runs on change in scene keys) ---
 	useEffect(() => {
-		// Kjører kun hvis ALLE nøklene er satt (som de blir av startSession)
+		// Only runs if all keys are set (as they are by startSession)
 		if (
 			session.sessionId &&
 			session.currentSceneId !== null &&
@@ -116,8 +168,6 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
 		) {
 			fetchScene(session.currentSceneId, session.currentSceneType);
 		}
-
-		// Avhengigheter: Dette er nøklene som trigger henting av ny scene
 	}, [session.sessionId, session.currentSceneId, session.currentSceneType]);
 
 	// Function to retrieve scene data (called internally in useEffect)
@@ -125,6 +175,7 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
 		sceneId: number | null,
 		sceneType: SceneType | null
 	) => {
+		// 1. Input validation checks state
 		if (
 			sceneId === null ||
 			sceneId === undefined ||
@@ -141,24 +192,14 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
 		setFeedbackText(null); // Hide feedback when loading new scene
 
 		try {
-			// API-call: /api/StoryPlaying/scene?sceneId=X&sceneType=Y&sessionId=Z
-			const response = await fetch(
-				`${API_URL}/api/StoryPlaying/scene?sceneId=${sceneId}&sceneType=${sceneType}&sessionId=${session.sessionId}`,
-				{
-					method: "GET",
-					headers: getAuthHeaders(),
-				}
+			// 2. Call the service layer
+			const data = await fetchSceneService(
+				sceneId,
+				sceneType,
+				session.sessionId
 			);
 
-			if (!response.ok) {
-				// If the error is JSON formatted, read it for better message
-				const errorBody: IErrorDto = await response.json();
-				throw new Error(errorBody.errorTitle || "Error loading scene.");
-			}
-
-			const data: IPlayScene = await response.json();
-
-			// Update the state with scene data
+			// 3. Update the state with scene data
 			setCurrentSceneData(data);
 
 			// Check if this is an EndingScene
@@ -180,134 +221,81 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
 			return;
 		}
 
+		if (
+			!selectedAnswer ||
+			selectedAnswer.answerOptionId === undefined ||
+			selectedAnswer.answerOptionId === null
+		) {
+			setError("Cannot submit answer: Answer ID is missing.");
+			return;
+		}
+		const answerId = selectedAnswer.answerOptionId;
+
 		setIsLoading(true);
 		setError(null);
 
 		try {
-			// API-call: POST /api/StoryPlaying/answer
-			const response = await fetch(`${API_URL}/api/StoryPlaying/answer`, {
-				method: "POST",
-				headers: getAuthHeaders(),
-				body: JSON.stringify({
-					// What the API expects in AnswerFeedbackDto
-					sessionId: session.sessionId,
-					selectedAnswerId: selectedAnswer.answerOptionId,
-				}),
-			});
+			// Call the service layer
+			const result: AnswerResult = await submitAnswerService(
+				session.sessionId,
+				answerId
+			);
 
-			if (!response.ok) {
-				// Handle Game Over on Level 1, which returns a special message
-				if (response.status === 200) {
-					// Check if the Game Over response was sent as Ok(200)
-					const gameOverResponse = await response.json();
-					if (gameOverResponse.message === "Game over") {
-						setIsGameOver(true);
-						// Update the final score, even if the game is over
-						setSession((prev: SessionState) => ({
-							...prev,
-							score: gameOverResponse.score,
-							currentSceneId: null,
-							currentSceneType: null,
-						}));
-						setIsLoading(false);
-						return;
-					}
-				}
+			// --- Handle Game Over (Loss) ---
+			if (result.type === "Game Over") {
+				setIsGameOver(true);
+				setCurrentSceneData(null);
+				const gameOverScore = result.score;
 
-				const errorBody: IErrorDto = await response.json();
-				throw new Error(
-					errorBody.errorTitle || "Error sending response."
-				);
+				setSession((prev: SessionState) => ({
+					...prev,
+					score: gameOverScore,
+					currentSceneId: null,
+					currentSceneType: null,
+				}));
+
+				// We're done, stop further processing
+				setIsLoading(false);
+				return;
 			}
 
-			const feedback: IAnswerFeedback = await response.json();
+			// --- Handle standard feedback(result.type === 'Feedback') ---
+			const feedback = result.feedback;
 
-			// First: Display the feedback text for AnswerOption
-			setFeedbackText(feedback.sceneText);
-
-			// Update score and level
+			// 1. Update score and level
 			setSession((prev: SessionState) => ({
 				...prev,
 				score: feedback.newScore,
 				level: feedback.newLevel,
 			}));
 
-			// Vent litt (f.eks. 2 sekunder) før du går til neste scene for å vise feedback
-			setTimeout(() => {
-				// Logikk for å sjekke om vi skal fortsette, avslutte eller fullføre
-				if (!feedback.nextSceneId) {
-					// Dette betyr at vi er ferdige med QuestionScenene, og skal til EndingScene (eller Game Over, som er håndtert over)
-					handleFinishStory(); // Kaller funksjonen for å fullføre og vise EndingScene
-					return;
-				}
+			// 2. Update currentSceneData with the keys for the next scene
+			setCurrentSceneData((prevData) => {
+				if (!prevData) return null;
+				return {
+					...prevData,
+					nextSceneId: feedback.nextSceneId,
+					nextSceneType: feedback.nextSceneType,
+				};
+			});
 
-				// Sett ny scene-ID og type i state (dette trigger fetchScene via useEffect)
-				setSession((prev: SessionState) => ({
-					...prev,
-					currentSceneId: feedback.nextSceneId,
-					currentSceneType: feedback.nextSceneType,
-				}));
-			}, 2000); // 2000ms for å vise feedback
+			// 3. Save the navigation keys for the next scene
+			setNextSceneKeys({
+				id: feedback.nextSceneId,
+				type: feedback.nextSceneType,
+			});
+
+			// 4. Show the feedback text/scene and stop loading
+			setFeedbackText(feedback.sceneText);
+
+			// 5. Set timer to see if we need to call handleFinishStory
+			setTimeout(() => {}, 2000);
 		} catch (e: any) {
+			// Catches errors (4xx/5xx) thrown from the service layer
 			setError(e.message);
+		} finally {
 			setIsLoading(false);
 		}
-	};
-
-	// Funksjon for å beregne og laste EndingScene ID
-	const handleFinishStory = async () => {
-		if (!session.sessionId) return;
-
-		setIsLoading(true);
-		setError(null);
-		setFeedbackText(null);
-
-		try {
-			// 1. API-kall: GET /calculate-ending/{sessionId}
-			// Backend velger, lagrer (i DB) og returnerer ID-en til sluttscenen.
-			const response = await fetch(
-				`${API_URL}/api/StoryPlaying/calculate-ending/${session.sessionId}`
-			);
-
-			if (!response.ok) {
-				throw new Error("Error calculating final ending.");
-			}
-
-			const finishData: ICalculateEndingResponse = await response.json();
-
-			// 2. Sett state til å hente den faktiske EndingScene dataen
-			setSession((prev: SessionState) => ({
-				...prev,
-				currentSceneId: finishData.endingSceneId, // Bruk ID fra responsen
-				currentSceneType: SceneType.Ending as SceneType,
-			}));
-
-			// useEffect vil trigge fetchScene(EndingSceneId, 'Ending')
-		} catch (e: any) {
-			setError(e.message);
-			setIsLoading(false);
-		}
-	};
-
-	const startFirstQuestion = () => {
-		// Sjekker om vi har data og er i IntroScene
-		if (!currentSceneData || currentSceneData.sceneType !== SceneType.Intro)
-			return;
-
-		// Henter ID-en som nå er levert av API'et
-		const nextId = currentSceneData.nextSceneAfterIntroId;
-
-		if (!nextId) {
-			setError("Kan ikke starte: Første spørsmålsmanglet ID fra API.");
-			return;
-		}
-
-		// Oppdaterer state: Dette trigger automatisk fetchScene via useEffect
-		setSession((prev: SessionState) => ({
-			...prev,
-			currentSceneId: nextId,
-			currentSceneType: SceneType.Question as SceneType,
-		}));
 	};
 
 	// --- Return ---
@@ -316,34 +304,39 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
 			{isLoading && <p>Loading...</p>}
 			{error && <p className="error">Error: {error}</p>}
 
-			{isGameOver && currentSceneData && (
-				<div className="game-over">
-					{/* Bruk scenetittel hvis tilgjengelig, ellers en generell melding */}
-					{/*<h2>{currentSceneData.title || "The Story Ends!"}</h2>*/}
-					<h2>{"The Story Ends!"}</h2>
-
-					<p className="ending-text">{currentSceneData.sceneText}</p>
-
-					<p>
-						Your final score: {session.score} of{" "}
-						{currentSceneData.maxScore || "N/A"}
-					</p>
-
-					{/* Legg til en Start New Game-knapp */}
-					<button onClick={() => window.location.reload()}>
-						Start New Game
-					</button>
+			{isGameOver && (
+				<div className="game-status-container">
+					{/* If currentSceneData IS NULL (at Level 1 loss), show loss */}
+					{!currentSceneData ? (
+						<div className="game-over-loss">
+							<h2>Game Over, You Lost!</h2>
+							<p>Your final score: {session.score}</p>
+							<button onClick={() => navigate("/")}>
+								Return Home
+							</button>
+						</div>
+					) : (
+						// If currentSceneData is set (this is EndingScene), show ending
+						<div className="game-finished">
+							<h2>Ending</h2>{" "}
+							<p className="ending-text">
+								{currentSceneData.sceneText}
+							</p>
+							<p>
+								Your final score: {session.score} of{" "}
+								{currentSceneData.maxScore || "N/A"}
+							</p>
+							<button onClick={() => navigate("/")}>
+								Return Home
+							</button>
+						</div>
+					)}
 				</div>
 			)}
 
-			{/* Vis selve spillet HVIS IKKE Game Over */}
+			{/* Show scne if not Game Over */}
 			{!isLoading && !error && !isGameOver && currentSceneData && (
 				<div className="scene-container">
-					{/* Viser den midlertidige feedbackteksten etter et svar */}
-					{feedbackText && (
-						<p className="feedback-text">{feedbackText}</p>
-					)}
-
 					<p>
 						Level: {session.level} | Score: {session.score} /{" "}
 						{currentSceneData.maxScore}
@@ -361,41 +354,74 @@ export const StoryPlayer: React.FC<StoryPlayerProps> = ({
 									!currentSceneData.nextSceneAfterIntroId
 								}
 							>
-								Start Spillet
+								Next
 							</button>
 						</div>
 					)}
 
 					{currentSceneData.sceneType === SceneType.Question && (
-						<div>
-							<h3>{currentSceneData.question}</h3>
-							<p>{currentSceneData.sceneText}</p>
+						<div className="question-scene-container">
+							{/* Check if we should show the 'feedback window' or the 'question window' */}
+							{feedbackText ? (
+								// --- 1. SHOW FEEDBACK AND CONTINUE BUTTON ---
+								<div className="feedback-view">
+									<p className="feedback-text">
+										{feedbackText}
+									</p>
 
-							<div className="answer-options">
-								{currentSceneData.answerOptions?.map(
-									(option) => (
-										<button
-											key={option.answerOptionId}
-											onClick={() => handleAnswer(option)}
-											disabled={!!feedbackText}
-										>
-											{option.answer}
-										</button>
-									)
-								)}
-							</div>
+									<button
+										onClick={goToNextScene}
+										disabled={isLoading}
+									>
+										Next
+									</button>
+								</div>
+							) : (
+								// --- 2. SHOW QUESTION, ANSWER OPTIONS AND SEND BUTTON ---
+								<div>
+									<h3>{currentSceneData.sceneText}</h3>
+									<p>{currentSceneData.question}</p>
+
+									<div className="answer-options">
+										{currentSceneData.answerOptions?.map(
+											(option) => (
+												<button
+													key={option.answerOptionId}
+													onClick={() =>
+														setSelectedOption(
+															option
+														)
+													}
+													className={
+														selectedOption?.answerOptionId ===
+														option.answerOptionId
+															? "selected-answer"
+															: ""
+													}
+													disabled={isLoading}
+												>
+													{option.answer}
+												</button>
+											)
+										)}
+									</div>
+
+									{/* Send Reply button calls handleAnswer */}
+									<button
+										onClick={() => {
+											if (selectedOption) {
+												handleAnswer(selectedOption);
+												setSelectedOption(null);
+											}
+										}}
+										disabled={!selectedOption || isLoading}
+									>
+										Send Answer
+									</button>
+								</div>
+							)}
 						</div>
 					)}
-
-					{/* 2. FJERNES: Denne sjekken er nå redundant og skaper konflikt.
-                {currentSceneData.sceneType === "Ending" && (
-                    <div>
-                        <h3>The game is finished!</h3>
-                        <p>{currentSceneData.sceneText}</p>
-                        ...
-                    </div>
-                )}
-                */}
 				</div>
 			)}
 		</div>

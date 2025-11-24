@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Jam.Models;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
-namespace Jam.DAL;
+namespace Jam.Api.DAL;
 
 public class StoryDbContext : DbContext
 {
@@ -23,28 +22,7 @@ public class StoryDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         // ==========================================================================
-        // 1. USER RELATIONSHIPS (Preserve content, break link by setting FK to NULL)
-        //    Requires Story.UserId and PlayingSession.UserId to be nullable (int?)
-        // ==========================================================================
-
-        // User -> Story: If a User is deleted, their Stories remain, but the Story.UserId is set to NULL
-        //modelBuilder.Entity<Story>()
-        //    .HasOne(s => s.User)
-        //    .WithMany(u => u.Stories)
-        //    .HasForeignKey(s => s.UserId)
-        //    .OnDelete(DeleteBehavior.SetNull);
-
-        // User -> PlayingSession: If a User is deleted, the sessions remain, but PlayingSession.UserId is set to NULL
-        //modelBuilder.Entity<PlayingSession>()
-        //    .HasOne(ps => ps.User)
-        //    .WithMany(u => u.PlayingSessions)
-        //    .HasForeignKey(ps => ps.UserId)
-        //    .OnDelete(DeleteBehavior.SetNull);
-
-
-
-        // ==========================================================================
-        // 2. STORY STRUCTURE RELATIONSHIPS (Cascade Delete for Dependent Content)
+        // 1. STORY STRUCTURE RELATIONSHIPS (Cascade Delete for Dependent Content)
         //    If the principal entity is deleted, all dependent entities are deleted
         // ==========================================================================
 
@@ -83,7 +61,7 @@ public class StoryDbContext : DbContext
 
 
         // ==========================================================================
-        // 3. Question SCENE NAVIGATION RELATIONSHIPS (Restrict Deletion to Preserve Integrity)
+        // 2. Question SCENE NAVIGATION RELATIONSHIPS (Restrict Deletion to Preserve Integrity)
         //    If a QuestionScene being referenced is deleted, the referencing Scene's 
         //    NextQuestionSceneId must be manually set to NULL beforehand
         // ==========================================================================
@@ -107,6 +85,5 @@ public class StoryDbContext : DbContext
             .WithOne(ao => ao.QuestionScene)
             .HasForeignKey(ao => ao.QuestionSceneId)
             .OnDelete(DeleteBehavior.Cascade);
-
     }
 }

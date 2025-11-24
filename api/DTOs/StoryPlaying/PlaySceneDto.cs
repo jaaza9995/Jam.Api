@@ -1,8 +1,7 @@
 using Jam.Models;
 using Jam.Models.Enums;
-using System.ComponentModel.DataAnnotations;
 
-namespace Jam.DTOs.StoryPlaying;
+namespace Jam.Api.DTOs.StoryPlaying;
 
 public class PlaySceneDto
 {
@@ -27,5 +26,4 @@ public class PlaySceneDto
     public int CurrentScore { get; set; }
     public int MaxScore { get; set; }
     public int CurrentLevel { get; set; }
-
 }

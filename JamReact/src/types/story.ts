@@ -6,4 +6,5 @@ export interface Story {
   accessibility: number | string;
   questionCount: number;
   code?: string;
+  userId: string;
 }
