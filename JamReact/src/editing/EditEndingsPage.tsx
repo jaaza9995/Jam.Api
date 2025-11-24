@@ -184,7 +184,7 @@ if (!res.ok) {
       <div className="ending-block">
         <h3 className="ending-label">GOOD ENDING</h3>
         <textarea
-          className="pixel-input ending-input"
+          className="input-area"
           value={good}
           onChange={(e) => setGood(e.target.value)}
         />
@@ -195,7 +195,7 @@ if (!res.ok) {
       <div className="ending-block">
         <h3 className="ending-label">NEUTRAL ENDING</h3>
         <textarea
-          className="pixel-input ending-input"
+          className="input-area"
           value={neutral}
           onChange={(e) => setNeutral(e.target.value)}
         />
@@ -206,7 +206,7 @@ if (!res.ok) {
       <div className="ending-block">
         <h3 className="ending-label">BAD ENDING</h3>
         <textarea
-          className="pixel-input ending-input"
+          className="input-area"
           value={bad}
           onChange={(e) => setBad(e.target.value)}
         />

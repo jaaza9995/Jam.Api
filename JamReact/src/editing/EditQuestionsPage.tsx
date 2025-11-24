@@ -387,7 +387,7 @@ const handleSave = async () => {
           {/* STORY CONTEXT */}
           <h3 className="question-label">STORY CONTEXT</h3>
           <textarea
-            className="pixel-input"
+            className="input-area"
             value={q.storyText}
             onChange={(e) => {
               const updated = [...questions];
@@ -404,7 +404,7 @@ const handleSave = async () => {
           {/* QUESTION */}
           <h3 className="question-label">QUESTION</h3>
           <textarea
-            className="pixel-input"
+            className="input-area"
             value={q.questionText}
             onChange={(e) => {
               const updated = [...questions];
@@ -424,7 +424,7 @@ const handleSave = async () => {
           {q.answers.map((a, idx) => (
             <div className="answer-row" key={idx}>
               <input
-                className="pixel-input"
+                className="input-area"
                 value={a.answerText}
                 onChange={(e) => {
                   const updated = [...questions];
@@ -468,7 +468,7 @@ const handleSave = async () => {
           {q.answers.map((a, idx) => (
             <textarea
               key={idx}
-              className="pixel-input"
+              className="input-area"
               value={a.contextText}
               onChange={(e) => {
                 const updated = [...questions];

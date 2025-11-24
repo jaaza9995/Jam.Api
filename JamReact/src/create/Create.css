@@ -1,0 +1,12 @@
+.create-form {
+  margin-inline: 15%;
+  max-width: none;
+  min-width: none;
+}
+
+.nav-buttons {
+  display: flex;
+  justify-content:center;
+  gap: 30%;
+  margin-top: 50px;
+}

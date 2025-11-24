@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../auth/AuthContext";
-import "./HomePage.css";
 import { useNavigate } from "react-router-dom";
 import { Story } from "../types/createStory";
 import { fetchHomePageData } from "./homePageService";
+
+import "./HomePage.css";
+import "../shared/StoryCard.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -51,7 +53,7 @@ useEffect(() => {
   return (
     <div className="pixel-bg">
 
-      <h1 className="homepage-title">WELCOME TO MATH UNIVERSE</h1>
+      <h1 className="title">WELCOME TO MATH UNIVERSE</h1>
       {error && <p className="error-text">{error}</p>}
 
       <div className="homepage-buttons">

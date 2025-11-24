@@ -15,7 +15,7 @@ body {
   padding: 0;
 }
 
-/* 🚀 IMPORTANT FIX — fjern padding som lager hvite felt */
+/*fjern padding som lager hvite felt */
 #root {
   max-width: 100%;
   margin: 0;
@@ -30,11 +30,9 @@ body {
   width: 100%;
   padding: 40px;
   text-align: center;
-
 }
 
 .title {
-  margin-bottom: 60px;  /* øk etter behov */
   color: #7ad3ff;
   font-size: 50px;
   margin-top: 40px;
@@ -56,13 +54,11 @@ body {
 }
 
 .delete { background: #cf1313; }
-.cancel { background: #646cff; }
+.back { background: #6b6b97; }
 .play { background: #ba1ddd; }
 .edit { background: #2fcea4; }
-.next { background: #4c9df3; }
-
-.back{ background: #ff72d0;}
-.addQuestion{ background-color: #FF8C00;}
+.next { background: #a502c6; }
+.addQuestion{ background: #FF8C00;}
 
 /* usikker på om dette brukes:*/
 .wide-btn { width: 300px; }
@@ -111,41 +107,10 @@ h1, h2, h3 {
   color: var(--secondary-color) !important;
 }
 
-/* =========================================================
-   GLOBAL FORM ELEMENTS (used in Create + Edit modes) jara
-   ========================================================= */
-
-/* Page titles for form pages */
-.pixel-title,
-.form-title {
-  color: var(--primary-color);
-  font-size: 32px;
-  text-align: center;
-  margin-bottom: 30px;
-  letter-spacing: 2px;
-}
-
-/* Form labels */
-.input-label,
-.question-label,
-.ending-label {
-  color: var(--secondary-color);
-  margin-bottom: 10px;
-  margin-top: 20px;
-  font-size: 20px;
-  display: block;
-}
-.ending-label {
-  margin-top: 50px;
-}
+/* CREATE:*/
 
 /* Inputs, textareas, selects */
-.pixel-input,
-.pixel-textarea,
-.pixel-select,
-.pixel-input-small,
-.ending-input, 
-.pixel-input-answer {
+.input-area, .select-dropdown {
   width: 100%;
   background-color: var(--card-bg);
   border: 2px solid white;
@@ -155,24 +120,26 @@ h1, h2, h3 {
   font-family: 'Press Start 2P', monospace;
   font-size: 12px;
   resize: vertical;
-}
-
-.pixel-input-small {
-  width: 70%;
-}
-.ending-block{
-  margin-bottom: 100px;
-}
-
-
-.pixel-textarea,
-.ending-input {
-  min-height: 110px;
   white-space: pre-wrap;
   word-wrap: break-word;
 }
 
-.pixel-select {
+.longer-box { min-height: 110px; }
+.smaller-box { width: 70%;}
+
+.input-label {
+  color: var(--secondary-color);
+  margin-bottom: 10px;
+  margin-top: 20px;
+  font-size: 20px;
+  display: block;
+}
+
+.dropdown-wrapper {
+  position: relative;
+}
+
+.select-dropdown {
   appearance: none;           /* fjerner default pil */
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -183,145 +150,14 @@ h1, h2, h3 {
   padding-right: 40px;        /* plass til egen pil */
 }
 
-/* Custom pixel arrow */
-.pixel-select::after {
+.dropdown-wrapper::after {
   content: "▼";
-  font-size: 12px;
   color: var(--primary-color);
   position: absolute;
   right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   pointer-events: none;
 }
 
-/* Error message (global) */
-.error-msg {
-  color: #ff4f79;
-  background: rgba(255, 79, 121, 0.15);
-  padding: 6px 10px;
-  border-left: 4px solid #ff4f79;
-  border-radius: 2px;
-  font-size: 10px;
-  margin-bottom: 12px;
-  line-height: 1.4;
-  max-width: 420px;
-  font-family: 'Press Start 2P', monospace;
-}
 
-/* Shared button rows for forms */
-.form-button-row,
-.button-row,
-.ending-buttons {
-  display: flex;
-  justify-content:center;
-  gap: 80%;
-  margin-top: 50px;
-
-}
-  
-.pixel-btn-back {
-  background: var(--back-btn);   /* rosa */
-  color: #000;
-  font-size: 18px;
-}
-
-.pixel-btn-back:hover {
-  filter: drop-shadow(0 0 0.8rem var(--back-btn));
-}
-
-
-.pixel-btn-next {
-  background: var(--next-btn);   /* grønn/turkis */
-  color: #000;
-  font-size: 18px;
-}
-
-.pixel-btn-next:hover {
-  filter: drop-shadow(0 0 0.8rem var(--next-btn));
-}
-.pixel-btn-saveChanges {
-  background: var(--next-btn);   /* grønn/turkis */
-  color: #000;
-  font-size: 18px;
-}
-
-.pixel-btn-saveChanges:hover {
-  filter: drop-shadow(0 0 0.8rem var(--next-btn));
-}
-
-.pixel-btn-finish {
-  background: var(--finish-btn);   /* grønn/turkis */
-  color: #000;
-  font-size: 18px;
-}
-
-.pixel-btn-finish:hover {
-  filter: drop-shadow(0 0 0.8rem var(--finish-btn));
-}
-
-.pixel-btn-delete {
-  background: var(--delete-btn);   /* rød */
-  color: #000;
-  font-size: 15px;
-  display: block;
-  margin-right: auto; /* ← skyver den til venstre */
-  margin-left: 0;     /* sikkerhetslinje */
-  margin-top: 50px;
-  width: fit-content; 
-}
-
-.pixel-btn-delete:hover {
-  filter: drop-shadow(0 0 0.8rem var(--delete-btn));
-}
-
-.pixel-btn-addQuestion {
-  background: var(--addQuestion-btn);   /* rosa */
-  color: #000;
-  font-size: 15px;
-  color: #000;
-  display: block;
-  margin-right: 0; /* ← skyver den til venstre */
-  margin-left: auto;     /* sikkerhetslinje */
-  margin-top: 40px;
-  margin-bottom: 60px;
-  width: fit-content; 
-}
-
-.pixel-btn-addQuestion:hover {
-  filter: drop-shadow(0 0 0.8rem var(--addQuestion-btn));
-}
-
-
-.answer-row {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 15px;
-}
-
-.answer-row .pixel-input-small {
-  flex: 1;  /* gjør dem like brede */
-}
-
-.correct-btn {
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  background: #444;
-  border: 2px solid white;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.correct-btn.selected {
-  background: var(--secondary-color);
-}
-
-
-.question-box{
-  border: 2px solid #ffffff44; /* semi-transparent hvit */
-  border-radius: 12px;
-  padding: 25px;
-  margin-bottom: 40px;
-  background-color: #180a42;
-}

@@ -5,7 +5,7 @@ import { saveIntro } from "./StoryCreationService";
 import { IntroDto, IntroErrors } from "../types/createStory";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
 import FormErrorMessage from "../components/FormErrorMessage";
-import "../App.css";
+import "./Create.css";
 
 const CreateIntro: React.FC = () => {
   const navigate = useNavigate();
@@ -88,14 +88,12 @@ const handleNext = async () => {
 
   return (
     <div className="pixel-bg">
-      <h1 className="title">CREATE NEW GAME</h1>
-
-      <div className="form-section">
-
+      <div className="create-form"> 
+        <h1 className="title">CREATE NEW GAME</h1>
         {/* TITLE */}
         <label className="input-label">TITLE</label>
         <input
-          className="pixel-input"
+          className="input-area"
           value={title}
           placeholder="Enter the title of your game..."
           onChange={(e) => {
@@ -108,7 +106,7 @@ const handleNext = async () => {
         {/* DESCRIPTION */}
         <label className="input-label">DESCRIPTION</label>
         <textarea
-          className="pixel-textarea"
+          className="input-area longer-box"
           value={description}
           placeholder="Write a description..."
           onChange={(e) => {
@@ -121,7 +119,7 @@ const handleNext = async () => {
         {/* INTRO TEXT */}
         <label className="input-label">INTRO TEXT</label>
         <textarea
-          className="pixel-textarea"
+          className="input-area longer-box"
           value={introText}
           placeholder="Write the intro story..."
           onChange={(e) => {
@@ -133,43 +131,47 @@ const handleNext = async () => {
 
         {/* DIFFICULTY */}
         <label className="input-label">DIFFICULTY</label>
-        <select
-          className="pixel-select"
-          value={difficulty}
-          onChange={(e) => {
-            setDifficulty(e.target.value);
-            setErrors(prev => ({ ...prev, difficulty: "" }));
-          }}
-        >
-          <option value="" disabled hidden>Select difficulty...</option>
-          <option value="0">Easy</option>
-          <option value="1">Medium</option>
-          <option value="2">Hard</option>
-        </select>
+        <div className="dropdown-wrapper">
+          <select
+            className="select-dropdown"
+            value={difficulty}
+            onChange={(e) => {
+              setDifficulty(e.target.value);
+              setErrors(prev => ({ ...prev, difficulty: "" }));
+            }}
+          >
+            <option value="" disabled hidden>Select difficulty...</option>
+            <option value="0">Easy</option>
+            <option value="1">Medium</option>
+            <option value="2">Hard</option>
+          </select>
+        </div>
         <FormErrorMessage message={errors.difficulty} />
 
         {/* ACCESSIBILITY */}
         <label className="input-label">ACCESSIBILITY</label>
-        <select
-          className="pixel-select"
-          value={accessibility}
-          onChange={(e) => {
-            setAccessibility(e.target.value);
-            setErrors(prev => ({ ...prev, accessibility: "" }));
-          }}
-        >
-          <option value="" disabled hidden>Select accessibility...</option>
-          <option value="0">Public</option>
-          <option value="1">Private</option>
-        </select>
+        <div className="dropdown-wrapper">
+          <select
+            className="select-dropdown"
+            value={accessibility}
+            onChange={(e) => {
+              setAccessibility(e.target.value);
+              setErrors(prev => ({ ...prev, accessibility: "" }));
+            }}
+          >
+            <option value="" disabled hidden>Select accessibility...</option>
+            <option value="0">Public</option>
+            <option value="1">Private</option>
+          </select>
+        </div>
         <FormErrorMessage message={errors.accessibility} />
 
         {/* BUTTONS */}
-        <div className="button-row">
-          <button className="pixel-btn pixel-btn-back" onClick={() => navigate("/")}>
+        <div className="nav-buttons">
+          <button className="pixel-btn back" onClick={() => navigate("/")}>
             BACK
           </button>
-          <button className="pixel-btn pixel-btn-next" onClick={handleNext}>
+          <button className="pixel-btn next" onClick={handleNext}>
             NEXT
           </button>
         </div>

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useStoryCreation from "./StoryCreationContext";
 import { saveQuestions } from "./StoryCreationService";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
-import "../App.css";
+import "./Create.css";
 
 import {
   QuestionSceneDto,
@@ -158,9 +158,9 @@ const CreateQuestions = () => {
             {/* STORY CONTEXT */}
             <h3 className="question-label">STORY CONTEXT</h3>
             <textarea
-              className="pixel-input"
+              className="input-area"
               value={q.storyText}
-              placeholder={`Write The Story Context...`}
+              placeholder={`Write Some Lead-up to Your Question Here...`}
               onChange={(e) => update(i, { ...q, storyText: e.target.value })}
             />
             {errors[i]?.storyText && <p className="error-msg">{errors[i].storyText}</p>}
@@ -168,7 +168,7 @@ const CreateQuestions = () => {
             {/* QUESTION TEXT */}
             <h3 className="question-label">QUESTION</h3>
             <textarea
-              className="pixel-input"
+              className="input-area"
               value={q.questionText}
               placeholder={`Write Your Question here...`}
               onChange={(e) => update(i, { ...q, questionText: e.target.value })}
@@ -176,7 +176,6 @@ const CreateQuestions = () => {
             {errors[i]?.questionText && <p className="error-msg">{errors[i].questionText}</p>}
 
             {/* ANSWERS */}
-           {/* ANSWERS */}
             <h3 className="question-label">ANSWER OPTIONS</h3>
 
             {q.answers.map((a, ai) => (
@@ -184,7 +183,7 @@ const CreateQuestions = () => {
 
                 {/* Answer text */}
                 <input
-                  className="pixel-input-small"
+                  className="input-area"
                   placeholder={`Write Answer ${ai + 1}...`}
                   value={a.answerText}
                   onChange={(e) => {
@@ -196,7 +195,7 @@ const CreateQuestions = () => {
 
                 {/* Context text */}
                 <input
-                  className="pixel-input-small"
+                  className="input-area"
                   placeholder={`Write Context ${ai + 1}...`}
                   value={a.contextText}
                   onChange={(e) => {

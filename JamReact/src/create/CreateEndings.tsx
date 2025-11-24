@@ -6,7 +6,7 @@ import { EndingDto, EndingErrors } from "../types/createStory";
 import { useToast } from "../shared/ToastContext";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
 import FormErrorMessage from "../components/FormErrorMessage";
-import "../App.css";
+import "./Create.css";
 
 const CreateEndings: React.FC = () => {
   
