@@ -14,7 +14,7 @@ import {
 // -----------------------------
 // HELPERS
 // -----------------------------
-const emptyQuestion = (): QuestionSceneDto => ({
+const emptyQuestion = (): QuestionSceneDto => ({ 
   storyText: "",
   questionText: "",
   answers: [

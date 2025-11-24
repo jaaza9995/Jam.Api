@@ -7,7 +7,7 @@ import { parseBackendErrors } from "../utils/parseBackendErrors";
 import FormErrorMessage from "../components/FormErrorMessage";
 import "../App.css";
 
-const CreateIntro = () => {
+const CreateIntro: React.FC = () => {
   const navigate = useNavigate();
   const { data, setData } = useStoryCreation();
 

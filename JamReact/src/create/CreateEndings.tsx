@@ -8,7 +8,8 @@ import { parseBackendErrors } from "../utils/parseBackendErrors";
 import FormErrorMessage from "../components/FormErrorMessage";
 import "../App.css";
 
-const CreateEndings = () => {
+const CreateEndings: React.FC = () => {
+  
   const navigate = useNavigate();
   const { data, setData } = useStoryCreation();
   const { showToast } = useToast();
