@@ -3,9 +3,10 @@ import { useAuth } from "../auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Story } from "../types/createStory";
 import { fetchHomePageData } from "./homePageService";
+import StoryCard from "../components/StoryCard";
 
 import "./HomePage.css";
-import "../shared/StoryCard.css";
+import "../components/StoryCard.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -75,61 +76,13 @@ useEffect(() => {
         {stories.length === 0 ? (
           <p className="empty-text">No stories found.</p>
         ) : (
-          <ul className="story-list">
-            {stories.map((s) => (
-              <li key={s.storyId} className="story-card">
-                <div className="story-content">
-                  <h3>{s.title}</h3>
-                  <p>{s.description}</p>
-                </div>
-                <div className="bottom-info">
-                  <div className="diff-qc-row">
-                    <span className="question-count"> 
-                      <p>Questions: {s.questionCount}</p>
-                    </span>
+        <div className="story-card-container">
 
-                    {/* DIFFICULTY */}
-                    <span className="difficulty"> 
-                      {(s.difficultyLevel === 0) && (
-                        <button className="difficulty easy">Easy</button>
-                      )}  
+          {stories.map((story) => (
+            <StoryCard key={story.storyId} story={story} showEditButton={true}/>
+          ))}
+        </div>
 
-                      {(s.difficultyLevel === 1) && (
-                        <button className="difficulty medium">Medium</button>
-                      )}  
-
-                      {(s.difficultyLevel === 2) && (
-                        <button className="difficulty hard">Hard</button>
-                      )}  
-                    </span>
-                  </div>
-
-                  {/* PRIVATE CODE */}
-                  {(s.accessibility === 1) && (
-                    <p className="private-code">Game Code: {s.code}</p>
-                  )}
-                </div>
-
-                {/* Buttons */}
-                <div className="story-buttons">
-                  <button
-                    className="pixel-btn edit"
-                    onClick={() => navigate(`/edit/${s.storyId}`)}
-                  >
-                    EDIT
-                  </button>
-
-                  <button
-                    className="pixel-btn play"
-                    onClick={() => navigate(`/play/${s.storyId}`)}
-                  >
-                    PLAY
-                  </button>
-                </div>
-
-              </li>
-            ))}
-          </ul>
         )}
       </section>
 
@@ -140,51 +93,11 @@ useEffect(() => {
         {recentlyPlayed.length === 0 ? (
           <p className="empty-text">No recently played games.</p>
         ) : (
-          <ul className="story-list">
-            {recentlyPlayed.map((s) => (
-              <li key={s.storyId} className="story-card">
-                <div className="story-content">
-                  <h3>{s.title}</h3>
-                  <p>{s.description}</p>
-                </div>
-                <div className="bottom-info">
-                  <div className="diff-qc-row">
-                    <span className="question-count">
-                      <p>Questions: {s.questionCount}</p>
-                    </span>
-                    {/* DIFFICULTY */}
-                    <span className="difficulty"> 
-                      {(s.difficultyLevel === 0) && (
-                        <button className="difficulty easy">Easy</button>
-                      )}  
-
-                      {(s.difficultyLevel === 1) && (
-                        <button className="difficulty medium">Medium</button>
-                      )}  
-
-                      {(s.difficultyLevel === 2) && (
-                        <button className="difficulty hard">Hard</button>
-                      )}  
-                    </span>
-                  </div>
-                  {/* PRIVATE CODE */}
-                  {(s.accessibility === 1) && (
-                    <p className="private-code">Game Code: {s.code}</p>
-                  )}
-                </div>
-
-                {/* Buttons */}
-                <div className="story-buttons">
-                  <button
-                    className="pixel-btn play"
-                    onClick={() => navigate(`/play/${s.storyId}`)}
-                  >
-                    PLAY
-                  </button>
-                </div>
-              </li>
+          <div className="story-card-container">
+            {recentlyPlayed.map((story) => (
+              <StoryCard key={story.storyId} story={story}/> /* EDIT-knapp skjult */
             ))}
-          </ul>
+          </div>
         )}
       </section>
     </div>

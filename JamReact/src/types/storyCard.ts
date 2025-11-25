@@ -3,7 +3,7 @@ export interface StoryCard {
   title: string;
   description: string;
   questionCount: number;
-  difficultyLevel: string;   // backend sender string når vi bruker ToString()
-  accessibility: string;     // backend sender string når vi bruker ToString()
+  difficultyLevel: number;   // backend sender string når vi bruker ToString()
+  accessibility: number;     // backend sender string når vi bruker ToString()
   code: string;
 }

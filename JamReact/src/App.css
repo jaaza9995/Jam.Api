@@ -30,6 +30,8 @@ body {
   width: 100%;
   padding: 40px;
   text-align: center;
+  border-radius: 10px;
+  border: none;
 }
 
 .title {
@@ -44,8 +46,6 @@ body {
 .pixel-btn {
   font-size: 0.9rem;
   padding: 0.5rem 1rem;
-  /*border: 2px solid var(--primary-color);*/
-  /*background-color: var(--primary-color);*/
   color: var(--text-color);
   cursor: pointer;
   transition: all 0.2s;
@@ -56,9 +56,10 @@ body {
 .delete { background: #cf1313; }
 .back { background: #6b6b97; }
 .play { background: #ba1ddd; }
-.edit { background: #2fcea4; }
+.edit { background: #00e257; }
 .next { background: #a502c6; }
-.addQuestion{ background: #FF8C00;}
+.addQuestion{ background: #6b50c4;}
+
 
 /* usikker på om dette brukes:*/
 .wide-btn { width: 300px; }
@@ -67,21 +68,6 @@ body {
 .pixel-btn:hover {
   filter: drop-shadow(0 0 0.8rem var(--secondary-color));
   transform: scale(1.05);
-}
-
-/* Cards */ƒ
-.story-card {
-  background-color: var(--card-bg);
-  border: 2px solid var(--primary-color);
-  padding: 1rem;
-  border-radius: 8px;
-  margin: 0.5rem;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.story-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 0 15px var(--accent-color);
 }
 
 /* Titles */
@@ -160,4 +146,21 @@ h1, h2, h3 {
   pointer-events: none;
 }
 
+.error-msg {
+  color: #ff4f79;
+  background: rgba(255, 79, 121, 0.15);
+  font-size: 15px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-style: italic;
+  padding: 6px 10px;
+  border-left: 4px solid #ff4f79;
+  border-radius: 2px;
+  margin-bottom: 12px;
+  line-height: 1.4;
+  max-width: 500px;
 
+}
+
+
+
+  

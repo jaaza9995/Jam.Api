@@ -10,7 +10,7 @@ html, body {
   color: #fff;
 }
 
-* {
+body {
   font-family: 'Press Start 2P', cursive !important;
   box-sizing: border-box;
 }

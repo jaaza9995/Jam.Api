@@ -27,9 +27,9 @@ const CreateEndings: React.FC = () => {
   const validate = () => {
     const newErrors: EndingErrors = { good: "", neutral: "", bad: "" };
 
-    if (!good.trim()) newErrors.good = "Opps, your forgot to write a good ending.";
-    if (!neutral.trim()) newErrors.neutral = "Opps, your forgot to write a neutral ending.";
-    if (!bad.trim()) newErrors.bad = "Opps, your forgot to write a bad ending.";
+    if (!good.trim()) newErrors.good = "Oops, your forgot to write a good ending.";
+    if (!neutral.trim()) newErrors.neutral = "Oops, your forgot to write a neutral ending.";
+    if (!bad.trim()) newErrors.bad = "Oops, your forgot to write a bad ending.";
 
     setErrors(newErrors);
     return Object.values(newErrors).every((e) => e === "");
@@ -85,9 +85,9 @@ const CreateEndings: React.FC = () => {
 
         {/* GOOD ENDING */}
         <div className="ending-block">
-          <h3 className="ending-label">GOOD ENDING</h3>
+          <h3 className="input-label">GOOD ENDING</h3>
           <textarea
-            className="ending-input"
+            className="input-area longer-box"
             value={good}
             placeholder="Write the good ending for your story..."
             onChange={(e) => {
@@ -104,9 +104,9 @@ const CreateEndings: React.FC = () => {
 
         {/* NEUTRAL ENDING */}
 
-          <h3 className="ending-label">NEUTRAL ENDING</h3>
+          <h3 className="input-label">NEUTRAL ENDING</h3>
           <textarea
-            className="ending-input"
+            className="input-area longer-box"
             value={neutral}
             placeholder="Write the neutral ending..."
             onChange={(e) => {
@@ -123,9 +123,9 @@ const CreateEndings: React.FC = () => {
 
         {/* BAD ENDING */}
 
-          <h3 className="ending-label">BAD ENDING</h3>
+          <h3 className="input-label">BAD ENDING</h3>
           <textarea
-            className="ending-input"
+            className="input-area longer-box"
             value={bad}
             placeholder="Write the BAD ending..."
             onChange={(e) => {
@@ -141,9 +141,9 @@ const CreateEndings: React.FC = () => {
         </div>
 
         {/* BUTTONS */}
-        <div className="button-row">
+        <div className="nav-buttons">
           <button
-            className="pixel-btn pixel-btn-back"
+            className="pixel-btn back"
             onClick={() => {
               setData((prev) => ({
                 ...prev,
@@ -155,7 +155,7 @@ const CreateEndings: React.FC = () => {
             BACK
           </button>
 
-          <button className="pixel-btn pixel-btn-finish" onClick={handleFinish}>
+          <button className="pixel-btn edit" onClick={handleFinish}>
             FINISH
           </button>
         </div>

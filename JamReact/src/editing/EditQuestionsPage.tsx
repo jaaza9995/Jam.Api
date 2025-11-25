@@ -385,7 +385,7 @@ const handleSave = async () => {
         <div key={q.questionSceneId !== 0 ? q.questionSceneId : i} className="question-scene-card">
 
           {/* STORY CONTEXT */}
-          <h3 className="question-label">STORY CONTEXT</h3>
+          <h3 className="input-label">STORY CONTEXT</h3>
           <textarea
             className="input-area"
             value={q.storyText}
@@ -402,7 +402,7 @@ const handleSave = async () => {
           {errors[i]?.storyText && <p className="error-msg">{errors[i]?.storyText}</p>}
 
           {/* QUESTION */}
-          <h3 className="question-label">QUESTION</h3>
+          <h3 className="input-label">QUESTION</h3>
           <textarea
             className="input-area"
             value={q.questionText}
@@ -419,7 +419,7 @@ const handleSave = async () => {
           {errors[i]?.questionText && <p className="error-msg">{errors[i]?.questionText}</p>}
 
           {/* ANSWERS */}
-          <h3 className="question-label">ANSWER OPTIONS</h3>
+          <h3 className="input-label">ANSWER OPTIONS</h3>
 
           {q.answers.map((a, idx) => (
             <div className="answer-row" key={idx}>
@@ -464,7 +464,7 @@ const handleSave = async () => {
           {errors[i]?.correct && <p className="error-msg">{errors[i]?.correct}</p>}
 
           {/* CONTEXT TEXTS */}
-          <h3 className="question-label">CONTEXT TEXTS</h3>
+          <h3 className="input-label">CONTEXT TEXTS</h3>
           {q.answers.map((a, idx) => (
             <textarea
               key={idx}

@@ -54,7 +54,7 @@ const CreateQuestions = () => {
     const errList: QuestionErrors[] = questions.map((q) => {
       const e: QuestionErrors = {};
 
-      if (!q.storyText.trim()) e.storyText = "Story context is required.";
+      if (!q.storyText.trim()) e.storyText = "Option outcome is required.";
       if (!q.questionText.trim()) e.questionText = "Question text is required.";
 
       if (q.answers.some((a) => !a.answerText.trim()))
@@ -156,7 +156,7 @@ const CreateQuestions = () => {
           <div className="question-box" key={i}>
             
             {/* STORY CONTEXT */}
-            <h3 className="question-label">STORY CONTEXT</h3>
+            <h3 className="input-label">STORY CONTEXT</h3>
             <textarea
               className="input-area"
               value={q.storyText}
@@ -166,7 +166,7 @@ const CreateQuestions = () => {
             {errors[i]?.storyText && <p className="error-msg">{errors[i].storyText}</p>}
 
             {/* QUESTION TEXT */}
-            <h3 className="question-label">QUESTION</h3>
+            <h3 className="input-label">QUESTION</h3>
             <textarea
               className="input-area"
               value={q.questionText}
@@ -176,7 +176,7 @@ const CreateQuestions = () => {
             {errors[i]?.questionText && <p className="error-msg">{errors[i].questionText}</p>}
 
             {/* ANSWERS */}
-            <h3 className="question-label">ANSWER OPTIONS</h3>
+            <h3 className="input-label">ANSWER OPTIONS</h3>
 
             {q.answers.map((a, ai) => (
               <div className="answer-row" key={ai}>
@@ -196,7 +196,7 @@ const CreateQuestions = () => {
                 {/* Context text */}
                 <input
                   className="input-area"
-                  placeholder={`Write Context ${ai + 1}...`}
+                  placeholder={`Outcome of Option ${ai + 1}...`}
                   value={a.contextText}
                   onChange={(e) => {
                     const list = [...q.answers];
@@ -229,7 +229,7 @@ const CreateQuestions = () => {
             )}
 
             <button
-              className="pixel-btn pixel-btn-delete"
+              className="delete-q-button"
               onClick={() => remove(i)}
             >
               DELETE QUESTION
@@ -238,14 +238,14 @@ const CreateQuestions = () => {
           
         ))}
       </div>
-          <button className="pixel-btn pixel-btn-addQuestion" onClick={add}>
+          <button className="pixel-btn addQuestion" onClick={add}>
           + ADD QUESTION
         </button>
 
         
-        <div className="button-row">
+        <div className="nav-buttons">
         <button
-          className="pixel-btn pixel-btn-back"
+          className="pixel-btn back"
           onClick={() => {
             setData(prev => ({ ...prev, questions }));
             navigate("/create/intro");
@@ -254,7 +254,7 @@ const CreateQuestions = () => {
           BACK
         </button>
          
-        <button className="pixel-btn pixel-btn-next" onClick={handleNext}>
+        <button className="pixel-btn next" onClick={handleNext}>
           NEXT
         </button>
 
