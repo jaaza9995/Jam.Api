@@ -26,6 +26,11 @@ public class StoryDbContext : DbContext
         //    If the principal entity is deleted, all dependent entities are deleted
         // ==========================================================================
 
+        // Make owner FK optional (allow UserId = null when user is deleted by admin)
+        modelBuilder.Entity<Story>()
+            .Property(s => s.UserId)
+            .IsRequired(false);
+
         // Story -> IntroScene (1-to-1): 
         // Deleting a Story automatically deletes its IntroScene
         modelBuilder.Entity<Story>()

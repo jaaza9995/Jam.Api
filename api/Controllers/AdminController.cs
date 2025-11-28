@@ -2,8 +2,13 @@ using Jam.Api.DAL;
 using Jam.Api.DAL.PlayingSessionDAL;
 using Jam.Api.DAL.StoryDAL;
 using Jam.Api.DTOs.Admin;
+using Jam.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
+using Jam.Api.Services;
+
 
 namespace Jam.Api.Controllers;
 
@@ -12,32 +17,36 @@ namespace Jam.Api.Controllers;
 [Authorize(Policy = "AdminOnly")] // Only admins can access
 public class AdminController : ControllerBase
 {
-    private readonly UserService _userService;
     private readonly IStoryRepository _storyRepository;
-
     private readonly IPlayingSessionRepository _playingSessionRepository;
+    private readonly UserManager<AuthUser> _userManager;
+    private readonly IAdminUserService _adminUserService;
     private readonly ILogger<AdminController> _logger;
 
     public AdminController(
         IStoryRepository storyRepository,
-        UserService userService,
         IPlayingSessionRepository playingSessionRepository,
+        UserManager<AuthUser> userManager,
+        IAdminUserService adminUserService,
         ILogger<AdminController> logger
     )
     {
         _storyRepository = storyRepository;
-        _userService = userService;
         _playingSessionRepository = playingSessionRepository;
+        _userManager = userManager;
+        _adminUserService = adminUserService;
         _logger = logger;
     }
 
-    // ---------------- USERS ----------------
+    // ---------------------------------------------------------------
+    // GET USERS
+    // ---------------------------------------------------------------
     [HttpGet("users")]
     public async Task<IActionResult> GetUsers()
     {
         try
         {
-            var users = await _userService.GetAllUsersAsync();
+            var users = await _adminUserService.GetAllUsersAsync();
 
             // Mapping AuthUser to UserDto
             // Not including user attributes like password hash for security reasons
@@ -57,6 +66,9 @@ public class AdminController : ControllerBase
         }
     }
 
+    // ---------------------------------------------------------------
+    // DELETE USER
+    // ---------------------------------------------------------------
     [HttpDelete("users/{id}")]
     public async Task<IActionResult> DeleteUser(string id)
     {
@@ -68,11 +80,38 @@ public class AdminController : ControllerBase
 
         try
         {
-            var deleted = await _userService.DeleteUserAsync(id);
+            // 1) Prevent deleting yourself (admin)
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(currentUserId) && currentUserId == id)
+            {
+                _logger.LogWarning("[AdminController -> DeleteUser] Admin attempted to delete their own account ({userId})", id);
+                return BadRequest(new { message = "You cannot delete your own account." });
+            }
 
-            if (!deleted)
+            // 2) Ensure target user exists
+            var targetUser = await _userManager.FindByIdAsync(id);
+            if (targetUser == null)
+            {
                 _logger.LogWarning("[AdminController -> DeleteUser] No user found with ID {userId}", id);
-            return NotFound(new { message = $"No user found with ID {id}" });
+                return NotFound(new { message = $"No user found with ID {id}" });
+            }
+
+            // 3) Prevent deleting another admin (only one admin account, but nice to have the check)
+            if (await _userManager.IsInRoleAsync(targetUser, "Admin"))
+            {
+                _logger.LogWarning("[AdminController -> DeleteUser] Attempt to delete Admin user {userId} blocked", id);
+                return BadRequest(new { message = "Cannot delete a user in the Admin role." });
+            }
+
+            // 4) Proceed with deletion (using AdminUserService)
+            var deleted = await _adminUserService.DeleteUserAsync(id);
+            if (!deleted)
+            {
+                _logger.LogWarning("[AdminController -> DeleteUser] Deletion failed for user ID {userId}", id);
+                return StatusCode(500, new { message = "Failed to delete user" });
+            }
+
+            return NoContent();
         }
 
         catch (Exception e)
@@ -82,7 +121,12 @@ public class AdminController : ControllerBase
         }
     }
 
-    // ---------------- STORIES ----------------
+
+
+
+    // ---------------------------------------------------------------
+    // GET STORIES
+    // ---------------------------------------------------------------
     [HttpGet("stories")]
     public async Task<IActionResult> GetStories()
     {
@@ -106,8 +150,36 @@ public class AdminController : ControllerBase
         }
     }
 
-    // ---------------- PLAYING SESSIONS ----------------
-    [HttpGet("sessions")]
+    // ---------------------------------------------------------------
+    // DELETE STORY
+    // ---------------------------------------------------------------
+    [HttpDelete("stories/{id}")]
+    public async Task<IActionResult> DeleteStory(int id)
+    {
+        try
+        {
+            var deleted = await _storyRepository.DeleteStory(id);
+            if (!deleted)
+            {
+                _logger.LogWarning("Failed to delete story with ID {StoryId}", id);
+                return StatusCode(500, new { message = "Failed to delete story" });
+            }
+            return NoContent();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Unexpected error while deleting story with ID {StoryId}", id);
+            return StatusCode(500, new { message = "Unexpected error deleting story" });
+        }
+    }
+
+
+
+
+    // ---------------------------------------------------------------
+    // GET PLAYING SESSIONS (not used in frontend, but could be useful in the future)
+    // ---------------------------------------------------------------
+    [HttpGet("sessions")]  
     public async Task<IActionResult> GetPlayingSessions()
     {
         try

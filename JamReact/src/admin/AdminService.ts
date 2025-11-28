@@ -1,4 +1,4 @@
-import { IErrorDto } from "../types/ErrorDto";
+import { IErrorDto } from "../types/errorDto";
 import { UserDataDto } from "../types/admin";
 import { StoryDataDto } from "../types/admin";
 
@@ -67,4 +67,22 @@ export const getAdminStories = async (): Promise<StoryDataDto[]> => {
     await handleApiError(response);
 
     return response.json();
+};
+
+export const adminDeleteUser = async (userId: string): Promise<void> => {
+    const response = await fetch(`${API_URL}/api/Admin/users/${userId}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+    });
+
+    await handleApiError(response);
+};
+
+export const adminDeleteStory = async (storyId: number): Promise<void> => {
+    const response = await fetch(`${API_URL}/api/Admin/stories/${storyId}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+    });
+
+    await handleApiError(response);
 };

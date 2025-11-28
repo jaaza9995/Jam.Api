@@ -1,14 +1,17 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Table, Button, Alert, Spinner } from "react-bootstrap";
-import { useAuth } from "../auth/AuthContext"; 
+import { useAuth } from "../auth/AuthContext";
 import { UserDataDto } from "../types/admin";
-import { getAdminUsers } from "./AdminService";
+import { getAdminUsers, adminDeleteUser } from "./AdminService";
+import DeleteModal from "../shared/DeleteModal";
 
 const AdminUsersPage: React.FC = () => {
 	const { token, user } = useAuth();
 	const [users, setUsers] = useState<UserDataDto[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [selectedUser, setSelectedUser] = useState<UserDataDto | null>(null);
 	const hasFetchedRef = useRef(false);
 
 	const fetchUsers = async () => {
@@ -30,6 +33,15 @@ const AdminUsersPage: React.FC = () => {
 		}
 	};
 
+	const deleteUser = async (userId: string) => {
+		try {
+			await adminDeleteUser(userId);
+			setUsers((prevUsers) => prevUsers.filter((u) => u.id !== userId));
+		} catch (err: any) {
+			setError(err.message || "Failed to delete user.");
+		}
+	};
+
 	useEffect(() => {
 		fetchUsers();
 	}, [token]);
@@ -40,6 +52,21 @@ const AdminUsersPage: React.FC = () => {
 
 	return (
 		<div className="admin-page">
+			{showDeleteModal && selectedUser && (
+				<DeleteModal
+					title={selectedUser.userName}
+					onConfirm={async () => {
+						await deleteUser(selectedUser.id);
+						setShowDeleteModal(false);
+						setSelectedUser(null);
+					}}
+					onCancel={() => {
+						setShowDeleteModal(false);
+						setSelectedUser(null);
+					}}
+				/>
+			)}
+
 			<h2>Users</h2>
 			{error && <Alert variant="danger">{error}</Alert>}
 
@@ -57,13 +84,17 @@ const AdminUsersPage: React.FC = () => {
 						<tr key={u.id}>
 							<td>{u.id.substring(0, 8)}...</td>
 							<td>{u.userName}</td>
+							<td>{u.email}</td>
 							<td>
-								{/* Vi implementerer sletting senere */}
 								<Button
 									variant="danger"
 									size="sm"
-                                    // So the admin cannot delete themselves (dont know if it works)
+									// So the admin cannot delete themselves
 									disabled={!!(user && user.sub === u.id)}
+									onClick={() => {
+										setSelectedUser(u);
+										setShowDeleteModal(true);
+									}}
 								>
 									Delete
 								</Button>
