@@ -1,6 +1,5 @@
 using Jam.Api.DAL.SceneDAL;
 using Jam.Api.DAL.StoryDAL;
-using Jam.Api.DAL.Services;
 using Jam.Api.DTOs.Shared;
 using Jam.Api.DTOs.IntroScenes;
 using Jam.Api.DTOs.QuestionScenes;
@@ -8,6 +7,7 @@ using Jam.Api.DTOs.EndingScenes;
 using Jam.Api.DTOs.Story;
 using Jam.Api.Models;
 using Jam.Api.Models.Enums;
+using Jam.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Jam.Api.Controllers;
@@ -19,24 +19,24 @@ public class StoryEditingController : ControllerBase
     private readonly IStoryRepository _storyRepository;
     private readonly ISceneRepository _sceneRepository;
     private readonly ILogger<StoryEditingController> _logger;
-    private readonly StoryCodeService _codeService;
+    private readonly IStoryCodeService _codeService;
 
-   public StoryEditingController(
-    IStoryRepository repo,
-    ISceneRepository sceneRepository,
-    StoryCodeService codeService,
-    ILogger<StoryEditingController> logger
-)
-{
-    _storyRepository = repo;
-    _sceneRepository = sceneRepository;
-    _codeService = codeService;
-    _logger = logger;
-}
+    public StoryEditingController(
+     IStoryRepository repo,
+     ISceneRepository sceneRepository,
+     IStoryCodeService codeService,
+     ILogger<StoryEditingController> logger
+ )
+    {
+        _storyRepository = repo;
+        _sceneRepository = sceneRepository;
+        _codeService = codeService;
+        _logger = logger;
+    }
 
-    // =====================================================================
+    // ---------------------------------------------------------------
     // STORY METADATA
-    // =====================================================================
+    // ---------------------------------------------------------------
 
     [HttpGet("{storyId:int}")]
     public async Task<IActionResult> GetStoryForEdit(int storyId)
@@ -47,6 +47,8 @@ public class StoryEditingController : ControllerBase
             if (story == null)
                 return NotFound(new ErrorDto { ErrorTitle = "Story not found." });
 
+            var questionCount = await _storyRepository.GetAmountOfQuestionsForStory(storyId) ?? 0;
+
             return Ok(new EditStoryDto
             {
                 StoryId = story.StoryId,
@@ -54,7 +56,8 @@ public class StoryEditingController : ControllerBase
                 Description = story.Description,
                 DifficultyLevel = story.DifficultyLevel,
                 Accessibility = story.Accessibility,
-                Code = story.Code
+                Code = story.Code,
+                QuestionCount = questionCount
             });
         }
         catch (Exception ex)
@@ -72,7 +75,7 @@ public class StoryEditingController : ControllerBase
         try
         {
             var story = await _storyRepository.GetStoryById(storyId);
-            if (story == null) 
+            if (story == null)
                 return NotFound(new ErrorDto { ErrorTitle = "Story not found." });
 
             story.Title = model.Title;
@@ -101,9 +104,11 @@ public class StoryEditingController : ControllerBase
         }
     }
 
-    // =====================================================================
+
+
+    // ---------------------------------------------------------------
     // INTRO SCENE
-    // =====================================================================
+    // ---------------------------------------------------------------
 
     [HttpGet("{storyId:int}/intro")]
     public async Task<IActionResult> GetIntro(int storyId)
@@ -136,9 +141,11 @@ public class StoryEditingController : ControllerBase
         return Ok(new { message = "Intro updated successfully." });
     }
 
-    // =====================================================================
+
+
+    // ---------------------------------------------------------------
     // QUESTION SCENES
-    // =====================================================================
+    // ---------------------------------------------------------------
 
     [HttpGet("{storyId:int}/questions")]
     public async Task<IActionResult> GetQuestions(int storyId)
@@ -209,9 +216,11 @@ public class StoryEditingController : ControllerBase
         }
     }
 
-    // =====================================================================
+
+
+    // ---------------------------------------------------------------
     // ENDING SCENES
-    // =====================================================================
+    // ---------------------------------------------------------------
 
     [HttpGet("{storyId:int}/endings")]
     public async Task<IActionResult> GetEndings(int storyId)
@@ -265,9 +274,11 @@ public class StoryEditingController : ControllerBase
         }
     }
 
-    // =====================================================================
+
+
+    // ---------------------------------------------------------------
     // DELETE STORY
-    // =====================================================================
+    // ---------------------------------------------------------------
 
     [HttpDelete("{storyId:int}")]
     public async Task<IActionResult> DeleteStory(int storyId)

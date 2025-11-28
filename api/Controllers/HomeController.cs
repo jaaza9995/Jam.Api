@@ -28,8 +28,10 @@ public class HomeController : ControllerBase
         _logger = logger;
     }
 
-    // GET: api/home/homepage
-  [HttpGet("homepage")]
+    // ---------------------------------------------------------------
+    // GET HOMEPAGE DATA (user's created stories and recently played)
+    // ---------------------------------------------------------------
+    [HttpGet("homepage")]
     public async Task<IActionResult> GetHomePage()
     {
         try
@@ -54,16 +56,15 @@ public class HomeController : ControllerBase
             }
 
             var userStories = await _storyRepository.GetStoriesByUserId(user.Id);
-        var recentlyPlayed = (await _storyRepository.GetMostRecentPlayedStories(user.Id, 5))
-            .OrderByDescending(s => s.Played)   // hvis Played brukes
-            .ToList();
+            var recentlyPlayed = (await _storyRepository.GetMostRecentPlayedStories(user.Id, 5))
+                .OrderByDescending(s => s.Played)   // hvis Played brukes
+                .ToList();
 
 
-            var questionCounts = new Dictionary<int, int>();
-            foreach (var s in userStories.Concat(recentlyPlayed))
-            {
-                questionCounts[s.StoryId] = await _storyRepository.GetAmountOfQuestionsForStory(s.StoryId) ?? 0;
-            }
+            // Batch fetch all question counts in one query
+            var allStories = userStories.Concat(recentlyPlayed).ToList();
+            var storyIds = allStories.Select(s => s.StoryId).Distinct().ToList();
+            var questionCounts = await _storyRepository.GetQuestionCountsForStories(storyIds);
 
             return Ok(new
             {
@@ -77,7 +78,11 @@ public class HomeController : ControllerBase
                     s.Accessibility,
                     s.Code,
                     QuestionCount = questionCounts[s.StoryId],
-                    
+                    s.Played,
+                    s.Finished,
+                    s.Failed,
+                    s.Dnf
+
                 }),
                 RecentlyPlayed = recentlyPlayed.Select(s => new
                 {
@@ -88,7 +93,7 @@ public class HomeController : ControllerBase
                     s.Accessibility,
                     s.Code,
                     QuestionCount = questionCounts[s.StoryId]
-                
+
                 })
             });
         }
