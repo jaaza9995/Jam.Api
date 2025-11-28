@@ -3,7 +3,6 @@ using Jam.Api.Models;
 using Jam.Api.DTOs.StoryPlaying;
 using Jam.Api.DTOs.Shared;
 using Jam.Api.DTOs.Story;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Jam.Api.Controllers;
@@ -20,7 +19,10 @@ public class BrowseController : ControllerBase
         _storyRepository = storyRepository;
         _logger = logger;
     }
-    
+
+    // ---------------------------------------------------------------
+    // GET PUBLIC AND PRIVATE STORIES (with optional search, THIS METHOD IS NOT IN USE)
+    // ---------------------------------------------------------------
     [HttpGet("stories")]
     public async Task<IActionResult> GetStories([FromQuery] string? search = null)
     {
@@ -55,17 +57,20 @@ public class BrowseController : ControllerBase
             StoryId = s.StoryId,
             Title = s.Title,
             Description = s.Description,
-            Accessibility = s.Accessibility.ToString(),
-            DifficultyLevel = s.DifficultyLevel.ToString(), 
+            Accessibility = s.Accessibility,
+            DifficultyLevel = s.DifficultyLevel,
             Code = s.Code ?? ""
         };
 
+    // ---------------------------------------------------------------
+    // JOIN PRIVATE STORY (NOT IN USE)
+    // ---------------------------------------------------------------
     [HttpPost("join")]
     public async Task<IActionResult> JoinPrivateStory([FromBody] JoinPrivateStoryRequestDto model)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
-                
+
         if (string.IsNullOrWhiteSpace(model.Code))
             return BadRequest(new ErrorDto { ErrorTitle = "Code required" });
 
@@ -77,7 +82,6 @@ public class BrowseController : ControllerBase
             if (story == null)
                 return NotFound(new ErrorDto { ErrorTitle = "Invalid code" });
 
-            // 🔥 Hent antall spørsmål fra databasen – IKKE fra Story.QuestionCount
             var questionCount = await _storyRepository.GetAmountOfQuestionsForStory(story.StoryId) ?? 0;
 
             return Ok(new StoryCardDto
@@ -85,8 +89,8 @@ public class BrowseController : ControllerBase
                 StoryId = story.StoryId,
                 Title = story.Title,
                 Description = story.Description,
-                QuestionCount = questionCount,  // 🔥 riktig nå!
-                Accessibility = story.Accessibility.ToString(),
+                QuestionCount = questionCount,
+                Accessibility = story.Accessibility,
                 Code = story.Code ?? ""
             });
         }
@@ -97,32 +101,27 @@ public class BrowseController : ControllerBase
         }
     }
 
-    // --------------------------
-    // PUBLIC GAMES
-    // --------------------------
+    // ---------------------------------------------------------------
+    // GET PUBLIC STORIES
+    // ---------------------------------------------------------------
     [HttpGet("public")]
     public async Task<IActionResult> GetPublicGames()
     {
         try
         {
             var publicStories = await _storyRepository.GetAllPublicStories();
+            var storyIds = publicStories.Select(s => s.StoryId).ToList();
+            var questionCounts = await _storyRepository.GetQuestionCountsForStories(storyIds);
 
-            var result = new List<object>();
-
-            foreach (var s in publicStories)
+            var result = publicStories.Select(s => new StoryCardDto
             {
-                var qCount = await _storyRepository.GetAmountOfQuestionsForStory(s.StoryId) ?? 0;
-
-                result.Add(new
-                {
-                    s.StoryId,
-                    s.Title,
-                    s.Description,
-                    DifficultyLevel = s.DifficultyLevel.ToString(),
-                    Accessibility = s.Accessibility.ToString(),
-                    QuestionCount = qCount
-                });
-            }
+                StoryId = s.StoryId,
+                Title = s.Title,
+                Description = s.Description,
+                DifficultyLevel = s.DifficultyLevel,
+                Accessibility = s.Accessibility,
+                QuestionCount = questionCounts.TryGetValue(s.StoryId, out var count) ? count : 0
+            }).ToList();
 
             return Ok(result);
         }
@@ -133,9 +132,9 @@ public class BrowseController : ControllerBase
         }
     }
 
-    // --------------------------
-    // PRIVATE GAME BY CODE
-    // --------------------------
+    // ---------------------------------------------------------------
+    // GET PRIVATE STORY (by code)
+    // ---------------------------------------------------------------
     [HttpGet("private/{code}")]
     public async Task<IActionResult> GetPrivateGame(string code)
     {

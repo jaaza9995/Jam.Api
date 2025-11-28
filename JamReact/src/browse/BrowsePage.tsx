@@ -1,172 +1,193 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 import PlayConfirmModal from "../shared/PlayConfirmModal";
 import "./BrowsePage.css";
-import "../App.css"
+import "../App.css";
 import { StoryCard } from "../types/storyCard";
 import { fetchPublicStories, fetchPrivateStory } from "./BrowsePageService";
-
-
-const API_URL = import.meta.env.VITE_API_URL;
+import {
+	getAccessibilityString,
+	getDifficultyLevelString,
+} from "../utils/enumHelpers";
 
 const BrowsePage: React.FC = () => {
-  const { token } = useAuth();
-  const navigate = useNavigate();
+	const { token } = useAuth();
+	const navigate = useNavigate();
 
-  const [publicGames, setPublicGames] = useState<StoryCard[]>([]);
-  const [publicSearch, setPublicSearch] = useState("");
+	const hasFetchedPublicGames = useRef(false);
 
-  const [privateCode, setPrivateCode] = useState("");
-  const [privateMatch, setPrivateMatch] = useState<StoryCard | null>(null);
-  const [error, setError] = useState<string | null>(null);
+	const [publicGames, setPublicGames] = useState<StoryCard[]>([]);
+	const [publicSearch, setPublicSearch] = useState("");
 
-  const [showModal, setShowModal] = useState(false);
-  const [selectedGame, setSelectedGame] = useState<StoryCard | null>(null);
+	const [privateCode, setPrivateCode] = useState("");
+	const [privateMatch, setPrivateMatch] = useState<StoryCard | null>(null);
+	const [error, setError] = useState<string | null>(null);
 
-  const openModal = (game: any) => {
-    setSelectedGame(game);
-    setShowModal(true);
-  };
+	const [showModal, setShowModal] = useState(false);
+	const [selectedGame, setSelectedGame] = useState<StoryCard | null>(null);
 
-  const closeModal = () => {
-    setSelectedGame(null);
-    setShowModal(false);
-  };
+	const openModal = (game: any) => {
+		setSelectedGame(game);
+		setShowModal(true);
+	};
 
-  const confirmPlay = () => {
-    navigate(`/play/${selectedGame!.storyId}`);
-  };
+	const closeModal = () => {
+		setSelectedGame(null);
+		setShowModal(false);
+	};
 
-  // ---------------------------
-  // FETCH PUBLIC GAMES
-  // ---------------------------
-useEffect(() => {
-  const load = async () => {
-    setError(null);
-    const { data, error } = await fetchPublicStories(token!);
-    if (error) {
-      setError(error);
-    }
-    setPublicGames(data ?? []);
-  };
-  load();
-}, [token]);
+	const confirmPlay = () => {
+		navigate(`/play/${selectedGame!.storyId}`);
+	};
 
-  // ---------------------------
-  // PUBLIC SEARCH
-  // ---------------------------
-  const filtered = publicGames.filter((g: StoryCard) => {
-  const title = g.title.toLowerCase();
-  return title.includes(publicSearch.toLowerCase());
-});
+	// ---------------------------
+	// FETCH PUBLIC GAMES
+	// ---------------------------
+	useEffect(() => {
+		if (hasFetchedPublicGames.current) {
+			return;
+		}
 
-  // ---------------------------
-  // PRIVATE CODE SEARCH
-  // ---------------------------
-const handlePrivateSearch = async () => {
-  if (!privateCode.trim()) return;
+		const load = async () => {
+			hasFetchedPublicGames.current = true;
+			setError(null);
 
-  setError(null);
-  const { data, error } = await fetchPrivateStory(token!, privateCode);
-  
-  if (data) {
-    setPrivateMatch(data);
-    openModal(data);
-  } else {
-    setError(error ?? "No game found with this code.");
-    setPrivateMatch(null);
-  }
-};
+			const { data, error } = await fetchPublicStories(token!);
+			if (error) {
+				setError(error);
+			}
+			setPublicGames(data ?? []);
+		};
+		load();
+	}, [token]);
 
+	// ---------------------------
+	// PUBLIC SEARCH
+	// ---------------------------
+	const filtered = publicGames.filter((g: StoryCard) => {
+		const title = g.title.toLowerCase();
+		return title.includes(publicSearch.toLowerCase());
+	});
 
-  return (
-    <div className="browse-container">
-      <h1 className="browse-title">Find a Game</h1>
+	// ---------------------------
+	// PRIVATE CODE SEARCH
+	// ---------------------------
+	const handlePrivateSearch = async () => {
+		if (!privateCode.trim()) return;
 
-      <div className="browse-sections">
-        {error && <p className="error-text">{error}</p>}
+		setError(null);
+		const { data, error } = await fetchPrivateStory(token!, privateCode);
 
-        {/* PUBLIC GAMES */}
-        <div className="browse-block">
-          <h2>Public Games</h2>
+		if (data) {
+			setPrivateMatch(data);
+			openModal(data);
+		} else {
+			setError(error ?? "No game found with this code.");
+			setPrivateMatch(null);
+		}
+	};
 
-          <input
-            className="search-input"
-            placeholder="Search by title..."
-            value={publicSearch}
-            onChange={(e) => setPublicSearch(e.target.value)}
-          />
+	return (
+		<div className="browse-container">
+			<h1 className="browse-title">Find a Game</h1>
 
-          <ul className="browse-list">
-            {filtered.length > 0 ? (
-              filtered.map((g) => (
-               <li key={g.storyId} className="browse-card">
-                <h3>{g.title}</h3>
-                <p>{g.description}</p>
+			<div className="browse-sections">
+				{error && <p className="error-text">{error}</p>}
 
-                <div className="browse-meta">
-                  <p><strong>Questions:</strong> {g.questionCount}</p>
-                  <p><strong>Difficulty:</strong> {g.difficultyLevel}</p>
-                  <p><strong>Accessibility:</strong> {g.accessibility}</p>
-                </div>
+				{/* PUBLIC GAMES */}
+				<div className="browse-block">
+					<h3>Public Games</h3>
 
-                {/* PLAY BUTTON */}
-                <button
-                  className="pixel-btn play"
-                  onClick={(e) => {
-                    e.stopPropagation(); // unngår at hele kortet trigges
-                    openModal(g);
-                  }}
-                >
-                  Play
-                </button>
-              </li>
+					<input
+						className="search-input"
+						placeholder="Search by title..."
+						value={publicSearch}
+						onChange={(e) => setPublicSearch(e.target.value)}
+					/>
 
-              ))
-            ) : (
-              <p className="empty-msg">No games match your search.</p>
-            )}
-          </ul>
-        </div>
+					<ul className="browse-list">
+						{filtered.length > 0 ? (
+							filtered.map((g) => (
+								<li key={g.storyId} className="browse-card">
+									<h3>{g.title}</h3>
+									<p>{g.description}</p>
 
-        {/* PRIVATE GAMES */}
-        <div className="browse-block">
-          <h2>Private Game Code</h2>
+									<div className="browse-meta">
+										<p>
+											<strong>Questions:</strong>{" "}
+											{g.questionCount}
+										</p>
+										<p>
+											<strong>Difficulty:</strong>{" "}
+											{getDifficultyLevelString(
+												g.difficultyLevel
+											)}
+										</p>
+										<p>
+											<strong>Accessibility:</strong>{" "}
+											{getAccessibilityString(
+												g.accessibility
+											)}
+										</p>
+									</div>
 
-          <input
-            className="search-input"
-            placeholder="Enter game code..."
-            value={privateCode}
-            onChange={(e) => setPrivateCode(e.target.value)}
-          />
+									{/* PLAY BUTTON */}
+									<button
+										className="pixel-btn play"
+										onClick={(e) => {
+											e.stopPropagation(); // unngår at hele kortet trigges
+											openModal(g);
+										}}
+									>
+										Play
+									</button>
+								</li>
+							))
+						) : (
+							<p className="empty-msg">
+								No games match your search.
+							</p>
+						)}
+					</ul>
+				</div>
 
-          <button className="pixel-btn pink" onClick={handlePrivateSearch}>
-            Search
-          </button>
-        </div>
-        
-      </div>
-      
+				{/* PRIVATE GAMES */}
+				<div className="browse-block">
+					<h3>Private Game</h3>
 
-      {/* MODAL */}
-      <PlayConfirmModal
-        title={selectedGame?.title || ""}
-        show={showModal}
-        onConfirm={confirmPlay}
-        onCancel={closeModal}
-      />
-     {/* BACK KNAPP HELT NEDERST VENSTRE */}
-    <button className="pixel-btn pixel-btn-back"
-      onClick={() => navigate("/")}
-    >
-      Back to Home
-    </button>
+					<input
+						className="search-input"
+						placeholder="Enter game code..."
+						value={privateCode}
+						onChange={(e) => setPrivateCode(e.target.value)}
+					/>
 
-  </div>
+					<button
+						className="pixel-btn pink"
+						onClick={handlePrivateSearch}
+					>
+						Search
+					</button>
+				</div>
+			</div>
 
-    
-  );
+			{/* MODAL */}
+			<PlayConfirmModal
+				title={selectedGame?.title || ""}
+				show={showModal}
+				onConfirm={confirmPlay}
+				onCancel={closeModal}
+			/>
+			{/* BACK KNAPP HELT NEDERST VENSTRE */}
+			<button
+				className="pixel-btn pixel-btn-back"
+				onClick={() => navigate("/")}
+			>
+				Back to Home
+			</button>
+		</div>
+	);
 };
 
 export default BrowsePage;
