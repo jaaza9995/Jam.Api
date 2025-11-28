@@ -11,7 +11,7 @@ public class PlayingSession
     public int MaxScore { get; set; } // Total possible score for the session, makes % calculation easier
     public int CurrentLevel { get; set; }
     public int? CurrentSceneId { get; set; }
-    public SceneType? CurrentSceneType { get; set; } 
+    public SceneType? CurrentSceneType { get; set; }
     public int StoryId { get; set; }
     public Story Story { get; set; } = null!; // Navigation property
     public string? UserId { get; set; } // Foreign key to User, nullable to allow User deletion without deleting playingsessions

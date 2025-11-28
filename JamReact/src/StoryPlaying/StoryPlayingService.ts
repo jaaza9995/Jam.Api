@@ -1,8 +1,10 @@
-import { IStartSessionResponse } from "../types/storyPlaying";
-import { IPlayScene } from "../types/storyPlaying";
+import {
+	IStartSessionResponse,
+	IPlayScene,
+	IAnswerFeedback,
+} from "../types/storyPlaying";
 import { SceneType } from "../types/enums";
-import { IAnswerFeedback } from "../types/storyPlaying";
-import { IErrorDto } from "../types/ErrorDto";
+import { IErrorDto } from "../types/errorDto";
 
 const API_URL = import.meta.env.VITE_API_URL;
 

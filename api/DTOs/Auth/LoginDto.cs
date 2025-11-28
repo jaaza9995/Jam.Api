@@ -4,7 +4,6 @@ namespace Jam.Api.DTOs.Auth;
 
 public class LoginDto
 {
-
     [Required(ErrorMessage = "Please enter a valid username.")]
     public string Username { get; set; } = string.Empty;
 

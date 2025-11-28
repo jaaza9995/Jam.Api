@@ -1,6 +1,6 @@
 namespace Jam.Api.DTOs.EndingScenes;
 
-public class EndingSceneDto//get dto
+public class EndingSceneDto
 {
     public int StoryId { get; set; }
     public string GoodEnding { get; set; } = string.Empty;

@@ -1,4 +1,11 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useParams, Outlet } from "react-router-dom";
+import {
+	BrowserRouter as Router,
+	Routes,
+	Route,
+	Navigate,
+	useParams,
+	Outlet,
+} from "react-router-dom";
 import { Container } from "react-bootstrap";
 
 import HomePage from "./home/HomePage";
@@ -44,10 +51,7 @@ const App: React.FC = () => {
 						{/* ---------------- PROTECTED ---------------- */}
 						<Route element={<ProtectedRoute />}>
 							{/* HOME */}
-							<Route
-								path="/"
-								element={<HomePage />}
-							/>
+							<Route path="/" element={<HomePage />} />
 
 							{/* CREATE FLOW */}
 							<Route
@@ -71,7 +75,7 @@ const App: React.FC = () => {
 									</StoryCreationProvider>
 								}
 							/>
-                            {/* EDIT FLOW */}
+							{/* EDIT FLOW */}
 							<Route
 								path="/edit/:storyId"
 								element={<EditStoryPage />}
@@ -95,11 +99,8 @@ const App: React.FC = () => {
 								element={<StoryPlayer />}
 							/>
 
-                            {/* BROWSE */}
-                            <Route 
-                                path="/browse" 
-                                element={<BrowsePage />} 
-                            />
+							{/* BROWSE */}
+							<Route path="/browse" element={<BrowsePage />} />
 
 							{/* ADMIN ROUTES */}
 							<Route
@@ -116,7 +117,7 @@ const App: React.FC = () => {
 									element={<AdminStoriesPage />}
 								/>
 							</Route>
-                        </Route>
+						</Route>
 
 						{/* ---------------- CATCH ALL ---------------- */}
 						<Route path="*" element={<Navigate to="/" replace />} />

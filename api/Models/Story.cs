@@ -19,5 +19,4 @@ public class Story
     public List<QuestionScene> QuestionScenes { get; set; } = new(); // Navigation property
     public List<EndingScene> EndingScenes { get; set; } = new(); // Navigation property
     public List<PlayingSession> PlayingSessions { get; set; } = new(); // Navigation property
-   
 }

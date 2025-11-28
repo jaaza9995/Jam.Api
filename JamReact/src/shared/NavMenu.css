@@ -1,39 +1,38 @@
 /* ===== GAMING / MATH UNIVERSE NAVBAR ===== */
 
 .navbar {
-    background: linear-gradient(90deg, #0d0221, #16043b, #230a59);
-    border-bottom: 1px solid rgba(138, 43, 226, 0.4);
-    padding: 12px 20px !important;
-    box-shadow: 0 0 12px rgba(138, 43, 226, 0.5);
-  }
-  
-  .navbar-brand {
-    color: #8a2be2 !important;
-    font-weight: 800;
-    font-size: 1.4rem;
-    letter-spacing: 1px;
-    text-shadow: 0 0 8px #8a2be2;
-    transition: 0.3s ease;
-  }
-  
-  .navbar-brand:hover {
-    color: #c084fc !important;
-    text-shadow: 0 0 12px #c084fc;
-  }
-  
-  .navbar-toggler {
-    background-color: rgba(138, 43, 226, 0.5) !important;
-    border: none;
-  }
-  
-  .navbar-nav .nav-link {
-    color: #e0d7fa !important;
-    font-weight: 500;
-    transition: 0.25s ease;
-  }
-  
-  .navbar-nav .nav-link:hover {
-    color: #b794f4 !important;
-    text-shadow: 0 0 6px #b794f4;
-  }
-  
+	background: linear-gradient(90deg, #0d0221, #16043b, #230a59);
+	border-bottom: 1px solid rgba(138, 43, 226, 0.4);
+	padding: 12px 20px !important;
+	box-shadow: 0 0 12px rgba(138, 43, 226, 0.5);
+}
+
+.navbar-brand {
+	color: #8a2be2 !important;
+	font-weight: 800;
+	font-size: 1.4rem;
+	letter-spacing: 1px;
+	text-shadow: 0 0 8px #8a2be2;
+	transition: 0.3s ease;
+}
+
+.navbar-brand:hover {
+	color: #c084fc !important;
+	text-shadow: 0 0 12px #c084fc;
+}
+
+.navbar-toggler {
+	background-color: rgba(138, 43, 226, 0.5) !important;
+	border: none;
+}
+
+.navbar-nav .nav-link {
+	color: #e0d7fa !important;
+	font-weight: 500;
+	transition: 0.25s ease;
+}
+
+.navbar-nav .nav-link:hover {
+	color: #b794f4 !important;
+	text-shadow: 0 0 6px #b794f4;
+}

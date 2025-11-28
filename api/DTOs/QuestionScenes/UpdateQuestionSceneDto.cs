@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Jam.Api.DTOs.QuestionScenes;
 
-public class UpdateQuestionSceneDto //put dto 
+public class UpdateQuestionSceneDto
 {
     [Required]
     public int QuestionSceneId { get; set; }

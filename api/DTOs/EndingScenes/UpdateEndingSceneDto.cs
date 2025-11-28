@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Jam.Api.DTOs.EndingScenes; //put dto
+namespace Jam.Api.DTOs.EndingScenes;
 
 public class UpdateEndingSceneDto
 {

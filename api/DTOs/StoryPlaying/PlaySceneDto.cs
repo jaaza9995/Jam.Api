@@ -14,9 +14,7 @@ public class PlaySceneDto
 
     // For QuestionScenes
     public string? Question { get; set; }
-    public IEnumerable<AnswerOption>? AnswerOptions { get; set; } 
-    public int? SelectedAnswerId { get; set; } // user’s selected answer in the form 
-    public Guid AnswerRandomSeed { get; set; } // in case client-side validation fails 
+    public IEnumerable<AnswerOption>? AnswerOptions { get; set; }  
 
 
     public int? NextSceneAfterIntroId { get; set; } // To navigate from IntroScene to first QuestionScene

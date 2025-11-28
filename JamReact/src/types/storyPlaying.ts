@@ -1,5 +1,12 @@
 import { SceneType } from "./enums";
-import { AnswerOption } from "./answerOption";
+
+export interface IAnswerOption {
+	answerOptionId?: number;
+	answer: string;
+	feedbackText: string;
+	isCorrect: boolean;
+	questionSceneId: number;
+}
 
 export interface IAnswerFeedback {
 	sceneText: string; // Feedback from chosen AnswerOption
@@ -20,7 +27,7 @@ export interface IPlayScene {
 
 	// For QuestionScenes
 	question: string | null;
-	answerOptions: AnswerOption[] | null;
+	answerOptions: IAnswerOption[] | null;
 
 	nextSceneAfterIntroId: number | null; // To navigate from IntroScene to first QuestionScene
 
@@ -36,7 +43,7 @@ export interface IStartSessionResponse {
 	sceneType: SceneType;
 }
 
-export interface SessionState {
+export interface ISessionState {
 	sessionId: number | null;
 	currentSceneId: number | null;
 	currentSceneType: SceneType | null;

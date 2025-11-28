@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Jam.Api.DTOs.IntroScenes;
 
-public class IntroSceneDto //get dto
+public class IntroSceneDto 
 {
     public int StoryId { get; set; }
     [Required]

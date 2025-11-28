@@ -1,6 +1,6 @@
 namespace Jam.Api.DTOs.QuestionScenes;
 
-public class QuestionSceneDto //get dto
+public class QuestionSceneDto
 {
     public int QuestionSceneId { get; set; }
     public string StoryText { get; set; } = "";

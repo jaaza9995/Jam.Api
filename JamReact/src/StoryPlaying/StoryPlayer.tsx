@@ -1,9 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { IPlayScene } from "../types/storyPlaying";
+import { IPlayScene, ISessionState, IAnswerOption } from "../types/storyPlaying";
 import { SceneType } from "../types/enums";
-import { AnswerOption } from "../types/answerOption";
-import { SessionState } from "../types/storyPlaying";
 import { useNavigate } from "react-router-dom";
 import {
 	startSession as startSessionService,
@@ -13,21 +11,18 @@ import {
 } from "./StoryPlayingService";
 
 export const StoryPlayer: React.FC = () => {
+	const { storyId } = useParams<{ storyId: string }>();
 
-    // --- NY LOGIKK: Hente ID internt ---
-    const { storyId } = useParams<{ storyId: string }>();
+	// Konvertere streng til tall
+	const storyIdNumber = parseInt(storyId || "0", 10);
 
-    // Konvertere streng til tall
-    const storyIdNumber = parseInt(storyId || "0", 10); 
-    
-    // Initial validitetssjekk
-    if (!storyIdNumber) {
-        return <div>Feil: Story ID missing or invalid.</div>;
-    }
-    // --- SLUTT PÅ NY LOGIKK ---
+	// Initial validitetssjekk
+	if (!storyIdNumber) {
+		return <div>Feil: Story ID missing or invalid.</div>;
+	}
 
 	// 1. Game State (keys for API-call)
-	const [session, setSession] = useState<SessionState>({
+	const [session, setSession] = useState<ISessionState>({
 		sessionId: null,
 		currentSceneId: null,
 		currentSceneType: null,
@@ -45,7 +40,7 @@ export const StoryPlayer: React.FC = () => {
 	const [error, setError] = useState<string | null>(null);
 
 	// 4. User's chosen AnswerOption
-	const [selectedOption, setSelectedOption] = useState<AnswerOption | null>(
+	const [selectedOption, setSelectedOption] = useState<IAnswerOption | null>(
 		null
 	);
 
@@ -67,7 +62,7 @@ export const StoryPlayer: React.FC = () => {
 
 	// Function to start a new game session
 	const startSession = useCallback(async () => {
-		// Check if the session has already started (extra security, but useRef fixes the problem in useEffect)
+		// Check if the session has already started
 		if (session.sessionId) return;
 
 		setIsLoading(true);
@@ -77,7 +72,7 @@ export const StoryPlayer: React.FC = () => {
 			// Call the service layer
 			const data = await startSessionService(storyIdNumber);
 
-			setSession((prev: SessionState) => ({
+			setSession((prev: ISessionState) => ({
 				...prev,
 				sessionId: data.sessionId,
 				currentSceneId: data.sceneId,
@@ -90,7 +85,7 @@ export const StoryPlayer: React.FC = () => {
 		}
 	}, [storyId, session.sessionId]);
 
-    // Function to start the first QuestionScene after the IntroScene
+	// Function to start the first QuestionScene after the IntroScene
 	const startFirstQuestion = () => {
 		// Checks if we have data and are in the IntroScene
 		if (!currentSceneData || currentSceneData.sceneType !== SceneType.Intro)
@@ -108,7 +103,7 @@ export const StoryPlayer: React.FC = () => {
 		}
 
 		// Updates state: This automatically triggers fetchScene via useEffect
-		setSession((prev: SessionState) => ({
+		setSession((prev: ISessionState) => ({
 			...prev,
 			currentSceneId: nextId,
 			currentSceneType: SceneType.Question as SceneType,
@@ -135,7 +130,7 @@ export const StoryPlayer: React.FC = () => {
 		setNextSceneKeys(null);
 
 		// Set new session to trigger fetchScene
-		setSession((prev: SessionState) => ({
+		setSession((prev: ISessionState) => ({
 			...prev,
 			currentSceneId: nextSceneKeys.id,
 			currentSceneType: nextSceneKeys.type,
@@ -207,7 +202,7 @@ export const StoryPlayer: React.FC = () => {
 	};
 
 	// Function to send selected response to API
-	const handleAnswer = async (selectedAnswer: AnswerOption) => {
+	const handleAnswer = async (selectedAnswer: IAnswerOption) => {
 		// Check that we have a valid session
 		if (!session.sessionId) {
 			setError("The game session has not started.");
@@ -240,7 +235,7 @@ export const StoryPlayer: React.FC = () => {
 				setCurrentSceneData(null);
 				const gameOverScore = result.score;
 
-				setSession((prev: SessionState) => ({
+				setSession((prev: ISessionState) => ({
 					...prev,
 					score: gameOverScore,
 					currentSceneId: null,
@@ -256,7 +251,7 @@ export const StoryPlayer: React.FC = () => {
 			const feedback = result.feedback;
 
 			// 1. Update score and level
-			setSession((prev: SessionState) => ({
+			setSession((prev: ISessionState) => ({
 				...prev,
 				score: feedback.newScore,
 				level: feedback.newLevel,

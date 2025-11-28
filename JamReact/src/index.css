@@ -1,43 +1,44 @@
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
 
 /* RESET / GLOBAL FIX */
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow-x: hidden;        /* hindrer hvite sider */
-  background: #140c1c;       /* global mørk bakgrunn */
-  color: #fff;
+html,
+body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	overflow-x: hidden; /* hindrer hvite sider */
+	background: #140c1c; /* global mørk bakgrunn */
+	color: #fff;
 }
 
 * {
-  font-family: 'Press Start 2P', cursive !important;
-  box-sizing: border-box;
+	font-family: "Press Start 2P", cursive !important;
+	box-sizing: border-box;
 }
 
 :root {
-  line-height: 1.5;
-  font-weight: 400;
+	line-height: 1.5;
+	font-weight: 400;
 
-  color-scheme: dark;
-  color: #ffffff;
-  background-color: #140c1c;
+	color-scheme: dark;
+	color: #ffffff;
+	background-color: #140c1c;
 
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 /* LINKS */
 a {
-  font-weight: 500;
-  color: #9d6dff;
-  text-decoration: none;
+	font-weight: 500;
+	color: #9d6dff;
+	text-decoration: none;
 }
 a:hover {
-  color: #caa3ff;
+	color: #caa3ff;
 }
 
 /* BODY FIX */
 body {
-  overscroll-behavior: none;
+	overscroll-behavior: none;
 }
