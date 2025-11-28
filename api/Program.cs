@@ -1,18 +1,18 @@
-using Microsoft.EntityFrameworkCore;
-using Serilog;
-using Serilog.Events;
-using Jam.Api.Models;
-using Microsoft.AspNetCore.Identity;
 using Jam.Api.DAL;
 using Jam.Api.DAL.AnswerOptionDAL;
 using Jam.Api.DAL.PlayingSessionDAL;
 using Jam.Api.DAL.SceneDAL;
 using Jam.Api.DAL.StoryDAL;
+using Jam.Api.Models;
+using Jam.Api.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.OpenApi.Models;
-using Jam.Api.DAL.Services;
+using Serilog;
+using Serilog.Events;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -86,24 +86,25 @@ builder.Services.AddIdentity<AuthUser, IdentityRole>()
 
 builder.Services.AddCors(options =>
     {
-    options.AddPolicy("CorsPolicy", builder =>
-    {
-        builder.WithOrigins(
-                "http://localhost:4000"  // custom Vite port (matches VITE_PORT)
-            ) // Allow requests from the React frontend
-               .AllowAnyMethod()
-               .AllowAnyHeader()
-               .AllowCredentials();
+        options.AddPolicy("CorsPolicy", builder =>
+        {
+            builder.WithOrigins(
+                    "http://localhost:4000"  // custom Vite port (matches VITE_PORT)
+                ) // Allow requests from the React frontend
+                   .AllowAnyMethod()
+                   .AllowAnyHeader()
+                   .AllowCredentials();
+        });
     });
-});
 
 builder.Services.AddScoped<IAnswerOptionRepository, AnswerOptionRepository>();
-builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IPlayingSessionRepository, PlayingSessionRepository>();
 builder.Services.AddScoped<ISceneRepository, SceneRepository>();
 builder.Services.AddScoped<IStoryRepository, StoryRepository>();
-
-builder.Services.AddScoped<StoryCodeService>();
+builder.Services.AddScoped<IStoryPlayingService, StoryPlayingService>();
+builder.Services.AddScoped<IStoryCodeService, StoryCodeService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 
 builder.Services.AddAuthorization(options =>
 {

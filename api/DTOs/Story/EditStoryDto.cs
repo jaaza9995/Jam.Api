@@ -1,5 +1,5 @@
 using Jam.Api.Models.Enums;
-using System.ComponentModel.DataAnnotations; //keep
+using System.ComponentModel.DataAnnotations;
 
 namespace Jam.Api.DTOs.Story;
 
@@ -10,7 +10,6 @@ public class EditStoryDto
     [Required]
     [MinLength(3, ErrorMessage = "Title must be at least 10 characters")]
     public string Title { get; set; } = string.Empty;
-
 
     [Required]
     [MinLength(10, ErrorMessage = "Description must be at least 10 characters")]
@@ -23,4 +22,6 @@ public class EditStoryDto
     public Accessibility Accessibility { get; set; }
 
     public string? Code { get; set; }
+
+    public int QuestionCount { get; set; }
 }

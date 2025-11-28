@@ -22,7 +22,7 @@ public class PlayingSessionRepository : IPlayingSessionRepository
 
     // --------------------------------------- Read / GET ---------------------------------------
 
-    public async Task<IEnumerable<PlayingSession>> GetAllPlayingSessions()
+    public async Task<IEnumerable<PlayingSession>> GetAllPlayingSessions() // used in AdminController, bu that method is not in use)
     {
         try
         {
@@ -60,7 +60,7 @@ public class PlayingSessionRepository : IPlayingSessionRepository
         }
     }
 
-    public async Task<IEnumerable<PlayingSession>> GetPlayingSessionsByUserId(string userId)
+    public async Task<IEnumerable<PlayingSession>> GetPlayingSessionsByUserId(string userId) // not in use
     {
         if (string.IsNullOrWhiteSpace(userId))
         {
@@ -81,7 +81,7 @@ public class PlayingSessionRepository : IPlayingSessionRepository
         }
     }
 
-    public async Task<IEnumerable<PlayingSession>> GetPlayingSessionsByStoryId(int storyId)
+    public async Task<IEnumerable<PlayingSession>> GetPlayingSessionsByStoryId(int storyId) // not in use
     {
         if (storyId <= 0)
         {
@@ -102,7 +102,7 @@ public class PlayingSessionRepository : IPlayingSessionRepository
         }
     }
 
-    public async Task<IEnumerable<PlayingSession>> GetPlayingSessionsByUserIdAndStoryId(string userId, int storyId)
+    public async Task<IEnumerable<PlayingSession>> GetPlayingSessionsByUserIdAndStoryId(string userId, int storyId) // not in use
     {
         if (string.IsNullOrWhiteSpace(userId))
         {
@@ -129,7 +129,7 @@ public class PlayingSessionRepository : IPlayingSessionRepository
         }
     }
 
-    public async Task<int?> GetUserHighScoreForStory(string userId, int storyId)
+    public async Task<int?> GetUserHighScoreForStory(string userId, int storyId) // not in use
     {
         if (string.IsNullOrWhiteSpace(userId))
         {
@@ -312,7 +312,7 @@ public class PlayingSessionRepository : IPlayingSessionRepository
 
     // --------------------------------------- Delete ---------------------------------------
 
-    public async Task<bool> DeletePlayingSession(int playingSessionId)
+    public async Task<bool> DeletePlayingSession(int playingSessionId) // not in use
     {
         if (playingSessionId <= 0)
         {

@@ -20,7 +20,7 @@ public class AnswerOptionRepository : IAnswerOptionRepository
 
     // --------------------------------------- Read / GET ---------------------------------------
 
-    public async Task<IEnumerable<AnswerOption>> GetAllAnswerOptions()
+    public async Task<IEnumerable<AnswerOption>> GetAllAnswerOptions() // not in use
     {
         try
         {
@@ -33,7 +33,7 @@ public class AnswerOptionRepository : IAnswerOptionRepository
         }
     }
 
-    public async Task<IEnumerable<AnswerOption>> GetAnswerOptionsByQuestionSceneId(int questionSceneId)
+    public async Task<IEnumerable<AnswerOption>> GetAnswerOptionsByQuestionSceneId(int questionSceneId) // not in use
     {
         if (questionSceneId <= 0)
         {
@@ -84,7 +84,7 @@ public class AnswerOptionRepository : IAnswerOptionRepository
 
     // --------------------------------------- Create ---------------------------------------
 
-    public async Task<bool> AddAnswerOption(AnswerOption answerOption)
+    public async Task<bool> AddAnswerOption(AnswerOption answerOption) // not in use
     {
         if (answerOption == null)
         {
@@ -109,7 +109,7 @@ public class AnswerOptionRepository : IAnswerOptionRepository
 
     // --------------------------------------- Update ---------------------------------------
 
-    public async Task<bool> UpdateAnswerOption(AnswerOption answerOption)
+    public async Task<bool> UpdateAnswerOption(AnswerOption answerOption) // not in use
     {
         if (answerOption == null)
         {
@@ -134,7 +134,7 @@ public class AnswerOptionRepository : IAnswerOptionRepository
 
     // --------------------------------------- Delete ---------------------------------------
 
-    public async Task<bool> DeleteAnswerOption(int answerOptionId)
+    public async Task<bool> DeleteAnswerOption(int answerOptionId) // not in use
     {
         if (answerOptionId <= 0)
         {

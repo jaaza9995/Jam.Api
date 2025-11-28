@@ -83,7 +83,7 @@ public class SceneRepository : ISceneRepository
         }
     }
 
-    public async Task<bool> AddIntroScene(IntroScene introScene)
+    public async Task<bool> AddIntroScene(IntroScene introScene) // not in use
     {
         if (introScene == null)
         {
@@ -125,7 +125,7 @@ public class SceneRepository : ISceneRepository
         }
     }
 
-    public async Task<bool> DeleteIntroScene(int introSceneId)
+    public async Task<bool> DeleteIntroScene(int introSceneId) // not in use
     {
         if (introSceneId <= 0)
         {
@@ -265,7 +265,7 @@ public class SceneRepository : ISceneRepository
         }
     }
 
-    public async Task<QuestionScene?> GetQuestionSceneById(int questionSceneId)
+    public async Task<QuestionScene?> GetQuestionSceneById(int questionSceneId) // not in use
     {
         if (questionSceneId <= 0)
         {
@@ -354,7 +354,7 @@ public class SceneRepository : ISceneRepository
     }
 
 
-    public async Task<bool> AddQuestionScene(QuestionScene questionScene)
+    public async Task<bool> AddQuestionScene(QuestionScene questionScene) // not in use
     {
         if (questionScene == null)
         {
@@ -375,7 +375,7 @@ public class SceneRepository : ISceneRepository
         }
     }
 
-    public async Task<bool> UpdateQuestionScene(QuestionScene questionScene)
+    public async Task<bool> UpdateQuestionScene(QuestionScene questionScene) // not in use
     {
         if (questionScene == null)
         {
@@ -396,6 +396,7 @@ public class SceneRepository : ISceneRepository
         }
     }
 
+    // This might be considered business logic and should be moved to the service layer or controller
     public async Task<bool> UpdateQuestionScenes(IEnumerable<QuestionScene> questionScenes)
     {
         var updatedScenes = questionScenes?.ToList() ?? new List<QuestionScene>();
@@ -409,7 +410,7 @@ public class SceneRepository : ISceneRepository
         {
             var storyId = updatedScenes.First().StoryId;
 
-            // Hent eksisterende scener
+            // Get existing scenes
             var existingScenes = await _db.QuestionScenes
                 .Include(q => q.AnswerOptions)
                 .Where(q => q.StoryId == storyId)
@@ -419,10 +420,11 @@ public class SceneRepository : ISceneRepository
             int updatedCount = 0;
             int deletedCount = 0;
 
-            // --- Finn og slett scener som er fjernet fra modellen ---
-            var modelIds = updatedScenes.Where(q => q.QuestionSceneId != 0)
-                                         .Select(q => q.QuestionSceneId)
-                                         .ToHashSet();
+            // Find and delete scenes that have been removed from the model
+            var modelIds = updatedScenes
+                .Where(q => q.QuestionSceneId != 0)
+                    .Select(q => q.QuestionSceneId)
+                    .ToHashSet();
 
             var toDelete = existingScenes.Where(s => !modelIds.Contains(s.QuestionSceneId)).ToList();
             if (toDelete.Any())
@@ -431,14 +433,14 @@ public class SceneRepository : ISceneRepository
                 deletedCount = toDelete.Count;
             }
 
-            // --- Legg til eller oppdater scener og behold rekkefølgen for lenking ---
+            // Add or update scenes and preserve the linking order
             var trackedInOrder = new List<QuestionScene>();
 
             foreach (var updatedScene in updatedScenes)
             {
                 if (updatedScene.QuestionSceneId == 0)
                 {
-                    // 🔹 Ny scene
+                    // New scene
                     foreach (var answer in updatedScene.AnswerOptions)
                         answer.QuestionScene = updatedScene;
 
@@ -448,17 +450,17 @@ public class SceneRepository : ISceneRepository
                 }
                 else
                 {
-                    // 🔹 Eksisterende scene
+                    // Existing scene
                     var existingScene = existingScenes.FirstOrDefault(q => q.QuestionSceneId == updatedScene.QuestionSceneId);
                     if (existingScene == null) continue;
 
                     existingScene.SceneText = updatedScene.SceneText;
                     existingScene.Question = updatedScene.Question;
 
-                    // Fjern gamle svaralternativer
+                    // Remove old answeroptions from existing scene
                     _db.AnswerOptions.RemoveRange(existingScene.AnswerOptions);
 
-                    // Knytt nye svar til scenen
+                    // Connect new answeroptions to existing scene
                     foreach (var answer in updatedScene.AnswerOptions)
                         answer.QuestionSceneId = existingScene.QuestionSceneId;
 
@@ -469,10 +471,10 @@ public class SceneRepository : ISceneRepository
                 }
             }
 
-            // Første lagring for å sikre at nye scener får genererte ID-er
+            // First save to ensure new scenes get generated IDs
             await _db.SaveChangesAsync();
 
-            // --- Oppdater NextQuestionSceneId slik at alle nye spørsmål lenkes i lagret rekkefølge ---
+            // Update NextQuestionSceneId so that all new questions are linked in the saved order
             for (int i = 0; i < trackedInOrder.Count; i++)
             {
                 var nextId = (i < trackedInOrder.Count - 1)
@@ -485,10 +487,10 @@ public class SceneRepository : ISceneRepository
 
             await _db.SaveChangesAsync();
 
-            // --- Logg resultatet ---
+            // Log result
             _logger.LogInformation(
-                "[🔹SceneRepository -> UpdateQuestionScenes] Endringer lagret for storyId={storyId}. " +
-                "🔹Added={addedCount}, Updated={updatedCount}, Deleted={deletedCount}",
+                "[SceneRepository -> UpdateQuestionScenes] Endringer lagret for storyId={storyId}. " +
+                "Added={addedCount}, Updated={updatedCount}, Deleted={deletedCount}",
                 storyId, addedCount, updatedCount, deletedCount
             );
 
@@ -496,7 +498,7 @@ public class SceneRepository : ISceneRepository
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "[🔹SceneRepository -> UpdateQuestionScenes] Error updating QuestionScenes");
+            _logger.LogError(e, "[SceneRepository -> UpdateQuestionScenes] Error updating QuestionScenes");
             return false;
         }
     }
@@ -524,7 +526,7 @@ public class SceneRepository : ISceneRepository
 
             var nextSceneId = scene.NextQuestionSceneId;
 
-            // 🔹 Hvis det finnes en forrige scene, koble den til neste
+            // If there is a previous scene, connect it to the next one
             if (previousSceneId.HasValue)
             {
                 var previous = await _db.QuestionScenes.FindAsync(previousSceneId.Value);
@@ -536,8 +538,8 @@ public class SceneRepository : ISceneRepository
             }
             else
             {
-                // 🔹 Hvis ingen forrige scene, betyr det at dette var den første scenen.
-                // Da lar vi neste scene være "ny start" (du kan senere oppdatere dette i Story om du vil)
+                // If no previous scene, that means this was the first scene
+                // Then we'll leave the next scene as "fresh start"
                 if (nextSceneId.HasValue)
                 {
                     var nextScene = await _db.QuestionScenes.FindAsync(nextSceneId.Value);
@@ -606,8 +608,8 @@ public class SceneRepository : ISceneRepository
         try
         {
             var ending = await _db.EndingScenes
-             .AsNoTracking()
-             .FirstOrDefaultAsync(e => e.EndingSceneId == endingSceneId);
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.EndingSceneId == endingSceneId);
 
             if (ending == null)
             {
@@ -638,7 +640,7 @@ public class SceneRepository : ISceneRepository
         return await GetEndingSceneByTypeAsync(storyId, EndingType.Bad, "Bad");
     }
 
-    // Added this private method to reduce redundancy in the three methods above
+    // private method to reduce code duplication
     private async Task<EndingScene?> GetEndingSceneByTypeAsync(int storyId, EndingType type, string typeName)
     {
         if (storyId <= 0)
@@ -667,7 +669,7 @@ public class SceneRepository : ISceneRepository
         }
     }
 
-    public async Task<bool> AddEndingScene(EndingScene endingScene)
+    public async Task<bool> AddEndingScene(EndingScene endingScene) // not in use
     {
         if (endingScene == null)
         {
@@ -688,7 +690,7 @@ public class SceneRepository : ISceneRepository
         }
     }
 
-    public async Task<bool> UpdateEndingScene(EndingScene endingScene)
+    public async Task<bool> UpdateEndingScene(EndingScene endingScene) // not in use
     {
         if (endingScene == null)
         {
@@ -747,7 +749,7 @@ public class SceneRepository : ISceneRepository
         }
     }
 
-    public async Task<bool> DeleteEndingScene(int endingSceneId)
+    public async Task<bool> DeleteEndingScene(int endingSceneId) // not in use
     {
         if (endingSceneId <= 0)
         {
