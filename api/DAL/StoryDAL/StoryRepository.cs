@@ -142,7 +142,7 @@ public class StoryRepository : IStoryRepository
         }
     }
 
-    public async Task<Story?> GetPublicStoryById(int storyId)
+    public async Task<Story?> GetPublicStoryById(int storyId) // not in use
     {
         if (storyId <= 0)
         {
@@ -221,7 +221,25 @@ public class StoryRepository : IStoryRepository
         }
     }
 
-    public async Task<string?> GetCodeForStory(int storyId)
+    public async Task<Dictionary<int, int>> GetQuestionCountsForStories(IEnumerable<int> storyIds)
+    {
+        if (!storyIds.Any()) return new Dictionary<int, int>();
+
+        try
+        {
+            return await _db.QuestionScenes
+                .Where(qs => storyIds.Contains(qs.StoryId))
+                .GroupBy(qs => qs.StoryId)
+                .ToDictionaryAsync(g => g.Key, g => g.Count());
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[StoryRepository -> GetQuestionCountsForStoriesAsync] Error counting questions for stories");
+            return new Dictionary<int, int>();
+        }
+    }
+
+    public async Task<string?> GetCodeForStory(int storyId) // not in use
     {
         if (storyId <= 0)
         {
@@ -255,7 +273,7 @@ public class StoryRepository : IStoryRepository
 
     // --------------------------------------- Creation Mode ---------------------------------------
 
-    public async Task<bool> AddStory(Story story)
+    public async Task<bool> AddStory(Story story) // not in use
     {
         if (story == null)
         {
@@ -457,6 +475,35 @@ public class StoryRepository : IStoryRepository
         catch (Exception e)
         {
             _logger.LogError(e, "[StoryRepository -> IncrementFailed] Failed to increment failed count for story id {storyId}", storyId);
+            return false;
+        }
+    }
+
+
+
+
+    // --------------------------------------- Admin ---------------------------------------
+    public async Task<bool> ClearOwnershipForUserAsync(string userId)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            _logger.LogWarning("[StoryRepository -> ClearOwnershipForUserAsync] Invalid user id {userId} provided", userId);
+            return false;
+        }
+
+        try
+        {
+            int affectedRows = await _db.Stories
+                .Where(s => s.UserId == userId)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(st => st.UserId, st => null));
+
+            _logger.LogInformation("[StoryRepository -> ClearOwnershipForUserAsync] Cleared ownership for {count} stories owned by user id {userId}", affectedRows, userId);
+            return true;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[StoryRepository -> ClearOwnershipForUserAsync] Failed to clear ownership for stories owned by user id {userId}", userId);
             return false;
         }
     }

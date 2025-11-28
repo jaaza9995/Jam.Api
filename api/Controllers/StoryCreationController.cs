@@ -1,7 +1,6 @@
 using Jam.Api.DAL.AnswerOptionDAL;
 using Jam.Api.DAL.SceneDAL;
 using Jam.Api.DAL.StoryDAL;
-using Jam.Api.DAL.Services;
 using Jam.Api.DTOs.Story;
 using Jam.Api.DTOs.IntroScenes;
 using Jam.Api.DTOs.QuestionScenes;
@@ -10,6 +9,7 @@ using Jam.Api.DTOs.Shared;
 using Jam.Api.Extensions;
 using Jam.Api.Models;
 using Jam.Api.Models.Enums;
+using Jam.Api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,30 +20,30 @@ namespace Jam.Api.Controllers;
 public class StoryCreationController : ControllerBase
 {
     private readonly IStoryRepository _storyRepo;
-    private readonly StoryCodeService _codeService;
+    private readonly IStoryCodeService _codeService;
     private readonly UserManager<AuthUser> _userManager;
     private readonly ISceneRepository _sceneRepo;
     private readonly IAnswerOptionRepository _answerRepo;
     private readonly ILogger<StoryCreationController> _logger;
 
-   public StoryCreationController(
-    IStoryRepository storyRepo,
-    ISceneRepository sceneRepo,
-    IAnswerOptionRepository answerRepo,
-    StoryCodeService codeService,
-    UserManager<AuthUser> userManager,
-    ILogger<StoryCreationController> logger)
-{
-    _storyRepo = storyRepo;
-    _sceneRepo = sceneRepo;
-    _answerRepo = answerRepo;
-    _codeService = codeService;
-    _userManager = userManager;
-    _logger = logger;
-}
-    // =====================================================================
+    public StoryCreationController(
+     IStoryRepository storyRepo,
+     ISceneRepository sceneRepo,
+     IAnswerOptionRepository answerRepo,
+     IStoryCodeService codeService,
+     UserManager<AuthUser> userManager,
+     ILogger<StoryCreationController> logger)
+    {
+        _storyRepo = storyRepo;
+        _sceneRepo = sceneRepo;
+        _answerRepo = answerRepo;
+        _codeService = codeService;
+        _userManager = userManager;
+        _logger = logger;
+    }
+    // ---------------------------------------------------------------
     // STEP 1 — STORY + INTRO
-    // =====================================================================
+    // ---------------------------------------------------------------
 
     [HttpPost("intro")]
     public IActionResult SaveIntro([FromBody] CreateStoryDto storyDto)
@@ -81,9 +81,11 @@ public class StoryCreationController : ControllerBase
         });
     }
 
-    // =====================================================================
+
+
+    // ---------------------------------------------------------------
     // STEP 2 — INTRO TEXT
-    // =====================================================================
+    // ---------------------------------------------------------------
 
     [HttpPost("intro-text")]
     public IActionResult SaveIntroText([FromBody] IntroSceneDto dto)
@@ -110,9 +112,11 @@ public class StoryCreationController : ControllerBase
         return Ok(new { session.IntroText });
     }
 
-    // =====================================================================
+
+
+    // ---------------------------------------------------------------
     // STEP 3 — QUESTION SCENES
-    // =====================================================================
+    // ---------------------------------------------------------------
 
     [HttpGet("questions")]
     public IActionResult GetQuestions()
@@ -123,41 +127,40 @@ public class StoryCreationController : ControllerBase
         return Ok(session.QuestionScenes);
     }
 
-   [HttpPost("questions")]
-public IActionResult SaveQuestions([FromBody] QuestionScenesPayload payload)
-{
-    if (!ModelState.IsValid)
-        return BadRequest(ModelState);
-
-    var session = HttpContext.Session.GetObject<StoryCreationSession>("CreateStory")
-                ?? new StoryCreationSession();
-
-    session.QuestionScenes = payload.QuestionScenes.Select(q => new QuestionSceneDto
+    [HttpPost("questions")]
+    public IActionResult SaveQuestions([FromBody] QuestionScenesPayload payload)
     {
-        QuestionSceneId = q.QuestionSceneId,
-        StoryText = q.StoryText,
-        QuestionText = q.QuestionText,
-        CorrectAnswerIndex = q.CorrectAnswerIndex,
-        Answers = q.Answers
-    }).ToList();
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-    HttpContext.Session.SetObject("CreateStory", session);
+        var session = HttpContext.Session.GetObject<StoryCreationSession>("CreateStory")
+                    ?? new StoryCreationSession();
 
-    // 🔥 Samme logikk som i HomeController, men uten per-question felt
-    var questionCount = session.QuestionScenes.Count;
+        session.QuestionScenes = payload.QuestionScenes.Select(q => new QuestionSceneDto
+        {
+            QuestionSceneId = q.QuestionSceneId,
+            StoryText = q.StoryText,
+            QuestionText = q.QuestionText,
+            CorrectAnswerIndex = q.CorrectAnswerIndex,
+            Answers = q.Answers
+        }).ToList();
 
-    return Ok(new 
-    { 
-        message = "Questions saved.",
-        questionCount
-    });
-}
+        HttpContext.Session.SetObject("CreateStory", session);
+
+        var questionCount = session.QuestionScenes.Count;
+
+        return Ok(new
+        {
+            message = "Questions saved.",
+            questionCount
+        });
+    }
 
 
 
-    // =====================================================================
+    // ---------------------------------------------------------------
     // STEP 4 — ENDING SCENES
-    // =====================================================================
+    // ---------------------------------------------------------------
 
     [HttpGet("endings")]
     public IActionResult GetEndings()
@@ -195,9 +198,10 @@ public IActionResult SaveQuestions([FromBody] QuestionScenesPayload payload)
     }
 
 
-    // =====================================================================
+
+    // ---------------------------------------------------------------
     // FINAL STEP — CREATE STORY IN DATABASE
-    // =====================================================================
+    // ---------------------------------------------------------------
 
     [HttpPost("create")]
     public async Task<IActionResult> CreateStory()
@@ -210,6 +214,40 @@ public IActionResult SaveQuestions([FromBody] QuestionScenesPayload payload)
         if (user == null)
             return Unauthorized(new ErrorDto { ErrorTitle = "Not logged in" });
 
+        // Map all QuestionScenes first, without linking them together
+        var questionScenes = session.QuestionScenes.Select(q => new QuestionScene
+        {
+            SceneText = q.StoryText,
+            Question = q.QuestionText,
+            AnswerOptions = q.Answers.Select((a, i) => new AnswerOption
+            {
+                Answer = a.AnswerText,
+                FeedbackText = a.ContextText,
+                IsCorrect = i == q.CorrectAnswerIndex
+            }).ToList()
+        }).ToList();
+
+        // Link the QuestionScenes sequentially (Business Logic)
+        for (int i = 0; i < questionScenes.Count; i++)
+        {
+            questionScenes[i].NextQuestionScene = i < questionScenes.Count - 1
+            ? questionScenes[i + 1]
+            : null;
+
+            // Check if there is a next scene in the list
+            if (i < questionScenes.Count - 1)
+            {
+                // Set the NextQuestionScene navigation property on the current scene (i)
+                // to point to the object of the next scene (i + 1).
+                questionScenes[i].NextQuestionScene = questionScenes[i + 1];
+            }
+            else
+            {
+                // The last scene points to null (the end of the question chain)
+                questionScenes[i].NextQuestionScene = null;
+            }
+        }
+
         var story = new Story
         {
             Title = session.Title,
@@ -218,17 +256,7 @@ public IActionResult SaveQuestions([FromBody] QuestionScenesPayload payload)
             Accessibility = session.Accessibility,
             UserId = user.Id,
             IntroScene = new IntroScene { IntroText = session.IntroText },
-            QuestionScenes = session.QuestionScenes.Select(q => new QuestionScene
-            {
-                SceneText = q.StoryText,
-                Question = q.QuestionText,
-                AnswerOptions = q.Answers.Select((a, idx) => new AnswerOption
-                {
-                    Answer = a.AnswerText,
-                    FeedbackText = a.ContextText,
-                    IsCorrect = idx == q.CorrectAnswerIndex
-                }).ToList()
-            }).ToList(),
+            QuestionScenes = questionScenes,
             EndingScenes = new List<EndingScene>
             {
                 new EndingScene { EndingType = EndingType.Good, EndingText = session.GoodEnding },
@@ -250,8 +278,4 @@ public IActionResult SaveQuestions([FromBody] QuestionScenesPayload payload)
 
         return Ok(new { message = "Story created!", storyId = story.StoryId });
     }
-
-// =====================================================================
-// INTERNAL: Session DTO used only inside the controller
-// =====================================================================
 }

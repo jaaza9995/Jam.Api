@@ -7,13 +7,14 @@ public interface IStoryRepository
     // Read / GET
     Task<IEnumerable<Story>> GetAllStories();
     Task<IEnumerable<Story>> GetAllPublicStories();
-    Task<IEnumerable<Story>> GetAllPrivateStories(); 
+    Task<IEnumerable<Story>> GetAllPrivateStories();
     Task<IEnumerable<Story>> GetStoriesByUserId(string userId);
     Task<IEnumerable<Story>> GetMostRecentPlayedStories(string userId, int count = 5);
     Task<Story?> GetStoryById(int storyId);
     Task<Story?> GetPublicStoryById(int storyId); // not in use
-    Task<Story?> GetPrivateStoryByCode(string code); // not in use
-    Task<int?> GetAmountOfQuestionsForStory(int storyId); 
+    Task<Story?> GetPrivateStoryByCode(string code);
+    Task<int?> GetAmountOfQuestionsForStory(int storyId);
+    Task<Dictionary<int, int>> GetQuestionCountsForStories(IEnumerable<int> storyIds);
     Task<string?> GetCodeForStory(int storyId); // not in use
 
 
@@ -26,8 +27,14 @@ public interface IStoryRepository
     Task<bool> DoesCodeExist(string code);
 
 
+
     // Playing mode
     Task<bool> IncrementPlayed(int storyId);
     Task<bool> IncrementFinished(int storyId);
     Task<bool> IncrementFailed(int storyId);
-} 
+
+
+
+    // Admin
+    Task<bool> ClearOwnershipForUserAsync(string userId);
+}
