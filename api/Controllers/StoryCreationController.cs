@@ -24,21 +24,25 @@ public class StoryCreationController : ControllerBase
     private readonly UserManager<AuthUser> _userManager;
     private readonly ISceneRepository _sceneRepo;
     private readonly IAnswerOptionRepository _answerRepo;
+    private readonly IStoryCreationService _storyCreationService;
     private readonly ILogger<StoryCreationController> _logger;
 
     public StoryCreationController(
-     IStoryRepository storyRepo,
-     ISceneRepository sceneRepo,
-     IAnswerOptionRepository answerRepo,
-     IStoryCodeService codeService,
-     UserManager<AuthUser> userManager,
-     ILogger<StoryCreationController> logger)
+        IStoryRepository storyRepo,
+        ISceneRepository sceneRepo,
+        IAnswerOptionRepository answerRepo,
+        IStoryCodeService codeService,
+        UserManager<AuthUser> userManager,
+        IStoryCreationService storyCreationService,
+        ILogger<StoryCreationController> logger
+    )
     {
         _storyRepo = storyRepo;
         _sceneRepo = sceneRepo;
         _answerRepo = answerRepo;
         _codeService = codeService;
         _userManager = userManager;
+        _storyCreationService = storyCreationService;
         _logger = logger;
     }
     // ---------------------------------------------------------------
@@ -214,68 +218,26 @@ public class StoryCreationController : ControllerBase
         if (user == null)
             return Unauthorized(new ErrorDto { ErrorTitle = "Not logged in" });
 
-        // Map all QuestionScenes first, without linking them together
-        var questionScenes = session.QuestionScenes.Select(q => new QuestionScene
+        try
         {
-            SceneText = q.StoryText,
-            Question = q.QuestionText,
-            AnswerOptions = q.Answers.Select((a, i) => new AnswerOption
-            {
-                Answer = a.AnswerText,
-                FeedbackText = a.ContextText,
-                IsCorrect = i == q.CorrectAnswerIndex
-            }).ToList()
-        }).ToList();
+            // Delegate to service
+            var story = await _storyCreationService.CreateStoryFromSessionAsync(session, user);
+            if (story == null)
+                return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to create story" });
 
-        // Link the QuestionScenes sequentially (Business Logic)
-        for (int i = 0; i < questionScenes.Count; i++)
-        {
-            questionScenes[i].NextQuestionScene = i < questionScenes.Count - 1
-            ? questionScenes[i + 1]
-            : null;
+            // Save to DB
+            var saved = await _storyRepo.AddFullStory(story);
+            if (!saved)
+                return StatusCode(500, new ErrorDto { ErrorTitle = "Could not save story" });
 
-            // Check if there is a next scene in the list
-            if (i < questionScenes.Count - 1)
-            {
-                // Set the NextQuestionScene navigation property on the current scene (i)
-                // to point to the object of the next scene (i + 1).
-                questionScenes[i].NextQuestionScene = questionScenes[i + 1];
-            }
-            else
-            {
-                // The last scene points to null (the end of the question chain)
-                questionScenes[i].NextQuestionScene = null;
-            }
+            HttpContext.Session.Remove("CreateStory");
+
+            return Ok(new { message = "Story created!", storyId = story.StoryId });
         }
-
-        var story = new Story
+        catch (Exception ex)
         {
-            Title = session.Title,
-            Description = session.Description,
-            DifficultyLevel = session.DifficultyLevel,
-            Accessibility = session.Accessibility,
-            UserId = user.Id,
-            IntroScene = new IntroScene { IntroText = session.IntroText },
-            QuestionScenes = questionScenes,
-            EndingScenes = new List<EndingScene>
-            {
-                new EndingScene { EndingType = EndingType.Good, EndingText = session.GoodEnding },
-                new EndingScene { EndingType = EndingType.Neutral, EndingText = session.NeutralEnding },
-                new EndingScene { EndingType = EndingType.Bad, EndingText = session.BadEnding }
-            }
-        };
-
-        if (story.Accessibility == Accessibility.Private)
-        {
-            story.Code = await _codeService.GenerateUniqueStoryCodeAsync();
+            _logger.LogError(ex, "[StoryCreationController -> CreateStory] Failed to create story");
+            return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to create story" });
         }
-
-        var saved = await _storyRepo.AddFullStory(story);
-        if (!saved)
-            return StatusCode(500, new ErrorDto { ErrorTitle = "Could not save story" });
-
-        HttpContext.Session.Remove("CreateStory");
-
-        return Ok(new { message = "Story created!", storyId = story.StoryId });
     }
 }

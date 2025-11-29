@@ -106,6 +106,7 @@ builder.Services.AddScoped<IStoryCodeService, StoryCodeService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.AddScoped<IStoryEditingService, StoryEditingService>();
+builder.Services.AddScoped<IStoryCreationService, StoryCreationService>();
 
 builder.Services.AddAuthorization(options =>
 {
