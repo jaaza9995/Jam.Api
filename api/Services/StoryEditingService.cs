@@ -1,7 +1,6 @@
 using Jam.Api.DAL.SceneDAL;
 using Jam.Api.DTOs.QuestionScenes;
 using Jam.Api.Models;
-using System.Transactions;
 
 namespace Jam.Api.Services;
 
@@ -13,10 +12,9 @@ namespace Jam.Api.Services;
 /// 2. Adds new scenes and updates existing ones, preserving their order
 /// 3. Relinks scenes by updating NextQuestionSceneId to maintain the scene chain
 /// 
-/// All operations are wrapped in a TransactionScope to ensure atomicity:
-/// - If any step fails, the entire transaction rolls back, preventing partial/inconsistent updates
+/// This method relies on EF Core's built-in transaction support:
+/// - If any step fails, EF Core should roll back the changes
 /// - This guarantees that either all changes are saved or none are saved
-/// - Critical because breaking the scene chain or leaving orphaned data would corrupt the story
 /// </summary>
 public class StoryEditingService : IStoryEditingService
 {
@@ -40,115 +38,108 @@ public class StoryEditingService : IStoryEditingService
             return false;
         }
 
-        using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+        try
         {
-            try
+            // 1. Retrieve existing QuestionScenes (to find the ones to delete)
+            var existingScenes = await _sceneRepository.GetQuestionScenesByStoryId(storyId);
+
+            // 2. Find QuestionScenes to delete 
+            var newSceneIds = newScenes
+                .Where(q => q.QuestionSceneId != 0)
+                .Select(q => q.QuestionSceneId)
+                .ToHashSet();
+            var toDelete = existingScenes
+                .Where(s => !newSceneIds
+                .Contains(s.QuestionSceneId))
+                .ToList();
+
+            int addedCount = 0;
+            int updatedCount = 0;
+            int deletedCount = 0;
+
+            // 3. Delete QuestionScenes
+            foreach (var scene in toDelete)
             {
-                // 1. Retrieve existing QuestionScenes (to find the ones to delete)
-                var existingScenes = await _sceneRepository.GetQuestionScenesByStoryId(storyId);
+                await _sceneRepository.DeleteQuestionScene(scene.QuestionSceneId);
+                deletedCount++;
+            }
 
-                // 2. Find QuestionScenes to delete 
-                var newSceneIds = newScenes
-                    .Where(q => q.QuestionSceneId != 0)
-                    .Select(q => q.QuestionSceneId)
-                    .ToHashSet();
-                var toDelete = existingScenes
-                    .Where(s => !newSceneIds
-                    .Contains(s.QuestionSceneId))
-                    .ToList();
+            // 4. Loop to update, add, and track order
+            var trackedInOrder = new List<QuestionScene>();
 
-                int addedCount = 0;
-                int updatedCount = 0;
-                int deletedCount = 0;
+            foreach (var newScene in newScenes)
+            {
+                QuestionScene? sceneToUpdate;
 
-                // 3. Delete QuestionScenes
-                foreach (var scene in toDelete)
+                if (newScene.QuestionSceneId == 0)
                 {
-                    await _sceneRepository.DeleteQuestionScene(scene.QuestionSceneId);
-                    deletedCount++;
+                    // New QuestionScene (add to db)
+                    sceneToUpdate = new QuestionScene
+                    {
+                        SceneText = newScene.StoryText, // should be Scenetext
+                        Question = newScene.QuestionText,
+                        StoryId = storyId,
+                        AnswerOptions = newScene.Answers.Select(a => new AnswerOption
+                        {
+                            // Map properties from DTO to AnswerOption
+                            Answer = a.AnswerText,
+                            FeedbackText = a.ContextText,
+                            IsCorrect = newScene.Answers.IndexOf(a) == newScene.CorrectAnswerIndex
+                        }).ToList()
+                    };
+
+                    await _sceneRepository.AddQuestionScene(sceneToUpdate);
+                    addedCount++;
                 }
-
-                // 4. Loop to update, add, and track order
-                var trackedInOrder = new List<QuestionScene>();
-
-                foreach (var newScene in newScenes)
+                else
                 {
-                    QuestionScene? sceneToUpdate;
+                    // Existing QuestionScene (update in db)
+                    sceneToUpdate = existingScenes.FirstOrDefault(q => q.QuestionSceneId == newScene.QuestionSceneId);
+                    if (sceneToUpdate == null) continue;
 
-                    if (newScene.QuestionSceneId == 0)
+                    sceneToUpdate.SceneText = newScene.StoryText;
+                    sceneToUpdate.Question = newScene.QuestionText;
+
+                    // Update AnswerOptions
+                    sceneToUpdate.AnswerOptions.Clear();
+                    foreach (var answer in newScene.Answers)
                     {
-                        // New QuestionScene (add to db)
-                        sceneToUpdate = new QuestionScene
+                        sceneToUpdate.AnswerOptions.Add(new AnswerOption
                         {
-                            SceneText = newScene.StoryText, // should be Scenetext
-                            Question = newScene.QuestionText,
-                            StoryId = storyId,
-                            AnswerOptions = newScene.Answers.Select(a => new AnswerOption
-                            {
-                                // Map properties from DTO to AnswerOption
-                                Answer = a.AnswerText,
-                                FeedbackText = a.ContextText,
-                                IsCorrect = newScene.Answers.IndexOf(a) == newScene.CorrectAnswerIndex
-                            }).ToList()
-                        };
-
-                        await _sceneRepository.AddQuestionScene(sceneToUpdate);
-                        addedCount++;
-                    }
-                    else
-                    {
-                        // Existing QuestionScene (update in db)
-                        sceneToUpdate = existingScenes.FirstOrDefault(q => q.QuestionSceneId == newScene.QuestionSceneId);
-                        if (sceneToUpdate == null) continue;
-
-                        sceneToUpdate.SceneText = newScene.StoryText;
-                        sceneToUpdate.Question = newScene.QuestionText;
-
-                        // Update AnswerOptions
-                        sceneToUpdate.AnswerOptions.Clear();
-                        foreach (var answer in newScene.Answers)
-                        {
-                            sceneToUpdate.AnswerOptions.Add(new AnswerOption
-                            {
-                                // Map properties from DTO to AnswerOption
-                                Answer = answer.AnswerText,
-                                FeedbackText = answer.ContextText,
-                                IsCorrect = newScene.Answers.IndexOf(answer) == newScene.CorrectAnswerIndex
-                            });
-                        }
-
-                        await _sceneRepository.UpdateQuestionScene(sceneToUpdate);
-                        updatedCount++;
+                            // Map properties from DTO to AnswerOption
+                            Answer = answer.AnswerText,
+                            FeedbackText = answer.ContextText,
+                            IsCorrect = newScene.Answers.IndexOf(answer) == newScene.CorrectAnswerIndex
+                        });
                     }
 
-                    trackedInOrder.Add(sceneToUpdate);
+                    await _sceneRepository.UpdateQuestionScene(sceneToUpdate);
+                    updatedCount++;
                 }
 
-                // 5. Update NextQuestionSceneId to link in saved order
-                for (int i = 0; i < trackedInOrder.Count; i++)
-                {
-                    trackedInOrder[i].NextQuestionSceneId = (i < trackedInOrder.Count - 1) ? trackedInOrder[i + 1].QuestionSceneId : (int?)null;
-                    await _sceneRepository.UpdateQuestionScene(trackedInOrder[i]);
-                }
-
-                // Complete transaction
-                transaction.Complete();
-
-                // Log result
-                _logger.LogInformation(
-                    "[StoryEditingService -> UpdateQuestionScenesAsync] Changes saved for storyId={storyId}. " +
-                    "Added={addedCount}, Updated={updatedCount}, Deleted={deletedCount}",
-                    storyId, addedCount, updatedCount, deletedCount
-                );
-
-                return true;
+                trackedInOrder.Add(sceneToUpdate);
             }
-            catch (Exception ex)
+
+            // 5. Update NextQuestionSceneId to link in saved order
+            for (int i = 0; i < trackedInOrder.Count; i++)
             {
-                _logger.LogError(ex, "[StoryEditingService -> UpdateQuestionScenesAsync] Error updating scenes for storyId={storyId}. Transaction rolled back.", storyId);
-                transaction.Dispose(); // Rollback happens automatically
-                return false;
+                trackedInOrder[i].NextQuestionSceneId = (i < trackedInOrder.Count - 1) ? trackedInOrder[i + 1].QuestionSceneId : (int?)null;
+                await _sceneRepository.UpdateQuestionScene(trackedInOrder[i]);
             }
+
+            // Log result
+            _logger.LogInformation(
+                "[StoryEditingService -> UpdateQuestionScenesAsync] Changes saved for storyId={storyId}. " +
+                "Added={addedCount}, Updated={updatedCount}, Deleted={deletedCount}",
+                storyId, addedCount, updatedCount, deletedCount
+            );
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[StoryEditingService -> UpdateQuestionScenesAsync] Error updating scenes for storyId={storyId}. Transaction rolled back.", storyId);
+            return false;
         }
     }
 }
