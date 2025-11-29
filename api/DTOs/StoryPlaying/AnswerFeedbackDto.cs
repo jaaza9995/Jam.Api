@@ -12,4 +12,6 @@ public class AnswerFeedbackDto
     public int NewScore { get; set; }
     public int NewLevel { get; set; }
     public int SelectedAnswerId { get; set; }
+    public bool IsGameOver { get; set; } = false;
+    public string? Message { get; set; }
 }

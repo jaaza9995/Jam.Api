@@ -9,7 +9,7 @@ using Jam.Api.Models.Enums;
 using Jam.Api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+
 
 namespace Jam.Api.Controllers;
 
@@ -32,7 +32,8 @@ public class StoryPlayingController : ControllerBase
         IAnswerOptionRepository answerOptionRepository,
         UserManager<AuthUser> userManager,
         IStoryPlayingService storyPlayingService,
-        ILogger<StoryPlayingController> logger)
+        ILogger<StoryPlayingController> logger
+    )
     {
         _playingSessionRepository = playingSessionRepository;
         _storyRepository = storyRepository;
@@ -47,13 +48,17 @@ public class StoryPlayingController : ControllerBase
     // ----------------------------------------------------------------------------------------
     // 1. START STORY (begin playing session)
     // ----------------------------------------------------------------------------------------
+
     [HttpPost("start/{storyId}")]
     public async Task<IActionResult> StartStory(int storyId)
     {
         try
         {
             // 1. Get UserId
-            var userId = GetCurrentUserId();
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return Unauthorized(new ErrorDto { ErrorTitle = "Not logged in" });
+            var userId = user.Id;
 
             // 2. Get Story and validate access
             var story = await _storyRepository.GetStoryById(storyId);
@@ -76,26 +81,42 @@ public class StoryPlayingController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error starting story {StoryId}", storyId);
+            _logger.LogError(e, "[StoryPlayingController -> StartStory] Error starting story {StoryId}", storyId);
             return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to start story" });
         }
     }
 
-    private string? GetCurrentUserId()
-    {
-        // Henter UserId (Sub) fra JWT-tokenets Claims
-        // "NameIdentifier" eller "Sub" er standard claims for UserId i ASP.NET Core
-        return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-    }
 
 
 
     // ----------------------------------------------------------------------------------------
     // 2. PLAY SCENE (fetches all types of scenes)
     // ----------------------------------------------------------------------------------------
+
     [HttpGet("scene")]
     public async Task<IActionResult> GetScene(int sceneId, SceneType sceneType, int sessionId)
     {
+        try
+        {
+            var dto = await _storyPlayingService.BuildPlaySceneDtoAsync(sceneId, sceneType, sessionId);
+            if (dto == null)
+                return NotFound(new ErrorDto { ErrorTitle = "Scene not found" });
+
+            if (sceneType == SceneType.Question)
+            {
+                var success = await _storyPlayingService.TransitionFromIntroToFirstQuestionAsync(sessionId, sceneId);
+                if (!success)
+                    _logger.LogWarning("[StoryPlayingController -> GetScene] Failed Intro->Q transition for SessionId: {sessionId}", sessionId);
+            }
+
+            return Ok(dto);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[StoryPlayingController -> GetScene] Error loading scene");
+            return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to load scene" });
+        }
+        /*
         try
         {
             object? scene = sceneType switch
@@ -158,7 +179,7 @@ public class StoryPlayingController : ControllerBase
 
                     if (!success)
                     {
-                        _logger.LogWarning("Failed to update session progress (Intro -> Q) for SessionId: {sessionId}", sessionId);
+                        _logger.LogWarning("[StoryPlayingController -> GetScene] Failed to update session progress (Intro -> Q) for SessionId: {sessionId}", sessionId);
                     }
                 }
             }
@@ -167,18 +188,48 @@ public class StoryPlayingController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error loading scene");
+            _logger.LogError(e, "[StoryPlayingController -> GetScene] Error loading scene");
             return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to load scene" });
         }
+        */
     }
+
+
 
 
     // ----------------------------------------------------------------------------------------
     // 3. USER ANSWERS QUESTION (story progression logic)
     // ----------------------------------------------------------------------------------------
+
     [HttpPost("answer")]
     public async Task<IActionResult> SubmitAnswer([FromBody] AnswerFeedbackDto model)
     {
+        try
+        {
+            var feedback = await _storyPlayingService.ProcessAnswerAsync(model.SelectedAnswerId, model.SessionId);
+            if (feedback.IsGameOver)
+            {
+                return Ok(new { message = "Game over", score = feedback.NewScore });
+            }
+            
+            return Ok(feedback);
+        }
+        catch (ArgumentException ex)
+        {
+            return NotFound(new ErrorDto { ErrorTitle = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "[StoryPlayingController -> SubmitAnswer] Business logic error");
+            return StatusCode(500, new ErrorDto { ErrorTitle = ex.Message });
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[StoryPlayingController -> SubmitAnswer] Error submitting answer");
+            return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to process answer" });
+        }
+
+        /*
         try
         {
             var selectedAnswer = await _answerOptionRepository.GetAnswerOptionById(model.SelectedAnswerId);
@@ -203,35 +254,35 @@ public class StoryPlayingController : ControllerBase
             int? nextSceneId = nextScene?.QuestionSceneId; // can be null if it is the last QuestionScene
             SceneType nextSceneType = nextScene != null ? SceneType.Question : SceneType.Ending;
 
-            // 4. Håndtering av Game Over (Level 1 Fail)
+            // Handling Game Over (Level 1 Fail)
             if (!isCorrect && session.CurrentLevel == 1)
             {
-                // Vi trenger ikke å oppdatere nextSceneId/Type i DB, kun FinishSession
+                // No need to update nextSceneId/Type in DB, only FinishSession
                 await _playingSessionRepository.FinishSession(model.SessionId, newScore, newLevel);
                 await _storyRepository.IncrementFailed(session.StoryId);
                 return Ok(new { message = "Game over", score = newScore });
             }
 
-            if (!nextSceneId.HasValue) // Vi er på siste QuestionScene -> Skal til EndingScene
+            if (!nextSceneId.HasValue) // We are at the last QuestionScene -> Going to EndingScene
             {
-                // 1. Beregn hvilken Ending Scene ID brukeren får basert på poeng
+                // Calculate which Ending Scene ID the user gets based on user's score
                 var finalEndingScene = await _storyPlayingService.GetEndingSceneAsync(session.StoryId, newScore, session.MaxScore);
 
                 if (finalEndingScene != null)
                 {
-                    nextSceneId = finalEndingScene.EndingSceneId; // Sett den FAKTISKE Ending Scene ID-en
-                    nextSceneType = SceneType.Ending; // Sikkerhetssteg, men burde være satt
+                    nextSceneId = finalEndingScene.EndingSceneId;
+                    nextSceneType = SceneType.Ending;
                     await _storyRepository.IncrementFinished(session.StoryId);
                 }
                 else
                 {
-                    // Feil: Finner ikke sluttscenen, logg og returner feil.
-                    _logger.LogError("Could not find an appropriate ending scene for story {StoryId} at score {Score}.", session.StoryId, newScore);
+                    // Error: Cannot find the end scene, log and return error
+                    _logger.LogError("[StoryPlayingController -> SubmitAnswer] Could not find an appropriate ending scene for story {StoryId} at score {Score}.", session.StoryId, newScore);
                     return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to fin the right ending scene." });
                 }
             }
 
-            // 5. Oppdater PlayingSession i databasen (flytter fremgang)
+            // Update PlayingSession in the database (moving progress)
             if (nextSceneId.HasValue)
             {
                 await _playingSessionRepository.AnswerQuestion(
@@ -243,7 +294,7 @@ public class StoryPlayingController : ControllerBase
                 );
             }
 
-            // 6. Returner Feedback til Frontend (Inkluderer neste scene for å trigge fetchScene)
+            // Return Feedback to Frontend (Includes next scene to trigger fetchScene)
             var feedback = new AnswerFeedbackDto
             {
                 SceneText = selectedAnswer.FeedbackText,
@@ -257,8 +308,9 @@ public class StoryPlayingController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error submitting answer");
+            _logger.LogError(e, "[StoryPlayingController] Error submitting answer");
             return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to process answer" });
         }
+        */
     }
 }
