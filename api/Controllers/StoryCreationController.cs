@@ -1,5 +1,3 @@
-using Jam.Api.DAL.AnswerOptionDAL;
-using Jam.Api.DAL.SceneDAL;
 using Jam.Api.DAL.StoryDAL;
 using Jam.Api.DTOs.Story;
 using Jam.Api.DTOs.IntroScenes;
@@ -8,7 +6,6 @@ using Jam.Api.DTOs.EndingScenes;
 using Jam.Api.DTOs.Shared;
 using Jam.Api.Extensions;
 using Jam.Api.Models;
-using Jam.Api.Models.Enums;
 using Jam.Api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -20,31 +17,24 @@ namespace Jam.Api.Controllers;
 public class StoryCreationController : ControllerBase
 {
     private readonly IStoryRepository _storyRepo;
-    private readonly IStoryCodeService _codeService;
     private readonly UserManager<AuthUser> _userManager;
-    private readonly ISceneRepository _sceneRepo;
-    private readonly IAnswerOptionRepository _answerRepo;
     private readonly IStoryCreationService _storyCreationService;
     private readonly ILogger<StoryCreationController> _logger;
 
     public StoryCreationController(
         IStoryRepository storyRepo,
-        ISceneRepository sceneRepo,
-        IAnswerOptionRepository answerRepo,
-        IStoryCodeService codeService,
         UserManager<AuthUser> userManager,
         IStoryCreationService storyCreationService,
         ILogger<StoryCreationController> logger
     )
     {
         _storyRepo = storyRepo;
-        _sceneRepo = sceneRepo;
-        _answerRepo = answerRepo;
-        _codeService = codeService;
         _userManager = userManager;
         _storyCreationService = storyCreationService;
         _logger = logger;
     }
+
+    
     // ---------------------------------------------------------------
     // STEP 1 — STORY + INTRO
     // ---------------------------------------------------------------
@@ -87,6 +77,7 @@ public class StoryCreationController : ControllerBase
 
 
 
+
     // ---------------------------------------------------------------
     // STEP 2 — INTRO TEXT
     // ---------------------------------------------------------------
@@ -115,6 +106,7 @@ public class StoryCreationController : ControllerBase
 
         return Ok(new { session.IntroText });
     }
+
 
 
 
@@ -162,6 +154,7 @@ public class StoryCreationController : ControllerBase
 
 
 
+
     // ---------------------------------------------------------------
     // STEP 4 — ENDING SCENES
     // ---------------------------------------------------------------
@@ -181,7 +174,6 @@ public class StoryCreationController : ControllerBase
         });
     }
 
-
     [HttpPost("endings")]
     public IActionResult SaveEndings([FromBody] UpdateEndingSceneDto dto)
     {
@@ -200,6 +192,7 @@ public class StoryCreationController : ControllerBase
 
         return Ok(new { message = "Endings saved." });
     }
+
 
 
 

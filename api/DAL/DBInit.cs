@@ -139,7 +139,7 @@ public static class DBInit
                     Finished = 0,
                     Failed = 0,
                     Dnf = 0,
-                    Code = "A123B29",
+                    Code = "A123B29C",
                     UserId = emily!.Id,
                 },
                 new Story

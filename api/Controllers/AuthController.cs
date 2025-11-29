@@ -13,20 +13,18 @@ public class AuthController : ControllerBase
 {
     private readonly UserManager<AuthUser> _userManager;
     private readonly SignInManager<AuthUser> _signInManager;
-    private readonly IConfiguration _config;
     private readonly ITokenService _tokenService;
     private readonly ILogger<AuthController> _logger;
 
     public AuthController(
         UserManager<AuthUser> userManager,
         SignInManager<AuthUser> signInManager,
-        IConfiguration config,
         ITokenService tokenService,
-        ILogger<AuthController> logger)
+        ILogger<AuthController> logger
+    )
     {
         _userManager = userManager;
         _signInManager = signInManager;
-        _config = config;
         _tokenService = tokenService;
         _logger = logger;
     }
@@ -34,6 +32,7 @@ public class AuthController : ControllerBase
     // ---------------------------------------------------------------
     // REGISTER
     // ---------------------------------------------------------------
+
     [AllowAnonymous]
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
@@ -61,6 +60,7 @@ public class AuthController : ControllerBase
     // ---------------------------------------------------------------
     // LOGIN
     // ---------------------------------------------------------------
+
     [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
@@ -83,6 +83,7 @@ public class AuthController : ControllerBase
     // ---------------------------------------------------------------
     // LOGOUT
     // ---------------------------------------------------------------
+    
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {

@@ -28,9 +28,11 @@ public class HomeController : ControllerBase
         _logger = logger;
     }
 
+
     // ---------------------------------------------------------------
     // GET HOMEPAGE DATA (user's created stories and recently played)
     // ---------------------------------------------------------------
+
     [HttpGet("homepage")]
     public async Task<IActionResult> GetHomePage()
     {

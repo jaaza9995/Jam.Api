@@ -5,11 +5,9 @@ using Jam.Api.DTOs.IntroScenes;
 using Jam.Api.DTOs.QuestionScenes;
 using Jam.Api.DTOs.EndingScenes;
 using Jam.Api.DTOs.Story;
-using Jam.Api.Models;
 using Jam.Api.Models.Enums;
 using Jam.Api.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
 namespace Jam.Api.Controllers;
 
@@ -37,6 +35,7 @@ public class StoryEditingController : ControllerBase
         _storyEditingService = storyEditingService;
         _logger = logger;
     }
+
 
     // ---------------------------------------------------------------
     // STORY METADATA
@@ -110,6 +109,7 @@ public class StoryEditingController : ControllerBase
 
 
 
+
     // ---------------------------------------------------------------
     // INTRO SCENE
     // ---------------------------------------------------------------
@@ -144,6 +144,7 @@ public class StoryEditingController : ControllerBase
 
         return Ok(new { message = "Intro updated successfully." });
     }
+
 
 
 
@@ -203,6 +204,7 @@ public class StoryEditingController : ControllerBase
 
 
 
+
     // ---------------------------------------------------------------
     // ENDING SCENES
     // ---------------------------------------------------------------
@@ -258,6 +260,7 @@ public class StoryEditingController : ControllerBase
             return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to update endings." });
         }
     }
+
 
 
 

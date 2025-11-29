@@ -1,5 +1,3 @@
-using Jam.Api.DAL;
-using Jam.Api.DAL.PlayingSessionDAL;
 using Jam.Api.DAL.StoryDAL;
 using Jam.Api.DTOs.Admin;
 using Jam.Api.Models;
@@ -18,29 +16,28 @@ namespace Jam.Api.Controllers;
 public class AdminController : ControllerBase
 {
     private readonly IStoryRepository _storyRepository;
-    private readonly IPlayingSessionRepository _playingSessionRepository;
     private readonly UserManager<AuthUser> _userManager;
     private readonly IAdminUserService _adminUserService;
     private readonly ILogger<AdminController> _logger;
 
     public AdminController(
         IStoryRepository storyRepository,
-        IPlayingSessionRepository playingSessionRepository,
         UserManager<AuthUser> userManager,
         IAdminUserService adminUserService,
         ILogger<AdminController> logger
     )
     {
         _storyRepository = storyRepository;
-        _playingSessionRepository = playingSessionRepository;
         _userManager = userManager;
         _adminUserService = adminUserService;
         _logger = logger;
     }
 
+
     // ---------------------------------------------------------------
     // GET USERS
     // ---------------------------------------------------------------
+
     [HttpGet("users")]
     public async Task<IActionResult> GetUsers()
     {
@@ -66,9 +63,11 @@ public class AdminController : ControllerBase
         }
     }
 
+
     // ---------------------------------------------------------------
     // DELETE USER
     // ---------------------------------------------------------------
+
     [HttpDelete("users/{id}")]
     public async Task<IActionResult> DeleteUser(string id)
     {
@@ -127,6 +126,7 @@ public class AdminController : ControllerBase
     // ---------------------------------------------------------------
     // GET STORIES
     // ---------------------------------------------------------------
+
     [HttpGet("stories")]
     public async Task<IActionResult> GetStories()
     {
@@ -150,9 +150,11 @@ public class AdminController : ControllerBase
         }
     }
 
+
     // ---------------------------------------------------------------
     // DELETE STORY
     // ---------------------------------------------------------------
+
     [HttpDelete("stories/{id}")]
     public async Task<IActionResult> DeleteStory(int id)
     {
@@ -170,27 +172,6 @@ public class AdminController : ControllerBase
         {
             _logger.LogError(e, "Unexpected error while deleting story with ID {StoryId}", id);
             return StatusCode(500, new { message = "Unexpected error deleting story" });
-        }
-    }
-
-
-
-
-    // ---------------------------------------------------------------
-    // GET PLAYING SESSIONS (not used in frontend, but could be useful in the future)
-    // ---------------------------------------------------------------
-    [HttpGet("sessions")]  
-    public async Task<IActionResult> GetPlayingSessions()
-    {
-        try
-        {
-            var sessions = await _playingSessionRepository.GetAllPlayingSessions();
-            return Ok(sessions);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error while loading playing sessions list");
-            return StatusCode(500, new { message = "Unexpected error while loading playing sessions list" });
         }
     }
 }
