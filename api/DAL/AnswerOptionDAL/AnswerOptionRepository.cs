@@ -24,7 +24,9 @@ public class AnswerOptionRepository : IAnswerOptionRepository
     {
         try
         {
-            return await _db.AnswerOptions.ToListAsync();
+            return await _db.AnswerOptions
+                .AsNoTracking()
+                .ToListAsync();
         }
         catch (Exception e)
         {
@@ -44,6 +46,7 @@ public class AnswerOptionRepository : IAnswerOptionRepository
         try
         {
             return await _db.AnswerOptions
+                .AsNoTracking()
                 .Where(ao => ao.QuestionSceneId == questionSceneId)
                 .ToListAsync();
         }
@@ -64,7 +67,10 @@ public class AnswerOptionRepository : IAnswerOptionRepository
 
         try
         {
-            var answerOption = await _db.AnswerOptions.FindAsync(answerOptionId);
+            var answerOption = await _db.AnswerOptions
+                .AsNoTracking()
+                .FirstOrDefaultAsync(ao => ao.AnswerOptionId == answerOptionId);
+                
             if (answerOption == null)
             {
                 _logger.LogWarning("[AnswerOptionRepository -> GetAnswerOptionById] No answer option found with id {answerOptionId}", answerOptionId);

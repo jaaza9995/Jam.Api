@@ -7,6 +7,7 @@ using Jam.Api.Models.Enums;
 using Jam.Api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Jam.Api.DAL.PlayingSessionDAL;
 
 
 namespace Jam.Api.Controllers;
@@ -17,6 +18,7 @@ public class StoryPlayingController : ControllerBase
 {
     private readonly IStoryRepository _storyRepository;
     private readonly ISceneRepository _sceneRepository;
+    private readonly IPlayingSessionRepository _playingSessionRepository;
     private readonly UserManager<AuthUser> _userManager;
     private readonly IStoryPlayingService _storyPlayingService;
     private readonly ILogger<StoryPlayingController> _logger;
@@ -24,6 +26,7 @@ public class StoryPlayingController : ControllerBase
     public StoryPlayingController(
         IStoryRepository storyRepository,
         ISceneRepository sceneRepository,
+        IPlayingSessionRepository playingSessionRepository,
         UserManager<AuthUser> userManager,
         IStoryPlayingService storyPlayingService,
         ILogger<StoryPlayingController> logger
@@ -31,6 +34,7 @@ public class StoryPlayingController : ControllerBase
     {
         _storyRepository = storyRepository;
         _sceneRepository = sceneRepository;
+        _playingSessionRepository = playingSessionRepository;
         _userManager = userManager;
         _storyPlayingService = storyPlayingService;
         _logger = logger;
@@ -96,9 +100,13 @@ public class StoryPlayingController : ControllerBase
 
             if (sceneType == SceneType.Question)
             {
-                var success = await _storyPlayingService.TransitionFromIntroToFirstQuestionAsync(sessionId, sceneId);
-                if (!success)
-                    _logger.LogWarning("[StoryPlayingController -> GetScene] Failed Intro->Q transition for SessionId: {sessionId}", sessionId);
+                var session = await _playingSessionRepository.GetPlayingSessionById(sessionId);
+                if (session?.CurrentSceneType == SceneType.Intro) // Only transition from Intro -> Question if the session is currently at Intro
+                {
+                    var success = await _storyPlayingService.TransitionFromIntroToFirstQuestionAsync(sessionId, sceneId);
+                    if (!success)
+                        _logger.LogWarning("[StoryPlayingController -> GetScene] Failed Intro -> first QuestionScene transition for SessionId: {sessionId}", sessionId);
+                }
             }
 
             return Ok(dto);

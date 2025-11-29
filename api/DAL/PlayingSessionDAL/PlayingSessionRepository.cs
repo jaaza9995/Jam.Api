@@ -22,11 +22,13 @@ public class PlayingSessionRepository : IPlayingSessionRepository
 
     // --------------------------------------- Read / GET ---------------------------------------
 
-    public async Task<IEnumerable<PlayingSession>> GetAllPlayingSessions() // used in AdminController, bu that method is not in use)
+    public async Task<IEnumerable<PlayingSession>> GetAllPlayingSessions() // not in use
     {
         try
         {
-            return await _db.PlayingSessions.ToListAsync();
+            return await _db.PlayingSessions
+                .AsNoTracking()
+                .ToListAsync();
         }
         catch (Exception e)
         {
@@ -45,7 +47,10 @@ public class PlayingSessionRepository : IPlayingSessionRepository
 
         try
         {
-            var session = await _db.PlayingSessions.FindAsync(playingSessionId);
+            var session = await _db.PlayingSessions
+                .AsNoTracking()
+                .FirstOrDefaultAsync(ps => ps.PlayingSessionId == playingSessionId);
+
             if (session == null)
             {
                 _logger.LogWarning("[PlayingSessionRepository -> GetPlayingSessionById] No playing session found with id: {playingSessionId}", playingSessionId);
@@ -71,6 +76,7 @@ public class PlayingSessionRepository : IPlayingSessionRepository
         try
         {
             return await _db.PlayingSessions
+                .AsNoTracking()
                 .Where(ps => ps.UserId == userId)
                 .ToListAsync();
         }
@@ -99,65 +105,6 @@ public class PlayingSessionRepository : IPlayingSessionRepository
         {
             _logger.LogError(e, "[PlayingSessionRepository -> GetPlayingSessionsByStoryId] Error retrieving playing sessions for storyId: {storyId}", storyId);
             return Enumerable.Empty<PlayingSession>(); // not returning null to avoid null reference exceptions
-        }
-    }
-
-    public async Task<IEnumerable<PlayingSession>> GetPlayingSessionsByUserIdAndStoryId(string userId, int storyId) // not in use
-    {
-        if (string.IsNullOrWhiteSpace(userId))
-        {
-            _logger.LogWarning("[PlayingSessionRepository -> GetPlayingSessionsByUserIdAndStoryId] Invalid userId: {userId}}", userId);
-            return Enumerable.Empty<PlayingSession>(); // not returning null to avoid null reference exceptions
-        }
-
-        if (storyId <= 0)
-        {
-            _logger.LogWarning("[PlayingSessionRepository -> GetPlayingSessionsByUserIdAndStoryId] Invalid storyId: {storyId}", storyId);
-            return Enumerable.Empty<PlayingSession>(); // not returning null to avoid null reference exceptions
-        }
-
-        try
-        {
-            return await _db.PlayingSessions
-                .Where(ps => ps.UserId == userId && ps.StoryId == storyId)
-                .ToListAsync();
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "[PlayingSessionRepository -> GetPlayingSessionsByUserIdAndStoryId] Error retrieving playing sessions for userId: {userId} and storyId: {storyId}", userId, storyId);
-            return Enumerable.Empty<PlayingSession>(); // not returning null to avoid null reference exceptions
-        }
-    }
-
-    public async Task<int?> GetUserHighScoreForStory(string userId, int storyId) // not in use
-    {
-        if (string.IsNullOrWhiteSpace(userId))
-        {
-            _logger.LogWarning("[PlayingSessionRepository -> GetUserHighScoreForStory] Invalid userId: {userId}", userId);
-            return null;
-        }
-
-        if (storyId <= 0)
-        {
-            _logger.LogWarning("[PlayingSessionRepository -> GetUserHighScoreForStory] Invalid storyId: {storyId}", storyId);
-            return null;
-        }
-
-        try
-        {
-            // returns null if no record exists (if 0 then that is the actual high score)
-            var bestScore = await _db.PlayingSessions
-                .Where(ps => ps.UserId == userId && ps.StoryId == storyId)
-                .Select(ps => (int?)ps.Score)
-                .OrderByDescending(score => score)
-                .FirstOrDefaultAsync();
-
-            return bestScore;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "[PlayingSessionRepository -> GetUserHighScoreForStory] Error retrieving high score for userId: {userId} and storyId: {storyId}", userId, storyId);
-            return null;
         }
     }
 

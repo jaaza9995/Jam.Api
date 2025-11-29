@@ -4,13 +4,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Jam.Api.DAL.SceneDAL;
 
-// Might want to consider avoiding logging entire EF entities
-// Consider adding AsNoTracking() to read-only queries for performance boost
-
-// I am including IntroScene as Entities in some of the log messages, that is
-// fine, but for QuestionScene I think I will avoid this for now, due to its 
-// potentially large size (?), especially when including AnswerOptions
-
 public class SceneRepository : ISceneRepository
 {
     private readonly StoryDbContext _db;
@@ -41,8 +34,8 @@ public class SceneRepository : ISceneRepository
         try
         {
             var intro = await _db.IntroScenes
-               .AsNoTracking()
-               .FirstOrDefaultAsync(s => s.StoryId == storyId);
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.StoryId == storyId);
 
             if (intro == null)
             {
@@ -68,7 +61,10 @@ public class SceneRepository : ISceneRepository
 
         try
         {
-            var intro = await _db.IntroScenes.FindAsync(introSceneId);
+            var intro = await _db.IntroScenes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.IntroSceneId == introSceneId);
+            
             if (intro == null)
             {
                 _logger.LogInformation("[SceneRepository -> GetIntroSceneById] No IntroScene found with id {introSceneId}", introSceneId);
@@ -156,7 +152,7 @@ public class SceneRepository : ISceneRepository
 
 
 
-    // --------------------------------- Question SCENE ---------------------------------
+    // --------------------------------- QUESTION SCENE ---------------------------------
 
     public async Task<IEnumerable<QuestionScene>> GetQuestionScenesByStoryId(int storyId)
     {
@@ -354,7 +350,7 @@ public class SceneRepository : ISceneRepository
     }
 
 
-    public async Task<bool> AddQuestionScene(QuestionScene questionScene) // not in use
+    public async Task<bool> AddQuestionScene(QuestionScene questionScene)
     {
         if (questionScene == null)
         {
@@ -375,7 +371,7 @@ public class SceneRepository : ISceneRepository
         }
     }
 
-    public async Task<bool> UpdateQuestionScene(QuestionScene questionScene) // not in use
+    public async Task<bool> UpdateQuestionScene(QuestionScene questionScene) 
     {
         if (questionScene == null)
         {
@@ -396,12 +392,6 @@ public class SceneRepository : ISceneRepository
         }
     }
 
-
-
-
-
-
-    // This might be considered business logic and should be moved to the service layer or controller
     public async Task<bool> DeleteQuestionScene(int questionSceneId)
     {
         if (questionSceneId <= 0)
@@ -454,6 +444,7 @@ public class SceneRepository : ISceneRepository
         try
         {
             return await _db.EndingScenes
+                .AsNoTracking()
                 .Where(e => e.StoryId == storyId)
                 .ToListAsync();
         }

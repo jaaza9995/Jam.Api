@@ -2,6 +2,11 @@ using Jam.Api.Models;
 
 namespace Jam.Api.DAL.SceneDAL;
 
+/// <summary>
+/// Methods: AddIntroScene(), DeleteIntroScene(), GetQuestionSceneById(), 
+/// AddEndingScene(), UpdateEndingScene(), and DeleteEndingScene() are not in use
+/// Retained for CRUD completeness and future standalone operations.
+/// </summary>
 public interface ISceneRepository
 {
     // Methods to handle IntroScene
@@ -25,8 +30,6 @@ public interface ISceneRepository
     
     
 
-
-
     // Methods to handle EndingScenes
     Task<IEnumerable<EndingScene>> GetEndingScenesByStoryId(int storyId);
     Task<EndingScene?> GetEndingSceneById(int endingSceneId);
@@ -38,4 +41,3 @@ public interface ISceneRepository
     Task<bool> UpdateEndingScenes(IEnumerable<EndingScene> endingScenes); 
     Task<bool> DeleteEndingScene(int endingSceneId);
 }
-

@@ -2,6 +2,12 @@ using Jam.Api.Models;
 
 namespace Jam.Api.DAL.StoryDAL;
 
+
+/// <summary>
+/// Methods: GetAllPrivateStories(), GetPublicStoryById(), 
+/// GetCodeForStory(), and AddStory() are not in use
+/// Retained for CRUD completeness and future standalone operations.
+/// </summary>
 public interface IStoryRepository
 {
     // Read / GET
@@ -11,16 +17,16 @@ public interface IStoryRepository
     Task<IEnumerable<Story>> GetStoriesByUserId(string userId);
     Task<IEnumerable<Story>> GetMostRecentPlayedStories(string userId, int count = 5);
     Task<Story?> GetStoryById(int storyId);
-    Task<Story?> GetPublicStoryById(int storyId); // not in use
+    Task<Story?> GetPublicStoryById(int storyId);
     Task<Story?> GetPrivateStoryByCode(string code);
     Task<int?> GetAmountOfQuestionsForStory(int storyId);
     Task<Dictionary<int, int>> GetQuestionCountsForStories(IEnumerable<int> storyIds);
-    Task<string?> GetCodeForStory(int storyId); // not in use
+    Task<string?> GetCodeForStory(int storyId);
 
 
 
     // Creation mode
-    Task<bool> AddStory(Story story); // not in use
+    Task<bool> AddStory(Story story);
     Task<bool> AddFullStory(Story story); // new method used to add an entire story with all scenes 
     Task<bool> UpdateStory(Story story);
     Task<bool> DeleteStory(int storyId);

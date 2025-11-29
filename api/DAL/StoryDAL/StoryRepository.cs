@@ -2,10 +2,7 @@ using Jam.Api.Models;
 using Jam.Api.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 
-namespace Jam.Api.DAL.StoryDAL;
-
-// Consider adding AsNoTracking where appropriate for read-only queries
-// to improve performance by disabling change tracking 
+namespace Jam.Api.DAL.StoryDAL; 
 
 public class StoryRepository : IStoryRepository
 {
@@ -28,7 +25,9 @@ public class StoryRepository : IStoryRepository
     {
         try
         {
-            return await _db.Stories.ToListAsync();
+            return await _db.Stories
+                .AsNoTracking()
+                .ToListAsync();
         }
         catch (Exception e)
         {
@@ -42,6 +41,7 @@ public class StoryRepository : IStoryRepository
         try
         {
             return await _db.Stories
+                .AsNoTracking()
                 .Where(s => s.Accessibility == Accessibility.Public)
                 .ToListAsync();
         }
@@ -52,11 +52,12 @@ public class StoryRepository : IStoryRepository
         }
     }
 
-    public async Task<IEnumerable<Story>> GetAllPrivateStories()
+    public async Task<IEnumerable<Story>> GetAllPrivateStories() // not in use
     {
         try
         {
             return await _db.Stories
+                .AsNoTracking()
                 .Where(s => s.Accessibility == Accessibility.Private)
                 .ToListAsync();
         }
@@ -78,6 +79,7 @@ public class StoryRepository : IStoryRepository
         try
         {
             return await _db.Stories
+                .AsNoTracking()
                 .Where(s => s.UserId == userId)
                 .ToListAsync();
         }
@@ -153,6 +155,7 @@ public class StoryRepository : IStoryRepository
         try
         {
             var story = await _db.Stories
+                .AsNoTracking()
                 .FirstOrDefaultAsync(s => s.StoryId == storyId && s.Accessibility == Accessibility.Public);
 
             if (story == null)
