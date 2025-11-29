@@ -9,6 +9,7 @@ using Jam.Api.Models;
 using Jam.Api.Models.Enums;
 using Jam.Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
 namespace Jam.Api.Controllers;
 
@@ -20,17 +21,20 @@ public class StoryEditingController : ControllerBase
     private readonly ISceneRepository _sceneRepository;
     private readonly ILogger<StoryEditingController> _logger;
     private readonly IStoryCodeService _codeService;
+    private readonly IStoryEditingService _storyEditingService;
 
     public StoryEditingController(
-     IStoryRepository repo,
-     ISceneRepository sceneRepository,
-     IStoryCodeService codeService,
-     ILogger<StoryEditingController> logger
- )
+        IStoryRepository repo,
+        ISceneRepository sceneRepository,
+        IStoryCodeService codeService,
+        IStoryEditingService storyEditingService,
+        ILogger<StoryEditingController> logger
+    )
     {
         _storyRepository = repo;
         _sceneRepository = sceneRepository;
         _codeService = codeService;
+        _storyEditingService = storyEditingService;
         _logger = logger;
     }
 
@@ -181,31 +185,12 @@ public class StoryEditingController : ControllerBase
 
         try
         {
-            // 1. Delete scenes marked for deletion
-            var toDelete = model.Where(m => m.MarkedForDeletion && m.QuestionSceneId != 0).ToList();
-            foreach (var del in toDelete)
-                await _sceneRepository.DeleteQuestionScene(del.QuestionSceneId);
-
-            // 2. Create/update remaining scenes
-            var scenes = model
-                .Where(q => !q.MarkedForDeletion)
-                .Select(q => new QuestionScene
-                {
-                    QuestionSceneId = q.QuestionSceneId,
-                    StoryId = storyId,
-                    SceneText = q.StoryText,
-                    Question = q.QuestionText,
-                    AnswerOptions = q.Answers.Select((a, idx) => new AnswerOption
-                    {
-                        AnswerOptionId = a.AnswerOptionId,
-                        Answer = a.AnswerText,
-                        FeedbackText = a.ContextText,
-                        IsCorrect = idx == q.CorrectAnswerIndex
-                    }).ToList()
-                }).ToList();
-
-            if (!await _sceneRepository.UpdateQuestionScenes(scenes))
+            // Calls the service layer which takes care of updating
+            var result = await _storyEditingService.UpdateQuestionScenesAsync(storyId, model);
+            if (!result)
+            {
                 return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to update question scenes." });
+            }
 
             return Ok(new { message = "Questions updated successfully." });
         }

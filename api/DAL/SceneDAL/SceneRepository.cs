@@ -396,118 +396,13 @@ public class SceneRepository : ISceneRepository
         }
     }
 
-    // This might be considered business logic and should be moved to the service layer or controller
-    public async Task<bool> UpdateQuestionScenes(IEnumerable<QuestionScene> questionScenes)
-    {
-        var updatedScenes = questionScenes?.ToList() ?? new List<QuestionScene>();
-        if (!updatedScenes.Any())
-        {
-            _logger.LogWarning("[SceneRepository -> UpdateQuestionScenes] No QuestionScenes provided");
-            return false;
-        }
 
-        try
-        {
-            var storyId = updatedScenes.First().StoryId;
-
-            // Get existing scenes
-            var existingScenes = await _db.QuestionScenes
-                .Include(q => q.AnswerOptions)
-                .Where(q => q.StoryId == storyId)
-                .ToListAsync();
-
-            int addedCount = 0;
-            int updatedCount = 0;
-            int deletedCount = 0;
-
-            // Find and delete scenes that have been removed from the model
-            var modelIds = updatedScenes
-                .Where(q => q.QuestionSceneId != 0)
-                    .Select(q => q.QuestionSceneId)
-                    .ToHashSet();
-
-            var toDelete = existingScenes.Where(s => !modelIds.Contains(s.QuestionSceneId)).ToList();
-            if (toDelete.Any())
-            {
-                _db.QuestionScenes.RemoveRange(toDelete);
-                deletedCount = toDelete.Count;
-            }
-
-            // Add or update scenes and preserve the linking order
-            var trackedInOrder = new List<QuestionScene>();
-
-            foreach (var updatedScene in updatedScenes)
-            {
-                if (updatedScene.QuestionSceneId == 0)
-                {
-                    // New scene
-                    foreach (var answer in updatedScene.AnswerOptions)
-                        answer.QuestionScene = updatedScene;
-
-                    _db.QuestionScenes.Add(updatedScene);
-                    trackedInOrder.Add(updatedScene);
-                    addedCount++;
-                }
-                else
-                {
-                    // Existing scene
-                    var existingScene = existingScenes.FirstOrDefault(q => q.QuestionSceneId == updatedScene.QuestionSceneId);
-                    if (existingScene == null) continue;
-
-                    existingScene.SceneText = updatedScene.SceneText;
-                    existingScene.Question = updatedScene.Question;
-
-                    // Remove old answeroptions from existing scene
-                    _db.AnswerOptions.RemoveRange(existingScene.AnswerOptions);
-
-                    // Connect new answeroptions to existing scene
-                    foreach (var answer in updatedScene.AnswerOptions)
-                        answer.QuestionSceneId = existingScene.QuestionSceneId;
-
-                    existingScene.AnswerOptions = updatedScene.AnswerOptions;
-                    _db.QuestionScenes.Update(existingScene);
-                    trackedInOrder.Add(existingScene);
-                    updatedCount++;
-                }
-            }
-
-            // First save to ensure new scenes get generated IDs
-            await _db.SaveChangesAsync();
-
-            // Update NextQuestionSceneId so that all new questions are linked in the saved order
-            for (int i = 0; i < trackedInOrder.Count; i++)
-            {
-                var nextId = (i < trackedInOrder.Count - 1)
-                    ? trackedInOrder[i + 1].QuestionSceneId
-                    : (int?)null;
-
-                trackedInOrder[i].NextQuestionSceneId = nextId;
-                _db.QuestionScenes.Update(trackedInOrder[i]);
-            }
-
-            await _db.SaveChangesAsync();
-
-            // Log result
-            _logger.LogInformation(
-                "[SceneRepository -> UpdateQuestionScenes] Endringer lagret for storyId={storyId}. " +
-                "Added={addedCount}, Updated={updatedCount}, Deleted={deletedCount}",
-                storyId, addedCount, updatedCount, deletedCount
-            );
-
-            return true;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "[SceneRepository -> UpdateQuestionScenes] Error updating QuestionScenes");
-            return false;
-        }
-    }
 
 
 
 
     // This might be considered business logic and should be moved to the service layer or controller
-    public async Task<bool> DeleteQuestionScene(int questionSceneId, int? previousSceneId)
+    public async Task<bool> DeleteQuestionScene(int questionSceneId)
     {
         if (questionSceneId <= 0)
         {
@@ -524,38 +419,10 @@ public class SceneRepository : ISceneRepository
                 return false;
             }
 
-            var nextSceneId = scene.NextQuestionSceneId;
-
-            // If there is a previous scene, connect it to the next one
-            if (previousSceneId.HasValue)
-            {
-                var previous = await _db.QuestionScenes.FindAsync(previousSceneId.Value);
-                if (previous != null)
-                {
-                    previous.NextQuestionSceneId = nextSceneId;
-                    _db.QuestionScenes.Update(previous);
-                }
-            }
-            else
-            {
-                // If no previous scene, that means this was the first scene
-                // Then we'll leave the next scene as "fresh start"
-                if (nextSceneId.HasValue)
-                {
-                    var nextScene = await _db.QuestionScenes.FindAsync(nextSceneId.Value);
-                    if (nextScene != null)
-                    {
-                        nextScene.NextQuestionSceneId = nextScene.NextQuestionSceneId;
-                        _db.QuestionScenes.Update(nextScene);
-                    }
-                }
-            }
-
             _db.QuestionScenes.Remove(scene);
             await _db.SaveChangesAsync();
 
-            _logger.LogInformation("[SceneRepository -> DeleteQuestionScene] Deleted scene {Id}, linked previous={Prev} → next={Next}",
-                questionSceneId, previousSceneId, nextSceneId);
+            _logger.LogInformation("[SceneRepository -> DeleteQuestionScene] Deleted scene {Id}", questionSceneId);
 
             return true;
         }

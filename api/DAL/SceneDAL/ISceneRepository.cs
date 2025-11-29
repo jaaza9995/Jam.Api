@@ -20,9 +20,8 @@ public interface ISceneRepository
     Task<QuestionScene?> GetNextQuestionSceneById(int currentQuestionSceneId); // new method for playing mode
     Task<QuestionScene?> GetQuestionSceneWithAnswerOptionsById(int questionSceneId); 
     Task<bool> AddQuestionScene(QuestionScene questionScene);
-    Task<bool> UpdateQuestionScene(QuestionScene questionScene);
-    Task<bool> UpdateQuestionScenes(IEnumerable<QuestionScene> questionScenes); 
-    Task<bool> DeleteQuestionScene(int questionSceneId, int? previousSceneId = null);
+    Task<bool> UpdateQuestionScene(QuestionScene questionScene); 
+    Task<bool> DeleteQuestionScene(int questionSceneId);
     
     
 
@@ -36,7 +35,7 @@ public interface ISceneRepository
     Task<EndingScene?> GetBadEndingSceneByStoryId(int storyId);
     Task<bool> AddEndingScene(EndingScene endingScene);
     Task<bool> UpdateEndingScene(EndingScene EndingScene);
-    Task<bool> UpdateEndingScenes(IEnumerable<EndingScene> endingScenes); // new method
+    Task<bool> UpdateEndingScenes(IEnumerable<EndingScene> endingScenes); 
     Task<bool> DeleteEndingScene(int endingSceneId);
 }
 
