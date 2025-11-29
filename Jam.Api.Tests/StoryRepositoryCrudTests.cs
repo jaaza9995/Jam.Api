@@ -1,7 +1,7 @@
-using Jam.DAL;
-using Jam.DAL.StoryDAL;
-using Jam.Models;
-using Jam.Models.Enums;
+using Jam.Api.DAL;
+using Jam.Api.DAL.StoryDAL;
+using Jam.Api.Models;
+using Jam.Api.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 

@@ -4,15 +4,16 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
 
 using Jam.Api.Controllers;
-using Jam.DAL.StoryDAL;
-using Jam.DAL.SceneDAL;
+using Jam.Api.DAL.StoryDAL;
+using Jam.Api.DAL.SceneDAL;
 using Jam.Api.Services;
 
-using Jam.Models;
-using Jam.DTOs;
-using Jam.DTOs.IntroScenes;
-using Jam.DTOs.QuestionScenes;
-using Jam.DTOs.UpdateEndingScenes;
+using Jam.Api.Models;
+using Jam.Api.DTOs;
+using Jam.Api.DTOs.IntroScenes;
+using Jam.Api.DTOs.QuestionScenes;
+using Jam.Api.DTOs.EndingScenes;
+using Jam.Api.DTOs.Shared;
 
 public class StoryControllerTests
 {
@@ -30,10 +31,13 @@ public class StoryControllerTests
 
         var mockStoryRepo = new Mock<IStoryRepository>();
 
+        var mockStoryEditingService = new Mock<IStoryEditingService>();
+
         var controller = new StoryEditingController(
             mockStoryRepo.Object,
             mockScene.Object,
             new StoryCodeService(mockStoryRepo.Object),
+            mockStoryEditingService.Object,
             new Mock<ILogger<StoryEditingController>>().Object);
 
         var result = await controller.GetIntro(1);
@@ -52,10 +56,14 @@ public class StoryControllerTests
         mockScene.Setup(s => s.GetIntroSceneByStoryId(1)).ReturnsAsync((IntroScene?)null);
 
         var mockStoryRepo = new Mock<IStoryRepository>();
+
+        var mockStoryEditingService = new Mock<IStoryEditingService>();
+
         var controller = new StoryEditingController(
             mockStoryRepo.Object,
             mockScene.Object,
             new StoryCodeService(mockStoryRepo.Object),
+            mockStoryEditingService.Object,
             new Mock<ILogger<StoryEditingController>>().Object);
 
         var result = await controller.GetIntro(1);
@@ -90,14 +98,16 @@ public class StoryControllerTests
         };
 
         var mockScene = new Mock<ISceneRepository>();
-        mockScene.Setup(r => r.UpdateQuestionScenes(It.IsAny<IEnumerable<QuestionScene>>()))
-                 .ReturnsAsync(true);
+        var mockStoryEditingService = new Mock<IStoryEditingService>();
+        mockStoryEditingService.Setup(s => s.UpdateQuestionScenesAsync(It.IsAny<int>(), It.IsAny<List<UpdateQuestionSceneDto>>()))
+                                .ReturnsAsync(true);
 
         var mockStoryRepo = new Mock<IStoryRepository>();
         var controller = new StoryEditingController(
             mockStoryRepo.Object,
             mockScene.Object,
             new StoryCodeService(mockStoryRepo.Object),
+            mockStoryEditingService.Object,
             new Mock<ILogger<StoryEditingController>>().Object);
 
         var result = await controller.UpdateQuestions(1, payload);
@@ -109,10 +119,13 @@ public class StoryControllerTests
     public async Task UpdateQuestions_ReturnsBadRequest_WhenModelStateInvalid()
     {
         var mockStoryRepo = new Mock<IStoryRepository>();
+        var mockStoryEditingService = new Mock<IStoryEditingService>();
+
         var controller = new StoryEditingController(
             mockStoryRepo.Object,
             new Mock<ISceneRepository>().Object,
             new StoryCodeService(mockStoryRepo.Object),
+            mockStoryEditingService.Object,
             new Mock<ILogger<StoryEditingController>>().Object);
 
         controller.ModelState.AddModelError("StoryText", "Required");
