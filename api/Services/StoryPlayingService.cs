@@ -1,8 +1,10 @@
 using Jam.Api.Models;
 using Jam.Api.Models.Enums;
-using Jam.Api.DAL.StoryDAL;
+using Jam.Api.DAL.EndingSceneDAL;
+using Jam.Api.DAL.IntroSceneDAL;
 using Jam.Api.DAL.PlayingSessionDAL;
-using Jam.Api.DAL.SceneDAL;
+using Jam.Api.DAL.QuestionSceneDAL;
+using Jam.Api.DAL.StoryDAL;
 using Jam.Api.DTOs.StoryPlaying;
 using Jam.Api.DAL.AnswerOptionDAL;
 
@@ -13,7 +15,9 @@ public class StoryPlayingService : IStoryPlayingService
 {
     private readonly IPlayingSessionRepository _playingSessionRepository;
     private readonly IStoryRepository _storyRepository;
-    private readonly ISceneRepository _sceneRepository;
+    private readonly IIntroSceneRepository _introSceneRepository;
+    private readonly IQuestionSceneRepository _questionSceneRepository;
+    private readonly IEndingSceneRepository _endingSceneRepository;
     private readonly IAnswerOptionRepository _answerOptionRepository;
     private readonly ILogger<StoryPlayingService> _logger;
 
@@ -21,14 +25,18 @@ public class StoryPlayingService : IStoryPlayingService
     public StoryPlayingService(
         IPlayingSessionRepository playingSessionRepository,
         IStoryRepository storyRepository,
-        ISceneRepository sceneRepository,
+        IIntroSceneRepository introSceneRepository,
+        IQuestionSceneRepository questionSceneRepository,
+        IEndingSceneRepository endingSceneRepository,
         IAnswerOptionRepository answerOptionRepository,
         ILogger<StoryPlayingService> logger
     )
     {
         _playingSessionRepository = playingSessionRepository;
         _storyRepository = storyRepository;
-        _sceneRepository = sceneRepository;
+        _introSceneRepository = introSceneRepository;
+        _questionSceneRepository = questionSceneRepository;
+        _endingSceneRepository = endingSceneRepository;
         _answerOptionRepository = answerOptionRepository;
         _logger = logger;
     }
@@ -37,7 +45,7 @@ public class StoryPlayingService : IStoryPlayingService
     {
         await _storyRepository.IncrementPlayed(story.StoryId);
 
-        var introScene = await _sceneRepository.GetIntroSceneByStoryId(story.StoryId);
+        var introScene = await _introSceneRepository.GetIntroSceneByStoryId(story.StoryId);
 
         if (introScene == null)
         {
@@ -68,9 +76,9 @@ public class StoryPlayingService : IStoryPlayingService
     {
         object? scene = sceneType switch
         {
-            SceneType.Intro => await _sceneRepository.GetIntroSceneById(sceneId),
-            SceneType.Question => await _sceneRepository.GetQuestionSceneWithAnswerOptionsById(sceneId),
-            SceneType.Ending => await _sceneRepository.GetEndingSceneById(sceneId),
+            SceneType.Intro => await _introSceneRepository.GetIntroSceneById(sceneId),
+            SceneType.Question => await _questionSceneRepository.GetQuestionSceneWithAnswerOptionsById(sceneId),
+            SceneType.Ending => await _endingSceneRepository.GetEndingSceneById(sceneId),
             _ => null
         };
 
@@ -138,7 +146,7 @@ public class StoryPlayingService : IStoryPlayingService
 
     private async Task<QuestionScene?> GetFirstQuestionSceneAsync(int storyId)
     {
-        var firstQuestionScene = await _sceneRepository.GetFirstQuestionSceneByStoryId(storyId);
+        var firstQuestionScene = await _questionSceneRepository.GetFirstQuestionSceneByStoryId(storyId);
 
         if (firstQuestionScene != null)
         {
@@ -185,7 +193,7 @@ public class StoryPlayingService : IStoryPlayingService
 
         // Get next scene
         int currentQuestionSceneId = session.CurrentSceneId.GetValueOrDefault();
-        var nextScene = await _sceneRepository.GetNextQuestionSceneById(currentQuestionSceneId);
+        var nextScene = await _questionSceneRepository.GetNextQuestionSceneById(currentQuestionSceneId);
 
         int? nextSceneId = nextScene?.QuestionSceneId; // can be null if it is the last QuestionScene
         SceneType nextSceneType = nextScene != null ? SceneType.Question : SceneType.Ending;
@@ -239,9 +247,9 @@ public class StoryPlayingService : IStoryPlayingService
 
         EndingScene? endingScene = percentage switch
         {
-            >= 70 => await _sceneRepository.GetGoodEndingSceneByStoryId(storyId),
-            >= 20 => await _sceneRepository.GetNeutralEndingSceneByStoryId(storyId),
-            _ => await _sceneRepository.GetBadEndingSceneByStoryId(storyId)
+            >= 70 => await _endingSceneRepository.GetGoodEndingSceneByStoryId(storyId),
+            >= 20 => await _endingSceneRepository.GetNeutralEndingSceneByStoryId(storyId),
+            _ => await _endingSceneRepository.GetBadEndingSceneByStoryId(storyId)
         };
 
         if (endingScene == null)

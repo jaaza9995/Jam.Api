@@ -1,7 +1,9 @@
 using Jam.Api.DAL;
 using Jam.Api.DAL.AnswerOptionDAL;
 using Jam.Api.DAL.PlayingSessionDAL;
-using Jam.Api.DAL.SceneDAL;
+using Jam.Api.DAL.EndingSceneDAL;
+using Jam.Api.DAL.IntroSceneDAL;
+using Jam.Api.DAL.QuestionSceneDAL;
 using Jam.Api.DAL.StoryDAL;
 using Jam.Api.Models;
 using Jam.Api.Services;
@@ -99,7 +101,9 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<IAnswerOptionRepository, AnswerOptionRepository>();
 builder.Services.AddScoped<IPlayingSessionRepository, PlayingSessionRepository>();
-builder.Services.AddScoped<ISceneRepository, SceneRepository>();
+builder.Services.AddScoped<IIntroSceneRepository, IntroSceneRepository>();
+builder.Services.AddScoped<IQuestionSceneRepository, QuestionSceneRepository>();
+builder.Services.AddScoped<IEndingSceneRepository, EndingSceneRepository>();
 builder.Services.AddScoped<IStoryRepository, StoryRepository>();
 builder.Services.AddScoped<IStoryPlayingService, StoryPlayingService>();
 builder.Services.AddScoped<IStoryCodeService, StoryCodeService>();

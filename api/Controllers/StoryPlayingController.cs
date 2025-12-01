@@ -1,4 +1,3 @@
-using Jam.Api.DAL.SceneDAL;
 using Jam.Api.DAL.StoryDAL;
 using Jam.Api.DTOs.StoryPlaying;
 using Jam.Api.DTOs.Shared;
@@ -17,7 +16,6 @@ namespace Jam.Api.Controllers;
 public class StoryPlayingController : ControllerBase
 {
     private readonly IStoryRepository _storyRepository;
-    private readonly ISceneRepository _sceneRepository;
     private readonly IPlayingSessionRepository _playingSessionRepository;
     private readonly UserManager<AuthUser> _userManager;
     private readonly IStoryPlayingService _storyPlayingService;
@@ -25,7 +23,6 @@ public class StoryPlayingController : ControllerBase
 
     public StoryPlayingController(
         IStoryRepository storyRepository,
-        ISceneRepository sceneRepository,
         IPlayingSessionRepository playingSessionRepository,
         UserManager<AuthUser> userManager,
         IStoryPlayingService storyPlayingService,
@@ -33,7 +30,6 @@ public class StoryPlayingController : ControllerBase
     )
     {
         _storyRepository = storyRepository;
-        _sceneRepository = sceneRepository;
         _playingSessionRepository = playingSessionRepository;
         _userManager = userManager;
         _storyPlayingService = storyPlayingService;

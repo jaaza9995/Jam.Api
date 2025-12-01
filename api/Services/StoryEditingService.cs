@@ -1,4 +1,4 @@
-using Jam.Api.DAL.SceneDAL;
+using Jam.Api.DAL.QuestionSceneDAL;
 using Jam.Api.DTOs.QuestionScenes;
 using Jam.Api.Models;
 
@@ -18,15 +18,15 @@ namespace Jam.Api.Services;
 /// </summary>
 public class StoryEditingService : IStoryEditingService
 {
-    private readonly ISceneRepository _sceneRepository;
+    private readonly IQuestionSceneRepository _questionSceneRepository;
     private readonly ILogger<StoryPlayingService> _logger;
 
     public StoryEditingService(
-        ISceneRepository sceneRepository,
+        IQuestionSceneRepository questionSceneRepository,
         ILogger<StoryPlayingService> logger
     )
     {
-        _sceneRepository = sceneRepository;
+        _questionSceneRepository = questionSceneRepository;
         _logger = logger;
     }
 
@@ -41,7 +41,7 @@ public class StoryEditingService : IStoryEditingService
         try
         {
             // 1. Retrieve existing QuestionScenes (to find the ones to delete)
-            var existingScenes = await _sceneRepository.GetQuestionScenesByStoryId(storyId);
+            var existingScenes = await _questionSceneRepository.GetQuestionScenesByStoryId(storyId);
 
             // 2. Find QuestionScenes to delete 
             var newSceneIds = newScenes
@@ -60,7 +60,7 @@ public class StoryEditingService : IStoryEditingService
             // 3. Delete QuestionScenes
             foreach (var scene in toDelete)
             {
-                await _sceneRepository.DeleteQuestionScene(scene.QuestionSceneId);
+                await _questionSceneRepository.DeleteQuestionScene(scene.QuestionSceneId);
                 deletedCount++;
             }
 
@@ -88,7 +88,7 @@ public class StoryEditingService : IStoryEditingService
                         }).ToList()
                     };
 
-                    await _sceneRepository.AddQuestionScene(sceneToUpdate);
+                    await _questionSceneRepository.AddQuestionScene(sceneToUpdate);
                     addedCount++;
                 }
                 else
@@ -113,7 +113,7 @@ public class StoryEditingService : IStoryEditingService
                         });
                     }
 
-                    await _sceneRepository.UpdateQuestionScene(sceneToUpdate);
+                    await _questionSceneRepository.UpdateQuestionScene(sceneToUpdate);
                     updatedCount++;
                 }
 
@@ -124,7 +124,7 @@ public class StoryEditingService : IStoryEditingService
             for (int i = 0; i < trackedInOrder.Count; i++)
             {
                 trackedInOrder[i].NextQuestionSceneId = (i < trackedInOrder.Count - 1) ? trackedInOrder[i + 1].QuestionSceneId : (int?)null;
-                await _sceneRepository.UpdateQuestionScene(trackedInOrder[i]);
+                await _questionSceneRepository.UpdateQuestionScene(trackedInOrder[i]);
             }
 
             // Log result

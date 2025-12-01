@@ -1,4 +1,6 @@
-using Jam.Api.DAL.SceneDAL;
+using Jam.Api.DAL.EndingSceneDAL;
+using Jam.Api.DAL.IntroSceneDAL;
+using Jam.Api.DAL.QuestionSceneDAL;
 using Jam.Api.DAL.StoryDAL;
 using Jam.Api.DTOs.Shared;
 using Jam.Api.DTOs.IntroScenes;
@@ -16,21 +18,27 @@ namespace Jam.Api.Controllers;
 public class StoryEditingController : ControllerBase
 {
     private readonly IStoryRepository _storyRepository;
-    private readonly ISceneRepository _sceneRepository;
+    private readonly IIntroSceneRepository _introSceneRepository;
+    private readonly IQuestionSceneRepository _questionSceneRepository;
+    private readonly IEndingSceneRepository _endingSceneRepository;
     private readonly ILogger<StoryEditingController> _logger;
     private readonly IStoryCodeService _codeService;
     private readonly IStoryEditingService _storyEditingService;
 
     public StoryEditingController(
-        IStoryRepository repo,
-        ISceneRepository sceneRepository,
+        IStoryRepository storyRepository,
+        IIntroSceneRepository introSceneRepository,
+        IQuestionSceneRepository questionSceneRepository,
+        IEndingSceneRepository endingSceneRepository,
         IStoryCodeService codeService,
         IStoryEditingService storyEditingService,
         ILogger<StoryEditingController> logger
     )
     {
-        _storyRepository = repo;
-        _sceneRepository = sceneRepository;
+        _storyRepository = storyRepository;
+        _introSceneRepository = introSceneRepository;
+        _questionSceneRepository = questionSceneRepository;
+        _endingSceneRepository = endingSceneRepository;
         _codeService = codeService;
         _storyEditingService = storyEditingService;
         _logger = logger;
@@ -117,7 +125,7 @@ public class StoryEditingController : ControllerBase
     [HttpGet("{storyId:int}/intro")]
     public async Task<IActionResult> GetIntro(int storyId)
     {
-        var intro = await _sceneRepository.GetIntroSceneByStoryId(storyId);
+        var intro = await _introSceneRepository.GetIntroSceneByStoryId(storyId);
         if (intro == null)
             return NotFound(new ErrorDto { ErrorTitle = "Intro scene not found." });
 
@@ -133,13 +141,13 @@ public class StoryEditingController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var intro = await _sceneRepository.GetIntroSceneByStoryId(storyId);
+        var intro = await _introSceneRepository.GetIntroSceneByStoryId(storyId);
         if (intro == null)
             return NotFound(new ErrorDto { ErrorTitle = "Intro scene not found." });
 
         intro.IntroText = model.IntroText;
 
-        if (!await _sceneRepository.UpdateIntroScene(intro))
+        if (!await _introSceneRepository.UpdateIntroScene(intro))
             return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to update intro scene." });
 
         return Ok(new { message = "Intro updated successfully." });
@@ -155,7 +163,7 @@ public class StoryEditingController : ControllerBase
     [HttpGet("{storyId:int}/questions")]
     public async Task<IActionResult> GetQuestions(int storyId)
     {
-        var scenes = await _sceneRepository.GetQuestionScenesByStoryId(storyId);
+        var scenes = await _questionSceneRepository.GetQuestionScenesByStoryId(storyId);
         if (scenes == null || !scenes.Any())
             return NotFound(new ErrorDto { ErrorTitle = "No question scenes found." });
 
@@ -212,7 +220,7 @@ public class StoryEditingController : ControllerBase
     [HttpGet("{storyId:int}/endings")]
     public async Task<IActionResult> GetEndings(int storyId)
     {
-        var list = await _sceneRepository.GetEndingScenesByStoryId(storyId);
+        var list = await _endingSceneRepository.GetEndingScenesByStoryId(storyId);
         if (list == null || !list.Any())
             return NotFound(new ErrorDto { ErrorTitle = "Ending scenes not found." });
 
@@ -234,7 +242,7 @@ public class StoryEditingController : ControllerBase
 
         try
         {
-            var endings = await _sceneRepository.GetEndingScenesByStoryId(storyId);
+            var endings = await _endingSceneRepository.GetEndingScenesByStoryId(storyId);
             if (!endings.Any())
                 return NotFound(new ErrorDto { ErrorTitle = "Ending scenes not found." });
 
@@ -249,7 +257,7 @@ public class StoryEditingController : ControllerBase
                 };
             }
 
-            if (!await _sceneRepository.UpdateEndingScenes(endings))
+            if (!await _endingSceneRepository.UpdateEndingScenes(endings))
                 return StatusCode(500, new ErrorDto { ErrorTitle = "Failed to update endings." });
 
             return Ok(new { message = "Endings updated successfully." });

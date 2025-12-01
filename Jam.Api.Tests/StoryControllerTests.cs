@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 using Jam.Api.Controllers;
 using Jam.Api.DAL.StoryDAL;
-using Jam.Api.DAL.SceneDAL;
+using Jam.Api.DAL.IntroSceneDAL;
+using Jam.Api.DAL.QuestionSceneDAL;
+using Jam.Api.DAL.EndingSceneDAL;
 using Jam.Api.Services;
 
 using Jam.Api.Models;
@@ -18,7 +20,7 @@ using Jam.Api.DTOs.Shared;
 public class StoryControllerTests
 {
     // =====================================================================
-    // INTRO SCENE TESTS  (2 TESTER)
+    // INTRO SCENE TESTS  (2 TESTS)
     // =====================================================================
 
     [Fact]
@@ -26,19 +28,29 @@ public class StoryControllerTests
     {
         var intro = new IntroScene { StoryId = 1, IntroText = "Math Universe" };
 
-        var mockScene = new Mock<ISceneRepository>();
-        mockScene.Setup(s => s.GetIntroSceneByStoryId(1)).ReturnsAsync(intro);
-
+        // Mocks for Repositories
+        var mockIntroSceneRepo = new Mock<IIntroSceneRepository>();
+        var mockQuestionSceneRepo = new Mock<IQuestionSceneRepository>();
+        var mockEndingSceneRepo = new Mock<IEndingSceneRepository>();
         var mockStoryRepo = new Mock<IStoryRepository>();
 
+        // Mocks for Services 
+        var mockStoryCodeService = new Mock<IStoryCodeService>();
         var mockStoryEditingService = new Mock<IStoryEditingService>();
+        var mockLogger = new Mock<ILogger<StoryEditingController>>();
+
+        // Setup the one action we care about for this test
+        mockIntroSceneRepo.Setup(s => s.GetIntroSceneByStoryId(1)).ReturnsAsync(intro);
 
         var controller = new StoryEditingController(
             mockStoryRepo.Object,
-            mockScene.Object,
-            new StoryCodeService(mockStoryRepo.Object),
+            mockIntroSceneRepo.Object,
+            mockQuestionSceneRepo.Object,
+            mockEndingSceneRepo.Object,
+            mockStoryCodeService.Object,
             mockStoryEditingService.Object,
-            new Mock<ILogger<StoryEditingController>>().Object);
+            mockLogger.Object
+        );
 
         var result = await controller.GetIntro(1);
 
@@ -52,19 +64,29 @@ public class StoryControllerTests
     [Fact]
     public async Task GetIntro_ReturnsNotFound_WhenIntroDoesNotExist()
     {
-        var mockScene = new Mock<ISceneRepository>();
-        mockScene.Setup(s => s.GetIntroSceneByStoryId(1)).ReturnsAsync((IntroScene?)null);
-
+        // Mocks for Repositories
+        var mockIntroSceneRepo = new Mock<IIntroSceneRepository>();
+        var mockQuestionSceneRepo = new Mock<IQuestionSceneRepository>();
+        var mockEndingSceneRepo = new Mock<IEndingSceneRepository>();
         var mockStoryRepo = new Mock<IStoryRepository>();
 
+        // Mocks for Services (Best Practice: Mock these too)
+        var mockStoryCodeService = new Mock<IStoryCodeService>();
         var mockStoryEditingService = new Mock<IStoryEditingService>();
+        var mockLogger = new Mock<ILogger<StoryEditingController>>();
+
+        // Setup the one action we care about for this test
+        mockIntroSceneRepo.Setup(s => s.GetIntroSceneByStoryId(1)).ReturnsAsync((IntroScene?)null);
 
         var controller = new StoryEditingController(
             mockStoryRepo.Object,
-            mockScene.Object,
-            new StoryCodeService(mockStoryRepo.Object),
+            mockIntroSceneRepo.Object,
+            mockQuestionSceneRepo.Object,
+            mockEndingSceneRepo.Object,
+            mockStoryCodeService.Object,
             mockStoryEditingService.Object,
-            new Mock<ILogger<StoryEditingController>>().Object);
+            mockLogger.Object
+        );
 
         var result = await controller.GetIntro(1);
 
@@ -75,7 +97,7 @@ public class StoryControllerTests
     }
 
     // =====================================================================
-    // QUESTIONS TESTS (2 TESTER)
+    // QUESTIONS TESTS (2 TEST)
     // =====================================================================
 
     [Fact]
@@ -97,18 +119,32 @@ public class StoryControllerTests
             }
         };
 
-        var mockScene = new Mock<ISceneRepository>();
-        var mockStoryEditingService = new Mock<IStoryEditingService>();
-        mockStoryEditingService.Setup(s => s.UpdateQuestionScenesAsync(It.IsAny<int>(), It.IsAny<List<UpdateQuestionSceneDto>>()))
-                                .ReturnsAsync(true);
-
+        // Mocks for Repositories
+        var mockIntroSceneRepo = new Mock<IIntroSceneRepository>();
+        var mockQuestionSceneRepo = new Mock<IQuestionSceneRepository>();
+        var mockEndingSceneRepo = new Mock<IEndingSceneRepository>();
         var mockStoryRepo = new Mock<IStoryRepository>();
+
+        // Mocks for Services (Best Practice: Mock these too)
+        var mockStoryCodeService = new Mock<IStoryCodeService>();
+        var mockStoryEditingService = new Mock<IStoryEditingService>();
+        var mockLogger = new Mock<ILogger<StoryEditingController>>();
+
+        // Setup the one action we care about for this test
+        mockStoryEditingService.Setup(s => s.UpdateQuestionScenesAsync(
+            It.IsAny<int>(),
+            It.IsAny<List<UpdateQuestionSceneDto>>()
+        )).ReturnsAsync(true);
+
         var controller = new StoryEditingController(
             mockStoryRepo.Object,
-            mockScene.Object,
-            new StoryCodeService(mockStoryRepo.Object),
+            mockIntroSceneRepo.Object,
+            mockQuestionSceneRepo.Object,
+            mockEndingSceneRepo.Object,
+            mockStoryCodeService.Object,
             mockStoryEditingService.Object,
-            new Mock<ILogger<StoryEditingController>>().Object);
+            mockLogger.Object
+        );
 
         var result = await controller.UpdateQuestions(1, payload);
 
@@ -118,15 +154,26 @@ public class StoryControllerTests
     [Fact]
     public async Task UpdateQuestions_ReturnsBadRequest_WhenModelStateInvalid()
     {
+        // Mocks for Repositories
+        var mockIntroSceneRepo = new Mock<IIntroSceneRepository>();
+        var mockQuestionSceneRepo = new Mock<IQuestionSceneRepository>();
+        var mockEndingSceneRepo = new Mock<IEndingSceneRepository>();
         var mockStoryRepo = new Mock<IStoryRepository>();
+
+        // Mocks for Services (Best Practice: Mock these too)
+        var mockStoryCodeService = new Mock<IStoryCodeService>();
         var mockStoryEditingService = new Mock<IStoryEditingService>();
+        var mockLogger = new Mock<ILogger<StoryEditingController>>();
 
         var controller = new StoryEditingController(
             mockStoryRepo.Object,
-            new Mock<ISceneRepository>().Object,
-            new StoryCodeService(mockStoryRepo.Object),
+            mockIntroSceneRepo.Object,
+            mockQuestionSceneRepo.Object,
+            mockEndingSceneRepo.Object,
+            mockStoryCodeService.Object,
             mockStoryEditingService.Object,
-            new Mock<ILogger<StoryEditingController>>().Object);
+            mockLogger.Object
+        );
 
         controller.ModelState.AddModelError("StoryText", "Required");
 
