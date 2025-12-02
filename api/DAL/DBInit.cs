@@ -391,7 +391,7 @@ public static class DBInit
                 new AnswerOption
                 {
                     Answer = "10",
-                    FeedbackText = "Å nei du svarte feil! Trollet ble veldig irritert over det gale svaret ditt. “Nå er jeg lei av deg og alt jukset ditt!” brølte trollet, og ga Askeladden et kraftig klaps i hodet så han ble halvveis bevisstløs. Trollet mumlet: “Du skal få se hvem som er sterk når vi kommer hjem”, og puttet Askeladden i baklomma si.",
+                    FeedbackText = "Å nei du svarte feil! Trollet ble veldig irritert over det gale svaret ditt. “Nå er jeg lei av deg og alt tullet ditt!” brølte trollet, og ga Askeladden et kraftig slag i hodet så han ble halvveis bevisstløs. Trollet mumlet: “Du skal få se hvem som er sjef når vi kommer hjem”, og puttet Askeladden i baklomma si.",
                     IsCorrect = false,
                 },
                 new AnswerOption
