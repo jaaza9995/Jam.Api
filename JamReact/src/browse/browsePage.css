@@ -1,0 +1,42 @@
+.browse-container {
+	max-width: 900px;
+	margin: auto;
+}
+
+.browse-title {
+	text-align: center;
+	margin-bottom: 30px;
+}
+
+.browse-sections {
+	display: flex;
+	justify-content: space-between;
+	gap: 30px;
+}
+
+.browse-block {
+	width: 50%;
+}
+
+.search-input {
+	width: 100%;
+	padding: 10px;
+	margin-bottom: 15px;
+}
+
+.browse-list {
+	list-style: none;
+	padding: 0;
+}
+
+.browse-card {
+	background: #202020;
+	padding: 15px;
+	margin-bottom: 10px;
+	cursor: pointer;
+	border-radius: 6px;
+}
+
+.browse-card:hover {
+	background: #303030;
+}

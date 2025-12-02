@@ -1,0 +1,289 @@
+using Jam.Api.Models.Enums;
+using Jam.Api.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace Jam.Api.DAL.PlayingSessionDAL;
+
+// Consider adding AsNoTracking() to read-only queries for performance boost
+
+public class PlayingSessionRepository : IPlayingSessionRepository
+{
+    private readonly StoryDbContext _db;
+    private readonly ILogger<PlayingSessionRepository> _logger;
+
+    public PlayingSessionRepository(
+        StoryDbContext db,
+        ILogger<PlayingSessionRepository> logger
+    )
+    {
+        _db = db;
+        _logger = logger;
+    }
+
+    // --------------------------------------- Read / GET ---------------------------------------
+
+    public async Task<IEnumerable<PlayingSession>> GetAllPlayingSessions() // not in use
+    {
+        try
+        {
+            return await _db.PlayingSessions
+                .AsNoTracking()
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[PlayingSessionRepository -> GetAllPlayingSessions] Error retrieving all playing sessions");
+            return Enumerable.Empty<PlayingSession>(); // not returning null to avoid null reference exceptions
+        }
+    }
+
+    public async Task<PlayingSession?> GetPlayingSessionById(int playingSessionId)
+    {
+        if (playingSessionId <= 0)
+        {
+            _logger.LogWarning("[PlayingSessionRepository -> GetPlayingSessionById] Invalid id: {playingSessionId}", playingSessionId);
+            return null;
+        }
+
+        try
+        {
+            var session = await _db.PlayingSessions
+                .AsNoTracking()
+                .FirstOrDefaultAsync(ps => ps.PlayingSessionId == playingSessionId);
+
+            if (session == null)
+            {
+                _logger.LogWarning("[PlayingSessionRepository -> GetPlayingSessionById] No playing session found with id: {playingSessionId}", playingSessionId);
+            }
+
+            return session;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[PlayingSessionRepository -> GetPlayingSessionById] Error retrieving playing session with id: {playingSessionId}", playingSessionId);
+            return null;
+        }
+    }
+
+    public async Task<IEnumerable<PlayingSession>> GetPlayingSessionsByUserId(string userId) // not in use
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            _logger.LogWarning("[PlayingSessionRepository -> GetPlayingSessionsByUserId] Invalid userId: {userId}", userId);
+            return Enumerable.Empty<PlayingSession>(); // not returning null to avoid null reference exceptions
+        }
+
+        try
+        {
+            return await _db.PlayingSessions
+                .AsNoTracking()
+                .Where(ps => ps.UserId == userId)
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[PlayingSessionRepository -> GetPlayingSessionsByUserId] Error retrieving playing sessions for userId: {userId}", userId);
+            return Enumerable.Empty<PlayingSession>(); // not returning null to avoid null reference exceptions
+        }
+    }
+
+    public async Task<IEnumerable<PlayingSession>> GetPlayingSessionsByStoryId(int storyId) // not in use
+    {
+        if (storyId <= 0)
+        {
+            _logger.LogWarning("[PlayingSessionRepository -> GetPlayingSessionsByStoryId] Invalid storyId: {storyId}", storyId);
+            return Enumerable.Empty<PlayingSession>(); // not returning null to avoid null reference exceptions
+        }
+
+        try
+        {
+            return await _db.PlayingSessions
+                .Where(ps => ps.StoryId == storyId)
+                .ToListAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[PlayingSessionRepository -> GetPlayingSessionsByStoryId] Error retrieving playing sessions for storyId: {storyId}", storyId);
+            return Enumerable.Empty<PlayingSession>(); // not returning null to avoid null reference exceptions
+        }
+    }
+
+
+
+
+    // --------------------------------------- Create ---------------------------------------
+
+    public async Task<bool> AddPlayingSession(PlayingSession playingSession)
+    {
+        if (playingSession == null)
+        {
+            _logger.LogWarning("[PlayingSessionRepository -> AddPlayingSession] Attempted to add a null playing session");
+            return false;
+        }
+
+        try
+        {
+            _db.PlayingSessions.Add(playingSession);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[PlayingSessionRepository -> AddPlayingSession] Error adding new playing session {playingSession}", playingSession);
+            return false;
+        }
+    }
+
+
+
+
+    // --------------------------------------- Update ---------------------------------------
+
+    // When user goes from IntroScene to first QuestionScene
+    public async Task<bool> TransitionFromIntroToFirstQuestion(int playingSessionId, int nextSceneId, SceneType newSceneType)
+    {
+        if (playingSessionId <= 0 || nextSceneId <= 0)
+        {
+            _logger.LogWarning("[PlayingSessionRepository -> TransitionFromIntroToFirstQuestion] Invalid playingSessionId: {playingSessionId} or nextSceneId: {nextSceneId}", playingSessionId, nextSceneId);
+            return false;
+        }
+
+        if (newSceneType != SceneType.Question)
+        {
+            _logger.LogWarning("[PlayingSessionRepository -> TransitionFromIntroToFirstQuestion] Invalid sceneType: {sceneType} for nextSceneId: {nextSceneId}", newSceneType, nextSceneId);
+            return false;
+        }
+
+        return await UpdateSessionProgressAsync(playingSessionId, nextSceneId, newSceneType); // private method (see below)
+    }
+
+    // When user goes from a QuestionScene to another QuestionScene
+    public async Task<bool> AnswerQuestion(int playingSessionId, int? nextSceneId, SceneType newSceneType, int newScore, int newLevel)
+    {
+        if (playingSessionId <= 0 || nextSceneId <= 0)
+        {
+            _logger.LogWarning("[PlayingSessionRepository -> AnswerQuestion] Invalid playingSessionId: {playingSessionId} or nextSceneId: {nextSceneId}", playingSessionId, nextSceneId);
+            return false;
+        }
+
+        if (newScore < 0)
+        {
+            _logger.LogWarning("[PlayingSessionRepository -> AnswerQuestion] Invalid newScore: {newScore} for playingSessionId: {playingSessionId}", newScore, playingSessionId);
+            return false;
+        }
+
+        if (newLevel < 1 || newLevel > 3)
+        {
+            _logger.LogWarning("[PlayingSessionRepository -> AnswerQuestion] Invalid newLevel: {newLevel} for playingSessionId: {playingSessionId}", newLevel, playingSessionId);
+            return false;
+        }
+
+        return await UpdateSessionProgressAsync(playingSessionId, nextSceneId, newSceneType, newScore, newLevel); // private method (see below)
+
+    }
+
+    // When user finishes the EndingScene (when user is done with the game)
+    public async Task<bool> FinishSession(int playingSessionId, int finalScore, int finalLevel)
+    {
+        if (playingSessionId <= 0)
+        {
+            _logger.LogWarning("[PlayingSessionRepository -> FinishSession] Invalid playingSessionId: {playingSessionId}", playingSessionId);
+            return false;
+        }
+
+        if (finalScore < 0)
+        {
+            _logger.LogWarning("[PlayingSessionRepository -> FinishSession] Invalid finalScore: {finalScore} for playingSessionId: {playingSessionId}", finalScore, playingSessionId);
+            return false;
+        }
+
+        if (finalLevel < 1 || finalLevel > 3)
+        {
+            _logger.LogWarning("[PlayingSessionRepository -> FinishSession] Invalid newLevel: {newLevel} for playingSessionId: {playingSessionId}", finalLevel, playingSessionId);
+            return false;
+        }
+
+        return await UpdateSessionProgressAsync(playingSessionId, null, null, finalScore, finalLevel); // private method (see below)
+    }
+
+
+    // Private helper method to update session progress based on different scenarios
+    private async Task<bool> UpdateSessionProgressAsync(
+        int playingSessionId,
+        int? nextSceneId,
+        SceneType? newSceneType,
+        int? newScore = null,
+        int? newCurrentLevel = null)
+    {
+        try
+        {
+            var session = await _db.PlayingSessions.FindAsync(playingSessionId);
+            if (session == null)
+            {
+                _logger.LogWarning("[PlayingSessionRepository -> UpdateSessionProgressAsync] No playing session found with playingSessionId: {playingSessionId}", playingSessionId);
+                return false;
+            }
+
+            if (nextSceneId.HasValue)
+                session.CurrentSceneId = nextSceneId;
+
+            if (newSceneType != null)
+                session.CurrentSceneType = newSceneType;
+
+            if (newScore.HasValue)
+                session.Score = newScore.Value;
+
+            if (newCurrentLevel.HasValue)
+                session.CurrentLevel = newCurrentLevel.Value;
+
+            // Set EndTime if:
+            // 1. The scene type is ENDING (Successful End of a PlayingSession), OR
+            // 2. There is no next scene ID (Level 1 Loss / user experiences 'Game Over')
+            if (newSceneType == SceneType.Ending || nextSceneId == null)
+            {
+                session.EndTime = DateTime.UtcNow;
+            }
+
+            await _db.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[PlayingSessionRepository -> UpdateSessionProgressAsync] Error updating session progress for playingSessionId: {playingSessionId}", playingSessionId);
+            return false;
+        }
+    }
+
+
+
+
+    // --------------------------------------- Delete ---------------------------------------
+
+    public async Task<bool> DeletePlayingSession(int playingSessionId) // not in use
+    {
+        if (playingSessionId <= 0)
+        {
+            _logger.LogWarning("[PlayingSessionRepository -> DeletePlayingSession] Invalid id: {playingSessionId}", playingSessionId);
+            return false;
+        }
+
+        try
+        {
+            var playingSession = await _db.PlayingSessions.FindAsync(playingSessionId);
+            if (playingSession == null)
+            {
+                _logger.LogWarning("[PlayingSessionRepository -> DeletePlayingSession] No playing session found with id: {playingSessionId}", playingSessionId);
+                return false;
+            }
+
+            _db.PlayingSessions.Remove(playingSession);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "[PlayingSessionRepository -> DeletePlayingSession] Error deleting playing session with id: {playingSessionId}", playingSessionId);
+            return false;
+        }
+    }
+}

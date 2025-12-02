@@ -1,0 +1,40 @@
+.edit-wrapper {
+	width: 70%;
+	margin: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 30px;
+}
+
+/* Grid-layout for venstre metadata + høyre knapper */
+.edit-layout {
+	display: grid;
+	grid-template-columns: 1fr 300px;
+	gap: 60px;
+	align-items: start;
+	margin-top: 40px;
+}
+
+/* Venstre kort */
+.left-card {
+	width: 100%;
+}
+
+/* Høyre knappekolonne */
+.right-buttons {
+	display: flex;
+	flex-direction: column;
+	gap: 70px;
+}
+
+/* Back-knappen nederst til venstre */
+.back-btn {
+	margin-top: 60px;
+	margin-left: 0;
+}
+
+.edit-btn {
+	background-color: rgb(24, 255, 255);
+	border-radius: 10px;
+	border: rgb(153, 255, 255);
+}
