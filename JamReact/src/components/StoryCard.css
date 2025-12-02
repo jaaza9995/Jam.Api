@@ -1,0 +1,130 @@
+.section-block {
+    margin-top: 40px;
+}
+  
+.section-title {
+    color: #ffc24f;
+    font-size: 22px;
+    margin-bottom: 15px;
+}
+  
+.empty-text {
+    color: #ccc;
+    font-size: 12px;
+}
+
+.story-card {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    min-width: 300px;
+    max-width: 320px;
+    height: 370px;
+    margin: 10px auto;
+    font-size: 12px;
+
+    
+    background-color: var(--card-bg);
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 2%;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    flex: 1 1 calc(1% - 1rem); /* Adjust width for three cards in a row */
+
+    margin: 0px; /* Add spacing between cards */
+  
+    box-sizing: border-box; /* Ensure padding and border are included in width */
+    margin-bottom: 10px;
+  
+  }
+
+  .story-card-container {
+    list-style: none;
+    padding: 0;
+    /* kanksje bytte til flex-start istedenfor center */
+    /*justify-content: flex-start;*/
+    justify-content: center;
+    flex-wrap: wrap;  
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-inline: 2%;
+  }
+  
+  .story-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 15px var(--accent-color);
+  }
+  
+/* title and description in story-card */
+.story-content {
+    flex-grow: 1;
+    overflow-y: auto; /* scroll hvis beskrivelse er for lang */
+    overflow-x: hidden;
+    scrollbar-width: none;
+    margin-bottom: 5px;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.story-content::-webkit-scrollbar {
+    display: none;            /* Chrome, Edge, Safari */
+  }
+  
+/* question count, difficulty and game code at the bottom of story-card */
+.bottom-info {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1px;
+}
+  
+/* question count and difficulty row */
+.diff-qc-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 2px;
+}
+  
+.difficulty {
+    font-size: 8px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: italic;
+    padding: 5px 10px;
+    border-radius: 10px;
+    border: none;
+    box-shadow: 3px 4px 0px #2e221ba3;
+    pointer-events: none;
+}
+  
+.easy { background: #6afb93; color: #104019;}
+.medium { background: #ead067; color: #70480d;}
+.hard { background: #ff7777; color: #380b0b;}
+  
+.question-count {
+    /*padding: 4px 10px;*/
+    padding-left: 10px;
+    padding-top: 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 10px;
+}
+  
+.private-code {
+    /*margin-top: auto;
+    margin-bottom: 10px;*/
+    font-size: 12px;
+    color: #ffea75;
+    font-weight: bold;
+}
+  
+.story-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: auto;
+}
+  

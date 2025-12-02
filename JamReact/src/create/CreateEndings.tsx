@@ -6,7 +6,7 @@ import { EndingDto, EndingErrors } from "../types/createStory";
 import { useToast } from "../shared/ToastContext";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
 import FormErrorMessage from "../components/FormErrorMessage";
-import "../App.css";
+import "./Create.css";
 
 const CreateEndings: React.FC = () => {
 	const navigate = useNavigate();
@@ -26,12 +26,9 @@ const CreateEndings: React.FC = () => {
 	const validate = () => {
 		const newErrors: EndingErrors = { good: "", neutral: "", bad: "" };
 
-		if (!good.trim())
-			newErrors.good = "Opps, your forgot to write a good ending.";
-		if (!neutral.trim())
-			newErrors.neutral = "Opps, your forgot to write a neutral ending.";
-		if (!bad.trim())
-			newErrors.bad = "Opps, your forgot to write a bad ending.";
+    if (!good.trim()) newErrors.good = "Oops, your forgot to write a good ending.";
+    if (!neutral.trim()) newErrors.neutral = "Oops, your forgot to write a neutral ending.";
+    if (!bad.trim()) newErrors.bad = "Oops, your forgot to write a bad ending.";
 
 		setErrors(newErrors);
 		return Object.values(newErrors).every((e) => e === "");
@@ -83,96 +80,85 @@ const CreateEndings: React.FC = () => {
 		<div className="pixel-bg">
 			<h1 className="title">CREATE ENDINGS</h1>
 
-			<div className="ending-wrapper">
-				{/* GOOD ENDING */}
-				<div className="ending-block">
-					<h3 className="ending-label">GOOD ENDING</h3>
-					<textarea
-						className="ending-input"
-						value={good}
-						placeholder="Write the good ending for your story..."
-						onChange={(e) => {
-							setGood(e.target.value);
-							setErrors((prev) => ({ ...prev, good: "" }));
-							setData((prev) => ({
-								...prev,
-								endings: {
-									...prev.endings,
-									good: e.target.value,
-								},
-							}));
-						}}
-					/>
-					<FormErrorMessage message={errors.good} />
+      <div className="ending-wrapper">
+
+        {/* GOOD ENDING */}
+        <div className="ending-block">
+          <h3 className="input-label">GOOD ENDING</h3>
+          <textarea
+            className="input-area longer-box"
+            value={good}
+            placeholder="Write the good ending for your story..."
+            onChange={(e) => {
+              setGood(e.target.value);
+              setErrors((prev) => ({ ...prev, good: "" }));
+              setData((prev) => ({
+                ...prev,
+                endings: { ...prev.endings, good: e.target.value },
+              }));
+            }}
+          />
+          <FormErrorMessage message={errors.good} />
 
 					{/* NEUTRAL ENDING */}
 
-					<h3 className="ending-label">NEUTRAL ENDING</h3>
-					<textarea
-						className="ending-input"
-						value={neutral}
-						placeholder="Write the neutral ending..."
-						onChange={(e) => {
-							setNeutral(e.target.value);
-							setErrors((prev) => ({ ...prev, neutral: "" }));
-							setData((prev) => ({
-								...prev,
-								endings: {
-									...prev.endings,
-									neutral: e.target.value,
-								},
-							}));
-						}}
-					/>
-					<FormErrorMessage message={errors.neutral} />
+          <h3 className="input-label">NEUTRAL ENDING</h3>
+          <textarea
+            className="input-area longer-box"
+            value={neutral}
+            placeholder="Write the neutral ending..."
+            onChange={(e) => {
+              setNeutral(e.target.value);
+              setErrors((prev) => ({ ...prev, neutral: "" }));
+              setData((prev) => ({
+                ...prev,
+                endings: { ...prev.endings, neutral: e.target.value },
+              }));
+            }}
+          />
+          <FormErrorMessage message={errors.neutral} />
 
 					{/* BAD ENDING */}
 
-					<h3 className="ending-label">BAD ENDING</h3>
-					<textarea
-						className="ending-input"
-						value={bad}
-						placeholder="Write the BAD ending..."
-						onChange={(e) => {
-							setBad(e.target.value);
-							setErrors((prev) => ({ ...prev, bad: "" }));
-							setData((prev) => ({
-								...prev,
-								endings: {
-									...prev.endings,
-									bad: e.target.value,
-								},
-							}));
-						}}
-					/>
-					<FormErrorMessage message={errors.bad} />
-				</div>
+          <h3 className="input-label">BAD ENDING</h3>
+          <textarea
+            className="input-area longer-box"
+            value={bad}
+            placeholder="Write the BAD ending..."
+            onChange={(e) => {
+              setBad(e.target.value);
+              setErrors((prev) => ({ ...prev, bad: "" }));
+              setData((prev) => ({
+                ...prev,
+                endings: { ...prev.endings, bad: e.target.value },
+              }));
+            }}
+          />
+          <FormErrorMessage message={errors.bad} />
+        </div>
 
-				{/* BUTTONS */}
-				<div className="button-row">
-					<button
-						className="pixel-btn pixel-btn-back"
-						onClick={() => {
-							setData((prev) => ({
-								...prev,
-								endings: { good, neutral, bad },
-							}));
-							navigate("/create/questions");
-						}}
-					>
-						BACK
-					</button>
+        {/* BUTTONS */}
+        <div className="nav-buttons">
+          <button
+            className="pixel-btn back"
+            onClick={() => {
+              setData((prev) => ({
+                ...prev,
+                endings: { good, neutral, bad },
+              }));
+              navigate("/create/questions");
+            }}
+          >
+            BACK
+          </button>
 
-					<button
-						className="pixel-btn pixel-btn-finish"
-						onClick={handleFinish}
-					>
-						FINISH
-					</button>
-				</div>
-			</div>
-		</div>
-	);
+          <button className="pixel-btn edit" onClick={handleFinish}>
+            FINISH
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default CreateEndings;

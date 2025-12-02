@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import useStoryCreation from "./StoryCreationContext";
 import { saveQuestions } from "./StoryCreationService";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
-import "../App.css";
+import "./Create.css";
+
 import {
 	QuestionSceneDto,
 	QuestionErrors,
@@ -55,9 +56,8 @@ const CreateQuestions = () => {
 		const errList: QuestionErrors[] = questions.map((q) => {
 			const e: QuestionErrors = {};
 
-			if (!q.storyText.trim()) e.storyText = "Story context is required.";
-			if (!q.questionText.trim())
-				e.questionText = "Question text is required.";
+      if (!q.storyText.trim()) e.storyText = "Option outcome is required.";
+      if (!q.questionText.trim()) e.questionText = "Question text is required.";
 
 			if (q.answers.some((a) => !a.answerText.trim()))
 				e.answers = "All 4 answer options must be filled.";
@@ -153,71 +153,59 @@ const CreateQuestions = () => {
 		<div className="pixel-bg">
 			<h1 className="title">CREATE QUESTIONS</h1>
 
-			<div className="questions-wrapper">
-				{questions.map((q, i) => (
-					<div className="question-box" key={i}>
-						{/* STORY CONTEXT */}
-						<h3 className="question-label">STORY CONTEXT</h3>
-						<textarea
-							className="pixel-input"
-							value={q.storyText}
-							placeholder={`Write The Story Context...`}
-							onChange={(e) =>
-								update(i, { ...q, storyText: e.target.value })
-							}
-						/>
-						{errors[i]?.storyText && (
-							<p className="error-msg">{errors[i].storyText}</p>
-						)}
+      <div className="questions-wrapper">
+        {questions.map((q, i) => (
+          <div className="question-box" key={i}>
+            
+            {/* STORY CONTEXT */}
+            <h3 className="input-label">STORY CONTEXT</h3>
+            <textarea
+              className="input-area"
+              value={q.storyText}
+              placeholder={`Write Some Lead-up to Your Question Here...`}
+              onChange={(e) => update(i, { ...q, storyText: e.target.value })}
+            />
+            {errors[i]?.storyText && <p className="error-msg">{errors[i].storyText}</p>}
 
-						{/* QUESTION TEXT */}
-						<h3 className="question-label">QUESTION</h3>
-						<textarea
-							className="pixel-input"
-							value={q.questionText}
-							placeholder={`Write Your Question here...`}
-							onChange={(e) =>
-								update(i, {
-									...q,
-									questionText: e.target.value,
-								})
-							}
-						/>
-						{errors[i]?.questionText && (
-							<p className="error-msg">
-								{errors[i].questionText}
-							</p>
-						)}
+            {/* QUESTION TEXT */}
+            <h3 className="input-label">QUESTION</h3>
+            <textarea
+              className="input-area"
+              value={q.questionText}
+              placeholder={`Write Your Question here...`}
+              onChange={(e) => update(i, { ...q, questionText: e.target.value })}
+            />
+            {errors[i]?.questionText && <p className="error-msg">{errors[i].questionText}</p>}
 
-						{/* ANSWERS */}
-						{/* ANSWERS */}
-						<h3 className="question-label">ANSWER OPTIONS</h3>
+            {/* ANSWERS */}
+            <h3 className="input-label">ANSWER OPTIONS</h3>
 
-						{q.answers.map((a, ai) => (
-							<div className="answer-row" key={ai}>
-								{/* Answer text */}
-								<input
-									className="pixel-input-small"
-									placeholder={`Write Answer ${ai + 1}...`}
-									value={a.answerText}
-									onChange={(e) => {
-										const list = [...q.answers];
-										list[ai].answerText = e.target.value;
-										update(i, { ...q, answers: list });
-									}}
-								/>
+            {q.answers.map((a, ai) => (
+              <div className="answer-row" key={ai}>
 
-								{/* Context text */}
-								<input
-									className="pixel-input-small"
-									placeholder={`Write Context ${ai + 1}...`}
-									value={a.contextText}
-									onChange={(e) => {
-										const list = [...q.answers];
-										list[ai].contextText = e.target.value;
-										update(i, { ...q, answers: list });
-									}}
-								/>
+                {/* Answer text */}
+                <input
+                  className="input-area"
+                  placeholder={`Write Answer ${ai + 1}...`}
+                  value={a.answerText}
+                  onChange={(e) => {
+                    const list = [...q.answers];
+                    list[ai].answerText = e.target.value;
+                    update(i, { ...q, answers: list });
+                  }}
+                />
+
+                {/* Context text */}
+                <input
+                  className="input-area"
+                  placeholder={`Outcome of Option ${ai + 1}...`}
+                  value={a.contextText}
+                  onChange={(e) => {
+                    const list = [...q.answers];
+                    list[ai].contextText = e.target.value;
+                    update(i, { ...q, answers: list });
+                  }}
+                />
 
 								{/* Correct button */}
 								<button
@@ -227,9 +215,7 @@ const CreateQuestions = () => {
 											: ""
 									}`}
 									onClick={() =>
-										update(i, {
-											...q,
-											correctAnswerIndex: ai,
+										update(i, { ...q, correctAnswerIndex: ai,
 										})
 									}
 								>
@@ -253,39 +239,39 @@ const CreateQuestions = () => {
 							</p>
 						)}
 
-						<button
-							className="pixel-btn pixel-btn-delete"
-							onClick={() => remove(i)}
-						>
-							DELETE QUESTION
-						</button>
-					</div>
-				))}
-			</div>
-			<button className="pixel-btn pixel-btn-addQuestion" onClick={add}>
-				+ ADD QUESTION
-			</button>
+            <button
+              className="delete-q-button"
+              onClick={() => remove(i)}
+            >
+              DELETE QUESTION
+            </button>
+          </div>
+          
+        ))}
+      </div>
+          <button className="pixel-btn addQuestion" onClick={add}>
+          + ADD QUESTION
+        </button>
 
-			<div className="button-row">
-				<button
-					className="pixel-btn pixel-btn-back"
-					onClick={() => {
-						setData((prev) => ({ ...prev, questions }));
-						navigate("/create/intro");
-					}}
-				>
-					BACK
-				</button>
+        
+        <div className="nav-buttons">
+        <button
+          className="pixel-btn back"
+          onClick={() => {
+            setData(prev => ({ ...prev, questions }));
+            navigate("/create/intro");
+          }}
+        >
+          BACK
+        </button>
+         
+        <button className="pixel-btn next" onClick={handleNext}>
+          NEXT
+        </button>
 
-				<button
-					className="pixel-btn pixel-btn-next"
-					onClick={handleNext}
-				>
-					NEXT
-				</button>
-			</div>
-		</div>
-	);
+        </div>
+    </div>
+  );
 };
 
 export default CreateQuestions;

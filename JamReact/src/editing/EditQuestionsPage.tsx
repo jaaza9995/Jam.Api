@@ -4,6 +4,7 @@ import "./Edit.css";
 import { getQuestions, updateQuestions } from "./storyEditingService";
 import ConfirmUndoModal from "../shared/ConfirmUndoModal";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
+
 import {
 	QuestionSceneDto as QuestionScene,
 	AnswerOptionDto as AnswerOption,
@@ -91,7 +92,7 @@ const normalizeAnswers = (
 };
 
 const emptyQuestion = (): QuestionScene => ({
-	//add question knappen
+	//add question button
 	questionSceneId: 0,
 	storyText: "",
 	questionText: "",
@@ -383,24 +384,19 @@ const EditQuestionsPage: React.FC = () => {
 
 			<h1 className="edit-title">Edit Questions</h1>
 
-			{questions.map((q, i) => (
-				// if QuestionSceneId is 0 (new question) use the index so keys are unique
-				<div
-					key={q.questionSceneId !== 0 ? q.questionSceneId : i}
-					className="question-scene-card"
-				>
-					{/* STORY CONTEXT */}
-					<h3 className="question-label">STORY CONTEXT</h3>
-					<textarea
-						className="pixel-input"
-						value={q.storyText}
-						onChange={(e) => {
-							const updated = [...questions];
-							updated[i] = {
-								...updated[i],
-								storyText: e.target.value,
-							};
-							setQuestions(updated);
+      {questions.map((q, i) => (
+        // if QuestionSceneId is 0 (new question) use the index so keys are unique
+        <div key={q.questionSceneId !== 0 ? q.questionSceneId : i} className="question-scene-card">
+
+          {/* STORY CONTEXT */}
+          <h3 className="input-label">STORY CONTEXT</h3>
+          <textarea
+            className="input-area"
+            value={q.storyText}
+            onChange={(e) => {
+              const updated = [...questions];
+              updated[i] = { ...updated[i], storyText: e.target.value };
+              setQuestions(updated);
 
 							const copy = [...errors];
 							copy[i] = { ...copy[i], storyText: "" };
@@ -411,18 +407,15 @@ const EditQuestionsPage: React.FC = () => {
 						<p className="error-msg">{errors[i]?.storyText}</p>
 					)}
 
-					{/* QUESTION */}
-					<h3 className="question-label">QUESTION</h3>
-					<textarea
-						className="pixel-input"
-						value={q.questionText}
-						onChange={(e) => {
-							const updated = [...questions];
-							updated[i] = {
-								...updated[i],
-								questionText: e.target.value,
-							};
-							setQuestions(updated);
+          {/* QUESTION */}
+          <h3 className="input-label">QUESTION</h3>
+          <textarea
+            className="input-area"
+            value={q.questionText}
+            onChange={(e) => {
+              const updated = [...questions];
+              updated[i] = { ...updated[i], questionText: e.target.value };
+              setQuestions(updated);
 
 							const copy = [...errors];
 							copy[i] = { ...copy[i], questionText: "" };
@@ -433,23 +426,20 @@ const EditQuestionsPage: React.FC = () => {
 						<p className="error-msg">{errors[i]?.questionText}</p>
 					)}
 
-					{/* ANSWERS */}
-					<h3 className="question-label">ANSWER OPTIONS</h3>
+          {/* ANSWERS */}
+          <h3 className="input-label">ANSWER OPTIONS</h3>
 
-					{q.answers.map((a, idx) => (
-						<div className="answer-row" key={idx}>
-							<input
-								className="pixel-input"
-								value={a.answerText}
-								onChange={(e) => {
-									const updated = [...questions];
-									const answers = [...updated[i].answers];
-									answers[idx] = {
-										...answers[idx],
-										answerText: e.target.value,
-									};
-									updated[i] = { ...updated[i], answers };
-									setQuestions(updated);
+          {q.answers.map((a, idx) => (
+            <div className="answer-row" key={idx}>
+              <input
+                className="input-area"
+                value={a.answerText}
+                onChange={(e) => {
+                  const updated = [...questions];
+                  const answers = [...updated[i].answers];
+                  answers[idx] = { ...answers[idx], answerText: e.target.value };
+                  updated[i] = { ...updated[i], answers };
+                  setQuestions(updated);
 
 									const copy = [...errors];
 									copy[i] = { ...copy[i], answers: "" };
@@ -488,22 +478,19 @@ const EditQuestionsPage: React.FC = () => {
 						<p className="error-msg">{errors[i]?.correct}</p>
 					)}
 
-					{/* CONTEXT TEXTS */}
-					<h3 className="question-label">CONTEXT TEXTS</h3>
-					{q.answers.map((a, idx) => (
-						<textarea
-							key={idx}
-							className="pixel-input"
-							value={a.contextText}
-							onChange={(e) => {
-								const updated = [...questions];
-								const answers = [...updated[i].answers];
-								answers[idx] = {
-									...answers[idx],
-									contextText: e.target.value,
-								};
-								updated[i] = { ...updated[i], answers };
-								setQuestions(updated);
+          {/* CONTEXT TEXTS */}
+          <h3 className="input-label">CONTEXT TEXTS</h3>
+          {q.answers.map((a, idx) => (
+            <textarea
+              key={idx}
+              className="input-area"
+              value={a.contextText}
+              onChange={(e) => {
+                const updated = [...questions];
+                const answers = [...updated[i].answers];
+                answers[idx] = { ...answers[idx], contextText: e.target.value };
+                updated[i] = { ...updated[i], answers };
+                setQuestions(updated);
 
 								const copy = [...errors];
 								copy[i] = { ...copy[i], contextTexts: "" };
