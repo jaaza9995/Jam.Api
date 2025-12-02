@@ -300,7 +300,7 @@ const EditIntroPage: React.FC = () => {
 	// RENDER
 	// ------------------------------------
 	return (
-		<div className="pixel-bg edit-container">
+		<div className="pixel-bg">
 			{/* Undo modal */}
 			{showUndoConfirm && (
 				<ConfirmUndoModal
@@ -317,93 +317,99 @@ const EditIntroPage: React.FC = () => {
 				<div className="nochanges-toast">No changes have been done</div>
 			)}
 
-			<h1 className="title">Edit Story & Intro</h1>
+			<div className="create-form"> 
+				<h1 className="title">EDIT INTRO</h1>
 
-			{backendError && <p className="error-msg">{backendError}</p>}
+				{backendError && <p className="error-msg">{backendError}</p>}
 
-			{/* TITLE */}
-			<label className="input-label">Title</label>
-			<input
-				className="pixel-textarea"
-				value={title}
-				onChange={(e) => {
-					setTitle(e.target.value);
-					setErrors((prev) => ({ ...prev, title: "" }));
-				}}
-			/>
-			{errors.title && <p className="error-msg">{errors.title}</p>}
+				{/* TITLE */}
+				<label className="input-label">TITLE</label>
+				<input
+					className="input-area"
+					value={title}
+					onChange={(e) => {
+						setTitle(e.target.value);
+						setErrors((prev) => ({ ...prev, title: "" }));
+					}}
+				/>
+				{errors.title && <p className="error-msg">{errors.title}</p>}
 
-			{/* DESCRIPTION */}
-			<label className="input-label">Description</label>
-			<textarea
-				className="pixel-textarea"
-				value={description}
-				onChange={(e) => {
-					setDescription(e.target.value);
-					setErrors((prev) => ({ ...prev, description: "" }));
-				}}
-			/>
-			{errors.description && (
-				<p className="error-msg">{errors.description}</p>
-			)}
+				{/* DESCRIPTION */}
+				<label className="input-label">DESCRIPTION</label>
+				<textarea
+					className="input-area longer-box"
+					value={description}
+					onChange={(e) => {
+						setDescription(e.target.value);
+						setErrors((prev) => ({ ...prev, description: "" }));
+					}}
+				/>
+				{errors.description && (
+					<p className="error-msg">{errors.description}</p>
+				)}
 
-			{/* INTRO TEXT */}
-			<label className="input-label">Introduction</label>
-			<textarea
-				className="pixel-textarea"
-				value={introText}
-				onChange={(e) => {
-					setIntroText(e.target.value);
-					setErrors((prev) => ({ ...prev, introText: "" }));
-				}}
-			/>
-			{errors.introText && (
-				<p className="error-msg">{errors.introText}</p>
-			)}
+				{/* INTRO TEXT */}
+				<label className="input-label">INTRO TEXT</label>
+				<textarea
+					className="input-area longer-box"
+					value={introText}
+					onChange={(e) => {
+						setIntroText(e.target.value);
+						setErrors((prev) => ({ ...prev, introText: "" }));
+					}}
+				/>
+				{errors.introText && (
+					<p className="error-msg">{errors.introText}</p>
+				)}
 
-			{/* DIFFICULTY */}
-			<label className="input-label">Difficulty</label>
-			<select
-				className="pixel-textarea"
-				value={difficulty}
-				onChange={(e) => setDifficulty(Number(e.target.value))}
-			>
-				<option value={0}>Easy</option>
-				<option value={1}>Medium</option>
-				<option value={2}>Hard</option>
-			</select>
-			{errors.difficulty && (
-				<p className="error-msg">{errors.difficulty}</p>
-			)}
+				{/* DIFFICULTY */}
+				<label className="input-label">DIFFICULTY</label>
+				<div className="dropdown-wrapper">
+					<select
+						className="select-dropdown"
+						value={difficulty}
+						onChange={(e) => setDifficulty(Number(e.target.value))}
+					>
+						<option value={0}>Easy</option>
+						<option value={1}>Medium</option>
+						<option value={2}>Hard</option>
+					</select>
+				</div>
+				{errors.difficulty && (
+					<p className="error-msg">{errors.difficulty}</p>
+				)}
 
-			{/* ACCESSIBILITY */}
-			<label className="input-label">Accessibility</label>
-			<select
-				className="pixel-textarea"
-				value={accessibility}
-				onChange={(e) => setAccessibility(Number(e.target.value))}
-			>
-				<option value={0}>Public</option>
-				<option value={1}>Private</option>
-			</select>
-			{errors.accessibility && (
-				<p className="error-msg">{errors.accessibility}</p>
-			)}
+				{/* ACCESSIBILITY */}
+				<label className="input-label">ACCESSIBILITY</label>
+				<div className="dropdown-wrapper">
+					<select
+						className="select-dropdown"
+						value={accessibility}
+						onChange={(e) => setAccessibility(Number(e.target.value))}
+					>
+						<option value={0}>Public</option>
+						<option value={1}>Private</option>
+					</select>
+				</div>
+				{errors.accessibility && (
+					<p className="error-msg">{errors.accessibility}</p>
+				)}
 
-			<div className="edit-buttons">
-				<button
-					className="pixel-btn pixel-btn-back"
-					onClick={handleBack}
-				>
-					Back
-				</button>
+				<div className="nav-buttons">
+					<button
+						className="pixel-btn back"
+						onClick={handleBack}
+					>
+						BACK
+					</button>
 
-				<button
-					className="pixel-btn pixel-btn-saveChanges"
-					onClick={handleSave}
-				>
-					Save Changes
-				</button>
+					<button
+						className="pixel-btn save"
+						onClick={handleSave}
+					>
+						SAVE CHANGES
+					</button>
+				</div>
 			</div>
 		</div>
 	);

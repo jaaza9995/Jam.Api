@@ -175,7 +175,7 @@ const CreateIntro: React.FC = () => {
           <button className="pixel-btn back" onClick={() => navigate("/")}>
             BACK
           </button>
-          <button className="pixel-btn next" onClick={handleNext}>
+          <button className="pixel-btn save" onClick={handleNext}>
             NEXT
           </button>
         </div>

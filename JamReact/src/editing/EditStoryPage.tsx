@@ -139,7 +139,7 @@ const EditStoryPage: React.FC = () => {
 						className="pixel-btn delete"
 						onClick={() => setShowDeleteModal(true)}
 					>
-						Delete Game
+						DELETE GAME
 					</button>
 				</div>
 			</div>
@@ -149,7 +149,7 @@ const EditStoryPage: React.FC = () => {
 				className="pixel-btn back"
 				onClick={() => navigate("/")}
 			>
-				Back to Home
+				BACK TO HOME
 			</button>
 		</div>
 	);

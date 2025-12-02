@@ -153,125 +153,119 @@ const CreateQuestions = () => {
 		<div className="pixel-bg">
 			<h1 className="title">CREATE QUESTIONS</h1>
 
-      <div className="questions-wrapper">
-        {questions.map((q, i) => (
-          <div className="question-box" key={i}>
-            
-            {/* STORY CONTEXT */}
-            <h3 className="input-label">STORY CONTEXT</h3>
-            <textarea
-              className="input-area"
-              value={q.storyText}
-              placeholder={`Write Some Lead-up to Your Question Here...`}
-              onChange={(e) => update(i, { ...q, storyText: e.target.value })}
-            />
-            {errors[i]?.storyText && <p className="error-msg">{errors[i].storyText}</p>}
+			<div className="questions-wrapper">
+				{questions.map((q, i) => (
+				<div className="question-box" key={i}>
+					
+					{/* STORY CONTEXT */}
+					<h3 className="input-label">STORY CONTEXT</h3>
+					<textarea className="input-area"
+						value={q.storyText}
+						placeholder={`Write Some Lead-up to Your Question Here...`}
+						onChange={(e) => update(i, { ...q, storyText: e.target.value })}
+					/>
+					{errors[i]?.storyText && <p className="error-msg">{errors[i].storyText}</p>}
 
-            {/* QUESTION TEXT */}
-            <h3 className="input-label">QUESTION</h3>
-            <textarea
-              className="input-area"
-              value={q.questionText}
-              placeholder={`Write Your Question here...`}
-              onChange={(e) => update(i, { ...q, questionText: e.target.value })}
-            />
-            {errors[i]?.questionText && <p className="error-msg">{errors[i].questionText}</p>}
+					{/* QUESTION TEXT */}
+					<h3 className="input-label">QUESTION</h3>
+					<textarea className="input-area"
+						value={q.questionText}
+						placeholder={`Write Your Question here...`}
+						onChange={(e) => update(i, { ...q, questionText: e.target.value })}
+					/>
+					{errors[i]?.questionText && <p className="error-msg">{errors[i].questionText}</p>}
 
-            {/* ANSWERS */}
-            <h3 className="input-label">ANSWER OPTIONS</h3>
+					{/* ANSWERS */}
+					<h3 className="input-label">ANSWER OPTIONS</h3>
 
-            {q.answers.map((a, ai) => (
-              <div className="answer-row" key={ai}>
+					{q.answers.map((a, ai) => (
+						<div className="answer-row" key={ai}>
 
-                {/* Answer text */}
-                <input
-                  className="input-area"
-                  placeholder={`Write Answer ${ai + 1}...`}
-                  value={a.answerText}
-                  onChange={(e) => {
-                    const list = [...q.answers];
-                    list[ai].answerText = e.target.value;
-                    update(i, { ...q, answers: list });
-                  }}
-                />
+							{/* Answer text */}
+							<input className="input-area"
+								placeholder={`Write Answer ${ai + 1}...`}
+								value={a.answerText}
+								onChange={(e) => {
+									const list = [...q.answers];
+									list[ai].answerText = e.target.value;
+									update(i, { ...q, answers: list });
+								}}
+							/>
 
-                {/* Context text */}
-                <input
-                  className="input-area"
-                  placeholder={`Outcome of Option ${ai + 1}...`}
-                  value={a.contextText}
-                  onChange={(e) => {
-                    const list = [...q.answers];
-                    list[ai].contextText = e.target.value;
-                    update(i, { ...q, answers: list });
-                  }}
-                />
+							{/* Context text */}
+							<input className="input-area"
+								placeholder={`Outcome of Option ${ai + 1}...`}
+								value={a.contextText}
+								onChange={(e) => {
+									const list = [...q.answers];
+									list[ai].contextText = e.target.value;
+									update(i, { ...q, answers: list });
+								}}
+							/>
 
-								{/* Correct button */}
-								<button
-									className={`correct-btn ${
-										q.correctAnswerIndex === ai
-											? "selected"
-											: ""
-									}`}
-									onClick={() =>
-										update(i, { ...q, correctAnswerIndex: ai,
-										})
-									}
-								>
-									✔
-								</button>
-							</div>
-						))}
+							{/* Correct button */}
+							<button
+								className={`correct-btn ${
+									q.correctAnswerIndex === ai
+										? "selected"
+										: ""
+								}`}
+								onClick={() =>
+									update(i, { ...q, correctAnswerIndex: ai,
+									})
+								}
+							>
+								✔
+							</button>
+						</div>
+					))}
 
-						{/* ERRORS for answer list */}
-						{errors[i]?.answers && (
-							<p className="error-msg">{errors[i].answers}</p>
-						)}
-						{errors[i]?.correct && (
-							<p className="error-msg">{errors[i].correct}</p>
-						)}
+					{/* ERRORS for answer list */}
+					{errors[i]?.answers && (
+						<p className="error-msg">{errors[i].answers}</p>
+					)}
+					{errors[i]?.correct && (
+						<p className="error-msg">{errors[i].correct}</p>
+					)}
 
-						{/* ERROR for context texts */}
-						{errors[i]?.contextTexts && (
-							<p className="error-msg">
-								{errors[i].contextTexts}
-							</p>
-						)}
+					{/* ERROR for context texts */}
+					{errors[i]?.contextTexts && (
+						<p className="error-msg">
+							{errors[i].contextTexts}
+						</p>
+					)}
 
-            <button
-              className="delete-q-button"
-              onClick={() => remove(i)}
-            >
-              DELETE QUESTION
-            </button>
-          </div>
-          
-        ))}
-      </div>
-          <button className="pixel-btn addQuestion" onClick={add}>
-          + ADD QUESTION
-        </button>
+					<button
+					className="delete-q-button"
+					onClick={() => remove(i)}
+					>
+						DELETE QUESTION
+					</button>
+				</div>
+				
+				))}
+			</div>
+			<button className="pixel-btn addQuestion" onClick={add}>
+				+ ADD QUESTION
+			</button>
 
-        
-        <div className="nav-buttons">
-        <button
-          className="pixel-btn back"
-          onClick={() => {
-            setData(prev => ({ ...prev, questions }));
-            navigate("/create/intro");
-          }}
-        >
-          BACK
-        </button>
-         
-        <button className="pixel-btn next" onClick={handleNext}>
-          NEXT
-        </button>
+			<div className="nav-buttons">
+				<button className="pixel-btn back"
+					onClick={() => {
+					setData(prev => ({ ...prev, questions }));
+					navigate("/create/intro");
+					}}
+				>
+				BACK
+				</button>
+			
+				<button className="pixel-btn next" onClick={handleNext}>
+					NEXT
+				</button>
 
-        </div>
-    </div>
-  );
+			</div>
+    	</div>
+  	);
 };
 
 export default CreateQuestions;

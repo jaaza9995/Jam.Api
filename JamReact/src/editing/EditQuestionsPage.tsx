@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import "./Edit.css";
 import { getQuestions, updateQuestions } from "./storyEditingService";
 import ConfirmUndoModal from "../shared/ConfirmUndoModal";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
@@ -8,6 +7,9 @@ import {
 	QuestionSceneDto as QuestionScene,
 	AnswerOptionDto as AnswerOption,
 } from "../types/editStory";
+
+
+import "../create/Create.css";
 
 type QuestionErrors = {
 	storyText?: string;
@@ -366,7 +368,7 @@ const EditQuestionsPage: React.FC = () => {
 	// RENDER
 	// -------------------------------
 	return (
-		<div className="pixel-bg edit-container">
+		<div className="pixel-bg">
 			{showUndoConfirm && (
 				<ConfirmUndoModal
 					onConfirm={confirmUndo}
@@ -381,145 +383,147 @@ const EditQuestionsPage: React.FC = () => {
 				<div className="nochanges-toast">No changes have been done</div>
 			)}
 
-			<h1 className="edit-title">Edit Questions</h1>
+			<h1 className="edit-title">EDIT QUESTIONS</h1>
 
-      {questions.map((q, i) => (
-        // if QuestionSceneId is 0 (new question) use the index so keys are unique
-        <div key={q.questionSceneId !== 0 ? q.questionSceneId : i} className="question-scene-card">
+			<div className="questions-wrapper">
+				{questions.map((q, i) => (
+					// if QuestionSceneId is 0 (new question) use the index so keys are unique
+					<div className="question-box" key={q.questionSceneId !== 0 ? q.questionSceneId : i}>
 
-          {/* STORY CONTEXT */}
-          <h3 className="input-label">STORY CONTEXT</h3>
-          <textarea
-            className="input-area"
-            value={q.storyText}
-            onChange={(e) => {
-              const updated = [...questions];
-              updated[i] = { ...updated[i], storyText: e.target.value };
-              setQuestions(updated);
-
-							const copy = [...errors];
-							copy[i] = { ...copy[i], storyText: "" };
-							setErrors(copy);
-						}}
-					/>
-					{errors[i]?.storyText && (
-						<p className="error-msg">{errors[i]?.storyText}</p>
-					)}
-
-          {/* QUESTION */}
-          <h3 className="input-label">QUESTION</h3>
-          <textarea
-            className="input-area"
-            value={q.questionText}
-            onChange={(e) => {
-              const updated = [...questions];
-              updated[i] = { ...updated[i], questionText: e.target.value };
-              setQuestions(updated);
-
-							const copy = [...errors];
-							copy[i] = { ...copy[i], questionText: "" };
-							setErrors(copy);
-						}}
-					/>
-					{errors[i]?.questionText && (
-						<p className="error-msg">{errors[i]?.questionText}</p>
-					)}
-
-          {/* ANSWERS */}
-          <h3 className="input-label">ANSWER OPTIONS</h3>
-
-          {q.answers.map((a, idx) => (
-            <div className="answer-row" key={idx}>
-              <input
-                className="input-area"
-                value={a.answerText}
-                onChange={(e) => {
-                  const updated = [...questions];
-                  const answers = [...updated[i].answers];
-                  answers[idx] = { ...answers[idx], answerText: e.target.value };
-                  updated[i] = { ...updated[i], answers };
-                  setQuestions(updated);
-
-									const copy = [...errors];
-									copy[i] = { ...copy[i], answers: "" };
-									setErrors(copy);
-								}}
-							/>
-
-							<button
-								className={
-									q.correctAnswerIndex === idx
-										? "correct-toggle correct-toggle--active"
-										: "correct-toggle"
-								}
-								onClick={() => {
-									const updated = [...questions];
-									updated[i] = {
-										...updated[i],
-										correctAnswerIndex: idx,
-									};
-									setQuestions(updated);
-
-									const copy = [...errors];
-									copy[i] = { ...copy[i], correct: "" };
-									setErrors(copy);
-								}}
-							>
-								✓
-							</button>
-						</div>
-					))}
-
-					{errors[i]?.answers && (
-						<p className="error-msg">{errors[i]?.answers}</p>
-					)}
-					{errors[i]?.correct && (
-						<p className="error-msg">{errors[i]?.correct}</p>
-					)}
-
-          {/* CONTEXT TEXTS */}
-          <h3 className="input-label">CONTEXT TEXTS</h3>
-          {q.answers.map((a, idx) => (
-            <textarea
-              key={idx}
-              className="input-area"
-              value={a.contextText}
-              onChange={(e) => {
-                const updated = [...questions];
-                const answers = [...updated[i].answers];
-                answers[idx] = { ...answers[idx], contextText: e.target.value };
-                updated[i] = { ...updated[i], answers };
-                setQuestions(updated);
-
+						{/* STORY CONTEXT */}
+						<h3 className="input-label">STORY CONTEXT</h3>
+						<textarea className="input-area"
+							value={q.storyText}
+							onChange={(e) => {
+								const updated = [...questions];
+								updated[i] = { ...updated[i], storyText: e.target.value };
+								setQuestions(updated);
 								const copy = [...errors];
-								copy[i] = { ...copy[i], contextTexts: "" };
+								copy[i] = { ...copy[i], storyText: "" };
 								setErrors(copy);
 							}}
 						/>
-					))}
+						{errors[i]?.storyText && (
+							<p className="error-msg">{errors[i]?.storyText}</p>
+						)}
 
-					{errors[i]?.contextTexts && (
-						<p className="error-msg">{errors[i]?.contextTexts}</p>
-					)}
+						{/* QUESTION */}
+						<h3 className="input-label">QUESTION</h3>
+						<textarea className="input-area"
+							value={q.questionText}
+							onChange={(e) => {
+								const updated = [...questions];
+								updated[i] = { ...updated[i], questionText: e.target.value };
+								setQuestions(updated);
 
-					<button
-						className="pixel-btn pink delete-scene-btn"
-						onClick={() => handleDeleteScene(q.questionSceneId, i)}
-					>
-						DELETE QUESTION
-					</button>
-				</div>
-			))}
+								const copy = [...errors];
+								copy[i] = { ...copy[i], questionText: "" };
+								setErrors(copy);
+							}}
+						/>
+						{errors[i]?.questionText && (
+							<p className="error-msg">{errors[i]?.questionText}</p>
+						)}
+
+						{/* ANSWERS */}
+						<h3 className="input-label">ANSWER OPTIONS</h3>
+
+						<div className="answer-row"> 
+							{q.answers.map((a, idx) => (
+								<div key={idx}>
+									<input className="input-area"
+										value={a.answerText}
+										onChange={(e) => {
+											const updated = [...questions];
+											const answers = [...updated[i].answers];
+											answers[idx] = { ...answers[idx], answerText: e.target.value };
+											updated[i] = { ...updated[i], answers };
+											setQuestions(updated);
+
+											const copy = [...errors];
+											copy[i] = { ...copy[i], answers: "" };
+											setErrors(copy);
+										}}
+									/>
+
+									<button
+										className={
+											q.correctAnswerIndex === idx
+												? "correct-toggle correct-toggle--active"
+												: "correct-toggle"
+										}
+										onClick={() => {
+											const updated = [...questions];
+											updated[i] = {
+												...updated[i],
+												correctAnswerIndex: idx,
+											};	
+											setQuestions(updated);
+
+											const copy = [...errors];
+											copy[i] = { ...copy[i], correct: "" };
+											setErrors(copy);
+										}}
+									>
+										✔
+									</button>
+								</div>
+							))}
+
+							{/* CONTEXT TEXTS */}
+							<h3 className="input-label">CONTEXT TEXTS</h3>
+							{q.answers.map((a, idx) => (
+								<textarea className="input-area"
+									key={idx}
+									
+									value={a.contextText}
+									onChange={(e) => {
+										const updated = [...questions];
+										const answers = [...updated[i].answers];
+										answers[idx] = { ...answers[idx], contextText: e.target.value };
+										updated[i] = { ...updated[i], answers };
+										setQuestions(updated);
+
+										const copy = [...errors];
+										copy[i] = { ...copy[i], contextTexts: "" };
+										setErrors(copy);
+								}}
+								/>
+							))}
+
+							{/* ERRORS for answer list */}
+							{errors[i]?.answers && (
+								<p className="error-msg">{errors[i]?.answers}</p>
+							)}
+							{errors[i]?.correct && (
+								<p className="error-msg">{errors[i]?.correct}</p>
+							)}
+
+							{/* ERROR for context texts */}
+							{errors[i]?.contextTexts && (
+								<p className="error-msg">{errors[i]?.contextTexts}</p>
+							)}
+
+							<button
+								className="pixel-btn pink delete-scene-btn"
+								onClick={() => handleDeleteScene(q.questionSceneId, i)}
+							>
+								DELETE QUESTION
+							</button>
+						</div>
+					</div>
+				))}
+			</div>
 
 			<div className="edit-buttons">
 				<button className="pixel-btn teal" onClick={handleAdd}>
-					Add Question
+					ADD QUESTION
 				</button>
 				<button className="pixel-btn teal" onClick={handleSave}>
-					Save Changes
+					SAVE CHANGES
 				</button>
 				<button className="pixel-btn blue" onClick={handleBack}>
-					Back
+					BACK
 				</button>
 			</div>
 		</div>

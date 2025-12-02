@@ -53,6 +53,14 @@
 	transition: all 0.2s;
 	border-radius: 10px;
 	border: none;
+
+	display: flex;            /* gjør knappen flex */
+	align-items: center;      /* sentrerer vertikalt */
+	justify-content: center;
+
+	height: 35px;
+	padding: 0 15px;  
+	box-sizing: border-box;
   }
   
   .delete { background: #c00202c2; }
@@ -60,6 +68,7 @@
   .play { background: #ba1ddd; }
   .edit { background: #00e257; }
   .next { background: #a502c6; }
+  .save { background: #00ff2aa0; }
   .addQuestion{ background: #6b50c4;}
   
   
