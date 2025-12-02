@@ -1,40 +1,113 @@
-.edit-wrapper {
-	width: 70%;
-	margin: auto;
-	display: flex;
-	flex-direction: column;
-	gap: 30px;
+/* ---------- MAIN LAYOUT ---------- */
+.edit-story-card-wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+
+    width: 95%;
+    max-width: 1400px;
+    margin: 40px auto;
+    gap: 50px;
+
+    flex-wrap: nowrap; /* DO NOT WRAP early */
 }
 
-/* Grid-layout for venstre metadata + høyre knapper */
-.edit-layout {
-	display: grid;
-	grid-template-columns: 1fr 300px;
-	gap: 60px;
-	align-items: start;
-	margin-top: 40px;
+/* ---------- STORYCARD OVERRIDES ---------- */
+.edit-story-card-wrapper .story-card {
+    /* Same large size as before, but flexible */
+    width: 60%;
+    max-width: 750px;
+    min-width: 420px;
+
+    height: 70vh;
+    padding: 40px;
+
+    overflow-y: auto;
+
+    margin: 0 !important;
 }
 
-/* Venstre kort */
-.left-card {
-	width: 100%;
+.edit-story-card-wrapper .story-card:hover { 
+	transform: none !important;
+    box-shadow: none !important;
 }
 
-/* Høyre knappekolonne */
+
+.edit-story-card-wrapper .story-content .story-description {
+	margin-top: 30px;
+	font-size: 15px;
+}
+
+.edit-story-card-wrapper .question-count {
+    font-size: 15px;
+}
+
+/* ---------- RIGHT BUTTON COLUMN ---------- */
 .right-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    min-width: 230px; /* keeps them on the right longer */
+    max-width: 260px;
+}
+
+/* BUTTON STYLE */
+.right-buttons .edit-btn {
+    background-color: var(--box-color);
+    /*border: 3px solid #33220b;*/
+	border: none;
+	border-bottom: 3px solid var(--text-color);
+	border-left: 3px solid var(--text-color);
+    padding: 12px 15px;
+    font-size: 14px;
+    cursor: pointer;
+	text-align: left;
+	transform-origin: bottom left;
+}
+
+.right-buttons .edit-btn:hover {
+	color: var(--secondary-color);
+	background-color: var(--card-bg);
+	transform: scale(1.05);
+	transition: background-color 0.2s, transform 0.2s;
+}
+
+.pixel-btn.delete {
+	margin-top: 20%;
+	margin-left: 15%;
+	width: 160px;
+	font-size: 12px;
+	padding: 5px 10px;
+}
+
+.pixel-btn.back {
 	display: flex;
-	flex-direction: column;
-	gap: 70px;
+	justify-content: flex-start;
+	margin-bottom: 20px;
+	margin-top: 0;
 }
 
-/* Back-knappen nederst til venstre */
-.back-btn {
-	margin-top: 60px;
-	margin-left: 0;
-}
+/* ---------- TRUE BREAKPOINT ---------- */
+/* Do NOT wrap until screen is REALLY small */
+@media (max-width: 900px) {
+    .edit-story-card-wrapper {
+        flex-direction: column;
+        align-items: center;
+        gap: 25px;
+    }
 
-.edit-btn {
-	background-color: rgb(24, 255, 255);
-	border-radius: 10px;
-	border: rgb(153, 255, 255);
+    .edit-story-card-wrapper .story-card {
+        width: 90%;
+        max-width: none;
+        min-width: 300px;
+        height: auto;
+    }
+
+    .right-buttons {
+        width: 100%;
+        align-items: center;
+        min-width: unset;
+    }
 }

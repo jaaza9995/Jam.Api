@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
-import "./Edit.css";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
 import {
 	getStoryMetadata,
@@ -11,6 +10,8 @@ import {
 } from "./storyEditingService";
 import ConfirmUndoModal from "../shared/ConfirmUndoModal";
 import { StoryMetadataDto } from "../types/editStory";
+import "./Edit.css";
+import "../create/Create.css";
 
 const EditIntroPage: React.FC = () => {
 	const { storyId } = useParams();
@@ -214,6 +215,11 @@ const EditIntroPage: React.FC = () => {
 			difficultyLevel: difficulty,
 			accessibility,
 			questionCount: 0, // Not updating questions here
+			lastPlayed: "", // Eller new Date() hvis det er en gyldig dato
+			played: 0,
+			finished: 0,
+			failed: 0,
+			dnf: 0,
 		});
 
 		if (!metaRes.ok) {

@@ -2,6 +2,7 @@
 	--primary-color: #646cff;
 	--secondary-color: #c084fc;
 	--bg-color: #140c1c;        /* SAMME som index.css */
+	--box-color: #130631;
 	--text-color: #f0f0f0;
 	--card-bg: #1a1a3d;
 	--accent-color: #61dafb;
@@ -13,6 +14,7 @@
 	color: var(--text-color);
 	margin: 0;
 	padding: 0;
+	cursor: default;
   }
   
   /*fjern padding som lager hvite felt */
@@ -24,7 +26,7 @@
   
   /* Pixel wrapper */
   .pixel-bg {
-	background: #130631;
+	background: var(--box-color);
 	box-shadow: 0 0 12px rgba(138, 43, 226, 0.5);
 	min-height: 100vh;
 	width: 100%;
@@ -53,7 +55,7 @@
 	border: none;
   }
   
-  .delete { background: #cf1313; }
+  .delete { background: #c00202c2; }
   .back { background: #6b6b97; }
   .play { background: #ba1ddd; }
   .edit { background: #00e257; }

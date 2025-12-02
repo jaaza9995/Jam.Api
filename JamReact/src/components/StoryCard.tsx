@@ -1,21 +1,27 @@
 import React from "react";
-import { Story as StoryCardType } from "../types/createStory";
+import { Story as StoryCardType } from "../types/storyCard";
 import { useNavigate } from "react-router-dom";
 
 interface Props {
   story: StoryCardType;
   showEditButton?: boolean; // valgfri EDIT-knapp
+  showPlayButton?: boolean;
+  onClick?: () => void; // Gjør onClick valgfri
+  isClickable?: boolean;
 }
 
-const StoryCard: React.FC<Props> = ({ story, showEditButton = false }) => {
+const StoryCard: React.FC<Props> = ({ story, onClick, showEditButton = false, showPlayButton = true, isClickable = false }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="story-card">
+    <div 
+    className={`story-card ${isClickable ? "clickable" : ""}`}
+    onClick={isClickable ? onClick : undefined}
+    >
       {/* Story content */}
       <div className="story-content">
         <h3>{story.title}</h3>
-        <p>{story.description}</p>
+        <p className="story-description">{story.description}</p>
       </div>
 
       {/* Bottom info: question count, difficulty, private code */}
@@ -53,13 +59,14 @@ const StoryCard: React.FC<Props> = ({ story, showEditButton = false }) => {
             EDIT
           </button>
         )}
-
-        <button
-          className="pixel-btn play"
-          onClick={() => navigate(`/play/${story.storyId}`)}
-        >
-          PLAY
-        </button>
+        {showPlayButton && (
+          <button
+            className="pixel-btn play"
+            onClick={() => navigate(`/play/${story.storyId}`)}
+          >
+            PLAY
+          </button>
+        )}
       </div>
     </div>
   );

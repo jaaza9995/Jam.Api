@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Story } from "../types/home";
+import { Story } from "../types/storyCard";
 import { fetchHomePageData } from "./homePageService";
 import { UnauthorizedError } from "./homePageService";
 import StoryStatsModal from "./StoryStatsModal";
@@ -106,33 +106,45 @@ const HomePage: React.FC = () => {
 			<section className="section-block">
 				<h2 className="section-title">YOUR GAMES:</h2>
 
-        {stories.length === 0 ? (
-          <p className="empty-text">No stories found.</p>
-        ) : (
-        <div className="story-card-container">
+				{stories.length === 0 ? (
+				<p className="empty-text">No stories found.</p>
+				) : (
+				<div className="story-card-container">
+					{stories.map((story) => (
+					<StoryCard
+						key={story.storyId}
+						story={story}
+						showEditButton={true}
+						onClick={() => {
+						setSelectedStory(story);
+						setShowStoryStatsModal(true);
+						}}
+						isClickable={true}
+					/>
+					))}
+				</div>
 
-          {stories.map((story) => (
-            <StoryCard key={story.storyId} story={story} showEditButton={true}/>
-          ))}
-        </div>
 
-        )}
-      </section>
+				)}
+			</section>
 
 			{/* ================= RECENTLY PLAYED ================ */}
 			<section className="section-block">
 				<h2 className="section-title">RECENTLY PLAYED:</h2>
 
-        {recentlyPlayed.length === 0 ? (
-          <p className="empty-text">No recently played games.</p>
-        ) : (
-          <div className="story-card-container">
-            {recentlyPlayed.map((story) => (
-              <StoryCard key={story.storyId} story={story}/> /* EDIT-knapp skjult */
-            ))}
-          </div>
-        )}
-      </section>
+				{recentlyPlayed.length === 0 ? (
+				<p className="empty-text">No recently played games.</p>
+				) : (
+				<div className="story-card-container">
+					{recentlyPlayed.map((story) => (
+					<StoryCard
+						key={story.storyId}
+						story={story}
+					/>
+					))}
+				</div>
+			)}
+		</section>
     </div>
   );
 };

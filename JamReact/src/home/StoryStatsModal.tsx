@@ -9,12 +9,11 @@ const StoryStatsModal: React.FC<StoryStatsModalProps> = ({
     failed,
     dnf,
     onConfirm,
-    onCancel,
 }) => {
     return (
         <div className="modal-overlay">
             <div className="modal-box">
-                <h2 className="modal-title">Statistics for "{storyTitle}"</h2>
+                <h2 className="modal-title">Stats for "{storyTitle}"</h2>
                 <div className="modal-stats">
                     <p>Total Played: {played}</p>
                     <p>Finished: {finished}</p>
@@ -23,11 +22,8 @@ const StoryStatsModal: React.FC<StoryStatsModalProps> = ({
                 </div>
 
                 <div className="modal-buttons">
-                    <button className="btn-white" onClick={onConfirm}>
-                        OK
-                    </button>
-                    <button className="btn-pink" onClick={onCancel}>
-                        Cancel
+                    <button className="pixel-btn back" onClick={onConfirm}>
+                        BACK
                     </button>
                 </div>
             </div>

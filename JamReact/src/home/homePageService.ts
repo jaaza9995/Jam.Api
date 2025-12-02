@@ -1,4 +1,4 @@
-import { Story } from "../types/home";
+import { Story } from "../types/storyCard";
 
 const API_URL = import.meta.env.VITE_API_URL;
 

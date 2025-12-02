@@ -122,7 +122,7 @@ public static class DBInit
                 },
                 new Story
                 {
-                    Title = "Gutten Som Kappåt Med Trollet",
+                    Title = "Gutten og Trollet",
                     Description = "Askeladden, en ung bondegutt, går en dag ut for å hogge litt ved. På sin ferd møter han på et farlig troll i skogen.",
                     DifficultyLevel = DifficultyLevel.Hard,
                     Accessibility = Accessibility.Private,

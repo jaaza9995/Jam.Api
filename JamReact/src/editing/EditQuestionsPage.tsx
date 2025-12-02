@@ -4,7 +4,6 @@ import "./Edit.css";
 import { getQuestions, updateQuestions } from "./storyEditingService";
 import ConfirmUndoModal from "../shared/ConfirmUndoModal";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
-
 import {
 	QuestionSceneDto as QuestionScene,
 	AnswerOptionDto as AnswerOption,
@@ -92,7 +91,7 @@ const normalizeAnswers = (
 };
 
 const emptyQuestion = (): QuestionScene => ({
-	//add question button
+	//add question knappen
 	questionSceneId: 0,
 	storyText: "",
 	questionText: "",

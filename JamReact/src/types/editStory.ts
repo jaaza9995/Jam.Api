@@ -1,5 +1,5 @@
 // ---------- Story Metadata ----------
-export interface StoryMetadataDto {
+/*export interface StoryMetadataDto {
 	storyId: number;
 	title: string;
 	description: string;
@@ -7,6 +7,12 @@ export interface StoryMetadataDto {
 	accessibility: number;
 	code?: string | null;
 	questionCount: number;
+}*/
+
+import { Story } from "./storyCard";
+
+export interface StoryMetadataDto extends Story {
+	// No additional fields needed if it already extends Story
 }
 
 // ---------- Intro ----------

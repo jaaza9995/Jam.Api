@@ -3,10 +3,18 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { getStoryMetadata, deleteStory } from "./storyEditingService";
 import { useAuth } from "../auth/AuthContext";
 import DeleteModal from "../shared/DeleteModal";
-import "./Edit.css";
-import { StoryMetadataDto } from "../types/editStory";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
 import { getDifficultyLevelString } from "../utils/enumHelpers";
+
+import { StoryMetadataDto } from "../types/editStory";
+
+
+
+import StoryCard from "../components/StoryCard";
+import "../components/StoryCard.css";
+import "./Edit.css";
+import "../Create/Create.css";
+
 
 const EditStoryPage: React.FC = () => {
 	const { storyId } = useParams();
@@ -84,7 +92,7 @@ const EditStoryPage: React.FC = () => {
 	};
 
 	return (
-		<div className="pixel-bg edit-dashboard">
+		<div className="pixel-bg">
 			{showDeleteModal && (
 				<DeleteModal
 					title={meta.title}
@@ -94,32 +102,14 @@ const EditStoryPage: React.FC = () => {
 			)}
 			<h2 className="title">EDIT GAME</h2>
 
-			<div className="edit-layout">
+			<div className="edit-story-card-wrapper">
 				{/* LEFT - THE METADATA CARD */}
-				<div className="story-card left-card">
-					<h1 className="story-title">{meta.title}</h1>
-					<p className="story-description">{meta.description}</p>
-
-					<div className="story-meta-grid">
-						<p>
-							<strong>Difficulty:</strong>{" "}
-							{getDifficultyLevelString(meta.difficultyLevel)}
-						</p>
-						<p>
-							<strong>Accessibility:</strong>{" "}
-							{isPrivate ? "Private" : "Public"}
-						</p>
-						{isPrivate && (
-							<p>
-								<strong>Code:</strong>{" "}
-								{code || "No code generated yet"}
-							</p>
-						)}
-						<p>
-							<strong>Questions:</strong>{" "}
-							{questionCount ?? "Loading..."}
-						</p>
-					</div>
+				<div className="story-card-container">
+					<StoryCard
+						key={meta.storyId}
+						story={meta}
+						showPlayButton={false}
+					/>
 				</div>
 
 				{/* RIGHT – BUTTONS UNDER EACH OTHER */}
@@ -146,7 +136,7 @@ const EditStoryPage: React.FC = () => {
 					</button>
 
 					<button
-						className="pixel-btn-delete"
+						className="pixel-btn delete"
 						onClick={() => setShowDeleteModal(true)}
 					>
 						Delete Game
@@ -156,7 +146,7 @@ const EditStoryPage: React.FC = () => {
 
 			{/* BACK BUTTON AT THE VERY BOTTOM LEFT */}
 			<button
-				className="pixel-btn  pixel-btn-back"
+				className="pixel-btn back"
 				onClick={() => navigate("/")}
 			>
 				Back to Home

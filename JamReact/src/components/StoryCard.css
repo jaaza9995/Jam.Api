@@ -36,7 +36,10 @@
   
     box-sizing: border-box; /* Ensure padding and border are included in width */
     margin-bottom: 10px;
-  
+  }
+
+  .story-card.clickable {
+    cursor: pointer; /* Kun klikkbare kort får pointer */
   }
 
   .story-card-container {
@@ -90,9 +93,10 @@
 }
   
 .difficulty {
-    font-size: 8px;
+    font-size: 9px;
     font-family: Arial, Helvetica, sans-serif;
     font-style: italic;
+    font-weight: bold;
     padding: 5px 10px;
     border-radius: 10px;
     border: none;
