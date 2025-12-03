@@ -74,20 +74,22 @@
 	transition: background-color 0.2s, transform 0.2s;
 }
 
-.pixel-btn.delete {
+.pixel-btn.del {
 	margin-top: 20%;
 	margin-left: 15%;
 	width: 160px;
 	font-size: 12px;
 	padding: 5px 10px;
+    background: #c00202c2;
 }
 
+/*
 .pixel-btn.back {
 	display: flex;
 	justify-content: flex-start;
 	margin-bottom: 20px;
 	margin-top: 0;
-}
+}*/
 
 /* ---------- TRUE BREAKPOINT ---------- */
 /* Do NOT wrap until screen is REALLY small */

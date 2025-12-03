@@ -136,7 +136,7 @@ const EditStoryPage: React.FC = () => {
 					</button>
 
 					<button
-						className="pixel-btn delete"
+						className="pixel-btn del"
 						onClick={() => setShowDeleteModal(true)}
 					>
 						DELETE GAME

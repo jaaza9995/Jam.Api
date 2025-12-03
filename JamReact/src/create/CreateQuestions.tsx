@@ -157,8 +157,8 @@ const CreateQuestions = () => {
 				{questions.map((q, i) => (
 				<div className="question-box" key={i}>
 					
-					{/* STORY CONTEXT */}
-					<h3 className="input-label">STORY CONTEXT</h3>
+					{/* LEAD-UP TO QUESTION */}
+					<h3 className="input-label">LEAD-UP</h3>
 					<textarea className="input-area"
 						value={q.storyText}
 						placeholder={`Write Some Lead-up to Your Question Here...`}
@@ -192,7 +192,7 @@ const CreateQuestions = () => {
 								}}
 							/>
 
-							{/* Context text */}
+							{/* Answer outcome */}
 							<input className="input-area"
 								placeholder={`Outcome of Option ${ai + 1}...`}
 								value={a.contextText}
@@ -242,12 +242,14 @@ const CreateQuestions = () => {
 						DELETE QUESTION
 					</button>
 				</div>
-				
 				))}
 			</div>
-			<button className="pixel-btn addQuestion" onClick={add}>
-				+ ADD QUESTION
-			</button>
+			
+			<div className="nav-buttons">
+				<button className="pixel-btn addQuestion" onClick={add}>
+					+ ADD QUESTION
+				</button>
+			</div>
 
 			<div className="nav-buttons">
 				<button className="pixel-btn back"
@@ -256,7 +258,7 @@ const CreateQuestions = () => {
 					navigate("/create/intro");
 					}}
 				>
-				BACK
+					BACK
 				</button>
 			
 				<button className="pixel-btn next" onClick={handleNext}>

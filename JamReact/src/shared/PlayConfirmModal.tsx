@@ -26,12 +26,11 @@ const PlayConfirmModal: React.FC<PlayConfirmModalProps> = ({
 				</p>
 
 				<div className="modal-buttons">
-					<button className="pixel-btn teal" onClick={onConfirm}>
-						Yes, play
-					</button>
-
-					<button className="pixel-btn pink" onClick={onCancel}>
+					<button className="pixel-btn back" onClick={onCancel}>
 						Cancel
+					</button>
+					<button className="pixel-btn save" onClick={onConfirm}>
+						Yes, play
 					</button>
 				</div>
 			</div>

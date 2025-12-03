@@ -20,11 +20,11 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
 				<p className="modal-warning">This action cannot be undone.</p>
 
 				<div className="modal-buttons">
-					<button className="btn-white" onClick={onConfirm}>
-						Yes, delete
-					</button>
-					<button className="btn-pink" onClick={onCancel}>
+					<button className="pixel-btn back" onClick={onCancel}>
 						Cancel
+					</button>
+					<button className="pixel-btn delete" onClick={onConfirm}>
+						Yes, delete
 					</button>
 				</div>
 			</div>

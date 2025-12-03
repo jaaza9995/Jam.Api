@@ -119,6 +119,11 @@
 	resize: vertical;
 	white-space: pre-wrap;
 	word-wrap: break-word;
+
+	min-height: 50px;
+	max-height: 200px;
+	overflow-y: auto;
+	scrollbar-width: none;
   }
   
   .longer-box { min-height: 110px; }

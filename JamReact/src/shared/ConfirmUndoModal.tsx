@@ -10,15 +10,17 @@ const ConfirmUndoModal: React.FC<Props> = ({ onConfirm, onCancel }) => {
 	return (
 		<div className="modal-overlay">
 			<div className="modal-box">
-				<p>Do you want to undo your changes?</p>
+				<p className="modal-title">Do you want to leave without saving your changes?</p>
 
-				<button className="pixel-btn pink" onClick={onConfirm}>
-					Yes
-				</button>
+				<div className="modal-buttons">
+					<button className="pixel-btn back" onClick={onConfirm}>
+						YES
+					</button>
 
-				<button className="pixel-btn blue" onClick={onCancel}>
-					No
-				</button>
+					<button className="pixel-btn save" onClick={onCancel}>
+						NO!
+					</button>
+				</div>
 			</div>
 		</div>
 	);

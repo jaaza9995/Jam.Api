@@ -165,7 +165,7 @@ const EditEndingsPage: React.FC = () => {
 	// RENDER
 	// ---------------------------
 	return (
-		<div className="pixel-bg edit-container">
+		<div className="pixel-bg">
 			{showUndoConfirm && (
 				<ConfirmUndoModal
 					onConfirm={confirmUndo}
@@ -176,55 +176,53 @@ const EditEndingsPage: React.FC = () => {
 			{/* SUCCESS TOAST */}
 			{showSavedMsg && <div className="saved-toast">Saved Changes</div>}
 
-			{/* 🔥 NO CHANGES TOAST */}
+			{/*  NO CHANGES TOAST */}
 			{showNoChangesMsg && (
 				<div className="nochanges-toast">No changes have been done</div>
 			)}
 
-			<h1 className="edit-title">Edit Endings</h1>
+			<h1 className="title">EDIT ENDINGS</h1>
 
 			{/* GOOD */}
-			<div className="ending-block">
-				<h3 className="ending-label">GOOD ENDING</h3>
-				<textarea
-					className="input-area"
-					value={good}
-					onChange={(e) => setGood(e.target.value)}
-				/>
-				{errors.good && <p className="error-msg">{errors.good}</p>}
-			</div>
+			<div className="create-form"> 
+					<h3 className="input-label">GOOD ENDING</h3>
+					<textarea
+						className="input-area longer-box"
+						value={good}
+						onChange={(e) => setGood(e.target.value)}
+					/>
+					{errors.good && <p className="error-msg">{errors.good}</p>}
 
-			{/* NEUTRAL */}
-			<div className="ending-block">
-				<h3 className="ending-label">NEUTRAL ENDING</h3>
+				{/* NEUTRAL */}
+				<h3 className="input-label">NEUTRAL ENDING</h3>
 				<textarea
-					className="input-area"
+					className="input-area longer-box"
 					value={neutral}
 					onChange={(e) => setNeutral(e.target.value)}
 				/>
 				{errors.neutral && (
 					<p className="error-msg">{errors.neutral}</p>
 				)}
-			</div>
+			
 
-			{/* BAD */}
-			<div className="ending-block">
-				<h3 className="ending-label">BAD ENDING</h3>
+				{/* BAD */}
+				<h3 className="input-label">BAD ENDING</h3>
 				<textarea
-					className="input-area"
+					className="input-area longer-box"
 					value={bad}
 					onChange={(e) => setBad(e.target.value)}
 				/>
 				{errors.bad && <p className="error-msg">{errors.bad}</p>}
-			</div>
+			
 
-			<div className="edit-buttons">
-				<button className="pixel-btn blue" onClick={handleBack}>
-					Back
-				</button>
-				<button className="pixel-btn teal" onClick={handleSave}>
-					Save Changes
-				</button>
+				<div className="nav-buttons">
+					<button className="pixel-btn back" onClick={handleBack}>
+						Back
+					</button>
+					<button className="pixel-btn save" onClick={handleSave}>
+						Save Changes
+					</button>
+				</div>
 			</div>
 		</div>
 	);

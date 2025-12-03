@@ -390,9 +390,9 @@ const EditQuestionsPage: React.FC = () => {
 					// if QuestionSceneId is 0 (new question) use the index so keys are unique
 					<div className="question-box" key={q.questionSceneId !== 0 ? q.questionSceneId : i}>
 
-						{/* STORY CONTEXT */}
-						<h3 className="input-label">STORY CONTEXT</h3>
-						<textarea className="input-area"
+						{/* LEAD-UP TO QUESTION*/}
+						<h3 className="input-label">LEAD-UP</h3>
+						<textarea className="input-area longer-box"
 							value={q.storyText}
 							onChange={(e) => {
 								const updated = [...questions];
@@ -409,7 +409,7 @@ const EditQuestionsPage: React.FC = () => {
 
 						{/* QUESTION */}
 						<h3 className="input-label">QUESTION</h3>
-						<textarea className="input-area"
+						<textarea className="input-area longer-box"
 							value={q.questionText}
 							onChange={(e) => {
 								const updated = [...questions];
@@ -428,104 +428,106 @@ const EditQuestionsPage: React.FC = () => {
 						{/* ANSWERS */}
 						<h3 className="input-label">ANSWER OPTIONS</h3>
 
-						<div className="answer-row"> 
-							{q.answers.map((a, idx) => (
-								<div key={idx}>
-									<input className="input-area"
-										value={a.answerText}
-										onChange={(e) => {
-											const updated = [...questions];
-											const answers = [...updated[i].answers];
-											answers[idx] = { ...answers[idx], answerText: e.target.value };
-											updated[i] = { ...updated[i], answers };
-											setQuestions(updated);
-
-											const copy = [...errors];
-											copy[i] = { ...copy[i], answers: "" };
-											setErrors(copy);
-										}}
-									/>
-
-									<button
-										className={
-											q.correctAnswerIndex === idx
-												? "correct-toggle correct-toggle--active"
-												: "correct-toggle"
-										}
-										onClick={() => {
-											const updated = [...questions];
-											updated[i] = {
-												...updated[i],
-												correctAnswerIndex: idx,
-											};	
-											setQuestions(updated);
-
-											const copy = [...errors];
-											copy[i] = { ...copy[i], correct: "" };
-											setErrors(copy);
-										}}
-									>
-										✔
-									</button>
-								</div>
-							))}
-
-							{/* CONTEXT TEXTS */}
-							<h3 className="input-label">CONTEXT TEXTS</h3>
-							{q.answers.map((a, idx) => (
-								<textarea className="input-area"
-									key={idx}
-									
-									value={a.contextText}
+						{q.answers.map((a, idx) => (
+							<div className="answer-row"key={idx}>
+								<input className="input-area"
+									value={a.answerText}
 									onChange={(e) => {
 										const updated = [...questions];
 										const answers = [...updated[i].answers];
-										answers[idx] = { ...answers[idx], contextText: e.target.value };
+										answers[idx] = { ...answers[idx], answerText: e.target.value };
 										updated[i] = { ...updated[i], answers };
 										setQuestions(updated);
 
 										const copy = [...errors];
-										copy[i] = { ...copy[i], contextTexts: "" };
+										copy[i] = { ...copy[i], answers: "" };
 										setErrors(copy);
-								}}
+									}}
 								/>
-							))}
 
-							{/* ERRORS for answer list */}
-							{errors[i]?.answers && (
-								<p className="error-msg">{errors[i]?.answers}</p>
-							)}
-							{errors[i]?.correct && (
-								<p className="error-msg">{errors[i]?.correct}</p>
-							)}
 
-							{/* ERROR for context texts */}
-							{errors[i]?.contextTexts && (
-								<p className="error-msg">{errors[i]?.contextTexts}</p>
-							)}
+						{/* Answer outcome */}
+						<textarea className="input-area longer-box"
+							key={idx}
+							
+							value={a.contextText}
+							onChange={(e) => {
+								const updated = [...questions];
+								const answers = [...updated[i].answers];
+								answers[idx] = { ...answers[idx], contextText: e.target.value };
+								updated[i] = { ...updated[i], answers };
+								setQuestions(updated);
 
-							<button
-								className="pixel-btn pink delete-scene-btn"
-								onClick={() => handleDeleteScene(q.questionSceneId, i)}
-							>
-								DELETE QUESTION
-							</button>
-						</div>
+								const copy = [...errors];
+								copy[i] = { ...copy[i], contextTexts: "" };
+								setErrors(copy);
+						}}
+						/>
+								
+						{/* Correct button */}
+						<button
+							className={`correct-btn ${
+								q.correctAnswerIndex === idx
+									? "selected"
+									: ""
+							}`}
+
+							onClick={() => {
+								const updated = [...questions];
+								updated[i] = {
+									...updated[i],
+									correctAnswerIndex: idx,
+								};	
+								setQuestions(updated);
+
+								const copy = [...errors];
+								copy[i] = { ...copy[i], correct: "" };
+								setErrors(copy);
+							}}
+						>
+							✔
+						</button>
 					</div>
 				))}
-			</div>
 
-			<div className="edit-buttons">
-				<button className="pixel-btn teal" onClick={handleAdd}>
-					ADD QUESTION
+				{/* ERRORS for answer list */}
+				{errors[i]?.answers && (
+					<p className="error-msg">{errors[i]?.answers}</p>
+				)}
+				{errors[i]?.correct && (
+					<p className="error-msg">{errors[i]?.correct}</p>
+				)}
+
+				{/* ERROR for context texts */}
+				{errors[i]?.contextTexts && (
+					<p className="error-msg">{errors[i]?.contextTexts}</p>
+				)}
+
+				<button
+					className="delete-q-button"
+					onClick={() => handleDeleteScene(q.questionSceneId, i)}
+				>
+					DELETE QUESTION
 				</button>
-				<button className="pixel-btn teal" onClick={handleSave}>
-					SAVE CHANGES
-				</button>
-				<button className="pixel-btn blue" onClick={handleBack}>
-					BACK
-				</button>
+			
 			</div>
+			))}
+		</div>
+
+		<div className="nav-buttons">
+			<button className="pixel-btn addQuestion" onClick={handleAdd}>
+				ADD QUESTION
+			</button>
+		</div>
+
+		<div className="nav-buttons">
+			<button className="pixel-btn back" onClick={handleBack}>
+				BACK
+			</button>
+			<button className="pixel-btn save" onClick={handleSave}>
+				SAVE CHANGES
+			</button>
+		</div>
 		</div>
 	);
 };
