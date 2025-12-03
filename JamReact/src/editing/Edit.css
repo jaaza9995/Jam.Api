@@ -1,38 +1,36 @@
 /* ---------- MAIN LAYOUT ---------- */
 .edit-story-card-wrapper {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: flex-start;
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: flex-start;
 
-    width: 95%;
-    max-width: 1400px;
-    margin: 40px auto;
-    gap: 50px;
+	width: 95%;
+	max-width: 1400px;
+	margin: 40px auto;
+	gap: 50px;
 
-    flex-wrap: nowrap; /* DO NOT WRAP early */
+	flex-wrap: nowrap;
 }
 
 /* ---------- STORYCARD OVERRIDES ---------- */
 .edit-story-card-wrapper .story-card {
-    /* Same large size as before, but flexible */
-    width: 60%;
-    max-width: 750px;
-    min-width: 420px;
+	width: 60%;
+	max-width: 750px;
+	min-width: 420px;
 
-    height: 70vh;
-    padding: 40px;
+	height: 70vh;
+	padding: 40px;
 
-    overflow-y: auto;
+	overflow-y: auto;
 
-    margin: 0 !important;
+	margin: 0 !important;
 }
 
-.edit-story-card-wrapper .story-card:hover { 
+.edit-story-card-wrapper .story-card:hover {
 	transform: none !important;
-    box-shadow: none !important;
+	box-shadow: none !important;
 }
-
 
 .edit-story-card-wrapper .story-content .story-description {
 	margin-top: 30px;
@@ -40,29 +38,28 @@
 }
 
 .edit-story-card-wrapper .question-count {
-    font-size: 15px;
+	font-size: 15px;
 }
 
 /* ---------- RIGHT BUTTON COLUMN ---------- */
 .right-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
 
-    min-width: 230px; /* keeps them on the right longer */
-    max-width: 260px;
+	min-width: 230px;
+	max-width: 260px;
 }
 
 /* BUTTON STYLE */
 .right-buttons .edit-btn {
-    background-color: var(--box-color);
-    /*border: 3px solid #33220b;*/
+	background-color: var(--box-color);
 	border: none;
 	border-bottom: 3px solid var(--text-color);
 	border-left: 3px solid var(--text-color);
-    padding: 12px 15px;
-    font-size: 14px;
-    cursor: pointer;
+	padding: 12px 15px;
+	font-size: 14px;
+	cursor: pointer;
 	text-align: left;
 	transform-origin: bottom left;
 }
@@ -80,36 +77,28 @@
 	width: 160px;
 	font-size: 12px;
 	padding: 5px 10px;
-    background: #c00202c2;
+	background: #c00202c2;
 }
-
-/*
-.pixel-btn.back {
-	display: flex;
-	justify-content: flex-start;
-	margin-bottom: 20px;
-	margin-top: 0;
-}*/
 
 /* ---------- TRUE BREAKPOINT ---------- */
 /* Do NOT wrap until screen is REALLY small */
 @media (max-width: 900px) {
-    .edit-story-card-wrapper {
-        flex-direction: column;
-        align-items: center;
-        gap: 25px;
-    }
+	.edit-story-card-wrapper {
+		flex-direction: column;
+		align-items: center;
+		gap: 25px;
+	}
 
-    .edit-story-card-wrapper .story-card {
-        width: 90%;
-        max-width: none;
-        min-width: 300px;
-        height: auto;
-    }
+	.edit-story-card-wrapper .story-card {
+		width: 90%;
+		max-width: none;
+		min-width: 300px;
+		height: auto;
+	}
 
-    .right-buttons {
-        width: 100%;
-        align-items: center;
-        min-width: unset;
-    }
+	.right-buttons {
+		width: 100%;
+		align-items: center;
+		min-width: unset;
+	}
 }

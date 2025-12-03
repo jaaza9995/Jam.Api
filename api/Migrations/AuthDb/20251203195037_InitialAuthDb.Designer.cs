@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Jam.Api.Migrations.AuthDb
 {
     [DbContext(typeof(AuthDbContext))]
-    [Migration("20251127184304_InitialAuthDb")]
+    [Migration("20251203195037_InitialAuthDb")]
     partial class InitialAuthDb
     {
         /// <inheritdoc />

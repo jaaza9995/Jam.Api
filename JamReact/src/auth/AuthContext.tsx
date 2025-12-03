@@ -21,14 +21,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 	);
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 
-	// --- NY LOGIKK: Beregne Admin-status ---
-	// Sjekker om brukeren finnes, og om rollen inkluderer "Admin"
+	// --- Calculate Admin status ---
+	// Checks if the user exists, and if the role includes "Admin"
 	const isAdmin =
 		!!user &&
-		(Array.isArray(user.role) // Hvis rollen er en array
+		(Array.isArray(user.role)
 			? user.role.includes("Admin")
-			: user.role === "Admin"); // Hvis rollen er en enkelt streng
-	// ---------- Slutt på ny logikk ----------
+			: user.role === "Admin");
 
 	useEffect(() => {
 		// Check token validity on mount and when token changes
@@ -58,10 +57,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 		const { token } = await authService.login(credentials);
 		localStorage.setItem("token", token);
 		const decodedUser: User = jwtDecode(token);
-		// console.log(token); // Debugging line to check the token
-		// --- LEGG TIL DENNE LOGGEN MIDLERTIDIG ---
+		console.log(token);
 		console.log("DECODED USER OBJECT:", decodedUser);
-		// ------------------------------------------
 		setUser(decodedUser);
 		setToken(token);
 	};

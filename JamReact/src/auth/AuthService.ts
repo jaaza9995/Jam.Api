@@ -31,7 +31,6 @@ export const register = async (userData: RegisterDto): Promise<any> => {
 
 	if (!response.ok) {
 		const errorData = await response.json();
-		// The backend sends an array of errors, let's format them.
 		const errorMessages = errorData
 			.map((err: { description: string }) => err.description)
 			.join(", ");
@@ -40,5 +39,3 @@ export const register = async (userData: RegisterDto): Promise<any> => {
 
 	return response.json();
 };
-
-// Logout is handled client-side by clearing the token.

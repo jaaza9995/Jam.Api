@@ -2,14 +2,11 @@ import React, { useEffect, useState, useRef } from "react";
 import { useAuth } from "../auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Story } from "../types/storyCard";
-import { fetchHomePageData } from "./homePageService";
-import { UnauthorizedError } from "./homePageService";
+import { fetchHomePageData, UnauthorizedError } from "./HomePageService";
 import StoryStatsModal from "./StoryStatsModal";
-
 import StoryCard from "../components/StoryCard";
 import "./HomePage.css";
 import "../components/StoryCard.css";
-
 
 const HomePage: React.FC = () => {
 	const { token, logout } = useAuth();
@@ -59,7 +56,6 @@ const HomePage: React.FC = () => {
 					logout();
 					setError(err.message);
 				} else {
-					// Håndterer andre ukjente feil
 					setError("An unexpected error occurred.");
 				}
 			} finally {
@@ -84,8 +80,8 @@ const HomePage: React.FC = () => {
 				/>
 			)}
 
-      		<h1 className="title">WELCOME TO MATH UNIVERSE</h1>
-      		{error && <p className="error-msg">{error}</p>}
+			<h1 className="title">WELCOME TO MATH UNIVERSE</h1>
+			{error && <p className="error-msg">{error}</p>}
 
 			<div className="homepage-buttons">
 				<button
@@ -107,24 +103,22 @@ const HomePage: React.FC = () => {
 				<h2 className="section-title">YOUR GAMES:</h2>
 
 				{stories.length === 0 ? (
-				<p className="empty-text">No stories found.</p>
+					<p className="empty-text">No stories found.</p>
 				) : (
-				<div className="story-card-container">
-					{stories.map((story) => (
-					<StoryCard
-						key={story.storyId}
-						story={story}
-						showEditButton={true}
-						onClick={() => {
-						setSelectedStory(story);
-						setShowStoryStatsModal(true);
-						}}
-						isClickable={true}
-					/>
-					))}
-				</div>
-
-
+					<div className="story-card-container">
+						{stories.map((story) => (
+							<StoryCard
+								key={story.storyId}
+								story={story}
+								showEditButton={true}
+								onClick={() => {
+									setSelectedStory(story);
+									setShowStoryStatsModal(true);
+								}}
+								isClickable={true}
+							/>
+						))}
+					</div>
 				)}
 			</section>
 
@@ -133,20 +127,17 @@ const HomePage: React.FC = () => {
 				<h2 className="section-title">RECENTLY PLAYED:</h2>
 
 				{recentlyPlayed.length === 0 ? (
-				<p className="empty-text">No recently played games.</p>
+					<p className="empty-text">No recently played games.</p>
 				) : (
-				<div className="story-card-container">
-					{recentlyPlayed.map((story) => (
-					<StoryCard
-						key={story.storyId}
-						story={story}
-					/>
-					))}
-				</div>
-			)}
-		</section>
-    </div>
-  );
+					<div className="story-card-container">
+						{recentlyPlayed.map((story) => (
+							<StoryCard key={story.storyId} story={story} />
+						))}
+					</div>
+				)}
+			</section>
+		</div>
+	);
 };
 
 export default HomePage;

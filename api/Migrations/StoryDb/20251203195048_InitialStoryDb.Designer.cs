@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Jam.Api.Migrations.StoryDb
 {
     [DbContext(typeof(StoryDbContext))]
-    [Migration("20251127184321_InitialStoryDb")]
+    [Migration("20251203195048_InitialStoryDb")]
     partial class InitialStoryDb
     {
         /// <inheritdoc />

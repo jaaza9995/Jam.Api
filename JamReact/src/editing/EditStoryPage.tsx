@@ -4,17 +4,11 @@ import { getStoryMetadata, deleteStory } from "./storyEditingService";
 import { useAuth } from "../auth/AuthContext";
 import DeleteModal from "../shared/DeleteModal";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
-import { getDifficultyLevelString } from "../utils/enumHelpers";
-
 import { StoryMetadataDto } from "../types/editStory";
-
-
-
 import StoryCard from "../components/StoryCard";
 import "../components/StoryCard.css";
 import "./Edit.css";
 import "../Create/Create.css";
-
 
 const EditStoryPage: React.FC = () => {
 	const { storyId } = useParams();
@@ -42,12 +36,12 @@ const EditStoryPage: React.FC = () => {
 			return; // Done, avoiding load() and API calls
 		}
 
-		// 2. If we DO NOT have data from state, check if we have already run load
+		// 2. If we do not have data from state, check if we have already run load
 		if (hasLoadedRef.current) {
 			return;
 		}
 
-		// 3. Fallback/First Mount (API call required)
+		// 3. Fallback (first mount), API call required
 		const load = async () => {
 			hasLoadedRef.current = true;
 
@@ -71,10 +65,6 @@ const EditStoryPage: React.FC = () => {
 	}, [storyId, token, location.key, location.state]);
 
 	if (!meta) return <div className="pixel-bg">Loading...</div>;
-
-	const isPrivate = meta.accessibility === 1;
-	const code = meta.code ?? null;
-	const questionCount = meta.questionCount;
 
 	const handleDelete = async () => {
 		const res = await deleteStory(Number(storyId));
@@ -145,10 +135,7 @@ const EditStoryPage: React.FC = () => {
 			</div>
 
 			{/* BACK BUTTON */}
-			<button
-				className="pixel-btn back"
-				onClick={() => navigate("/")}
-			>
+			<button className="pixel-btn back" onClick={() => navigate("/")}>
 				BACK TO HOME
 			</button>
 		</div>

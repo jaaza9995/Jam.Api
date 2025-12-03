@@ -1,3 +1,5 @@
+import { Story } from "../types/storyCard";
+
 export interface StoryStatsModalProps {
 	storyTitle: string;
     played: number;
@@ -6,4 +8,15 @@ export interface StoryStatsModalProps {
     dnf: number;
 	onConfirm: () => void;
 	onCancel: () => void;
+}
+
+export interface HomePageResponse {
+    firstName: string;
+    yourStories: Story[];
+    recentlyPlayed: Story[];
+}
+
+export interface HomePageResult {
+    data: HomePageResponse | null;
+    error: string | null;
 }

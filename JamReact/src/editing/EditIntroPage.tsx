@@ -42,8 +42,6 @@ const EditIntroPage: React.FC = () => {
 	const [backendError, setBackendError] = useState<string>("");
 	const [showUndoConfirm, setShowUndoConfirm] = useState<boolean>(false);
 	const [showSavedMsg, setShowSavedMsg] = useState<boolean>(false);
-
-	// "No changes" toast
 	const [showNoChangesMsg, setShowNoChangesMsg] = useState<boolean>(false);
 
 	// State to hold the last loaded/saved metadata
@@ -72,12 +70,14 @@ const EditIntroPage: React.FC = () => {
 		};
 
 		if (!title.trim())
-			newErrors.title = "You must write a Title for your game.";
+			newErrors.title = "You must write a Title for your story.";
+
 		if (!description.trim())
 			newErrors.description =
-				"You must write a Description for your game";
+				"You must write a Description for your story";
+
 		if (!introText.trim())
-			newErrors.introText = "You must write an Intro Text for your game";
+			newErrors.introText = "You must write an Intro Text for your story";
 
 		if (difficulty !== 0 && difficulty !== 1 && difficulty !== 2)
 			newErrors.difficulty = "Please choose difficulty.";
@@ -187,11 +187,9 @@ const EditIntroPage: React.FC = () => {
 	// ------------------------------------
 	// SAVE
 	// ------------------------------------
-
 	const handleSave = async () => {
 		setBackendError("");
 
-		// NEW: no change toast
 		if (!hasChanges()) {
 			setShowNoChangesMsg(true);
 			setTimeout(() => setShowNoChangesMsg(false), 4000);
@@ -214,8 +212,8 @@ const EditIntroPage: React.FC = () => {
 			description,
 			difficultyLevel: difficulty,
 			accessibility,
-			questionCount: 0, // Not updating questions here
-			lastPlayed: "", // Eller new Date() hvis det er en gyldig dato
+			questionCount: 0,
+			lastPlayed: "",
 			played: 0,
 			finished: 0,
 			failed: 0,
@@ -317,7 +315,7 @@ const EditIntroPage: React.FC = () => {
 				<div className="nochanges-toast">No changes have been done</div>
 			)}
 
-			<div className="create-form"> 
+			<div className="create-form">
 				<h1 className="title">EDIT INTRO</h1>
 
 				{backendError && <p className="error-msg">{backendError}</p>}
@@ -385,7 +383,9 @@ const EditIntroPage: React.FC = () => {
 					<select
 						className="select-dropdown"
 						value={accessibility}
-						onChange={(e) => setAccessibility(Number(e.target.value))}
+						onChange={(e) =>
+							setAccessibility(Number(e.target.value))
+						}
 					>
 						<option value={0}>Public</option>
 						<option value={1}>Private</option>
@@ -396,24 +396,22 @@ const EditIntroPage: React.FC = () => {
 				)}
 
 				{/* SUCCESS TOAST */}
-				{showSavedMsg && <div className="saved-toast">Saved Changes</div>}
-		
+				{showSavedMsg && (
+					<div className="saved-toast">Saved Changes</div>
+				)}
+
 				{showNoChangesMsg && (
-				<div className="nochanges-toast">No changes have been done</div>
+					<div className="nochanges-toast">
+						No changes have been done
+					</div>
 				)}
 
 				<div className="nav-buttons">
-					<button
-						className="pixel-btn back"
-						onClick={handleBack}
-					>
+					<button className="pixel-btn back" onClick={handleBack}>
 						BACK
 					</button>
 
-					<button
-						className="pixel-btn save"
-						onClick={handleSave}
-					>
+					<button className="pixel-btn save" onClick={handleSave}>
 						SAVE CHANGES
 					</button>
 				</div>

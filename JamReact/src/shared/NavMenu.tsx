@@ -5,7 +5,7 @@ import { useAuth } from "../auth/AuthContext";
 import "./NavMenu.css";
 
 const NavMenu: React.FC = () => {
-	// Hent isAdmin-statusen fra AuthContext
+	// Get the isAdmin status from the AuthContext
 	const { user, isAdmin } = useAuth();
 
 	return (

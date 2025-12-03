@@ -1,12 +1,6 @@
 import React from "react";
+import { PlayConfirmModalProps } from "../types/shared";
 import "./Modal.css";
-
-interface PlayConfirmModalProps {
-	title: string;
-	show: boolean;
-	onConfirm: () => void;
-	onCancel: () => void;
-}
 
 const PlayConfirmModal: React.FC<PlayConfirmModalProps> = ({
 	title,

@@ -36,7 +36,6 @@ const EditEndingsPage: React.FC = () => {
 	const [showUndoConfirm, setShowUndoConfirm] = useState(false);
 	const [showSavedMsg, setShowSavedMsg] = useState(false);
 
-	// "No changes" toast
 	const [showNoChangesMsg, setShowNoChangesMsg] = useState(false);
 
 	// ---------------------------
@@ -109,7 +108,6 @@ const EditEndingsPage: React.FC = () => {
 
 		if (!storyId) return;
 
-		// No changes toast
 		if (!hasChanges()) {
 			setShowNoChangesMsg(true);
 			setTimeout(() => setShowNoChangesMsg(false), 4000);
@@ -135,7 +133,6 @@ const EditEndingsPage: React.FC = () => {
 				bad: parsed.badEnding || "",
 			});
 
-			// Global feilmelding (frivillig)
 			setBackendError(Object.values(parsed)[0] || "");
 
 			return;
@@ -184,14 +181,14 @@ const EditEndingsPage: React.FC = () => {
 			<h1 className="title">EDIT ENDINGS</h1>
 
 			{/* GOOD */}
-			<div className="create-form"> 
-					<h3 className="input-label">GOOD ENDING</h3>
-					<textarea
-						className="input-area longer-box"
-						value={good}
-						onChange={(e) => setGood(e.target.value)}
-					/>
-					{errors.good && <p className="error-msg">{errors.good}</p>}
+			<div className="create-form">
+				<h3 className="input-label">GOOD ENDING</h3>
+				<textarea
+					className="input-area longer-box"
+					value={good}
+					onChange={(e) => setGood(e.target.value)}
+				/>
+				{errors.good && <p className="error-msg">{errors.good}</p>}
 
 				{/* NEUTRAL */}
 				<h3 className="input-label">NEUTRAL ENDING</h3>
@@ -203,7 +200,6 @@ const EditEndingsPage: React.FC = () => {
 				{errors.neutral && (
 					<p className="error-msg">{errors.neutral}</p>
 				)}
-			
 
 				{/* BAD */}
 				<h3 className="input-label">BAD ENDING</h3>
@@ -213,12 +209,16 @@ const EditEndingsPage: React.FC = () => {
 					onChange={(e) => setBad(e.target.value)}
 				/>
 				{errors.bad && <p className="error-msg">{errors.bad}</p>}
-			
+
 				{/* SUCCESS TOAST */}
-				{showSavedMsg && <div className="saved-toast">Saved Changes</div>}
-		
+				{showSavedMsg && (
+					<div className="saved-toast">Saved Changes</div>
+				)}
+
 				{showNoChangesMsg && (
-					<div className="nochanges-toast">No changes have been done</div>
+					<div className="nochanges-toast">
+						No changes have been done
+					</div>
 				)}
 
 				<div className="nav-buttons">

@@ -1,6 +1,10 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { IPlayScene, ISessionState, IAnswerOption } from "../types/storyPlaying";
+import {
+	IPlayScene,
+	ISessionState,
+	IAnswerOption,
+} from "../types/storyPlaying";
 import { SceneType } from "../types/enums";
 import { useNavigate } from "react-router-dom";
 import {
@@ -14,15 +18,15 @@ import "./StoryPlayer.css";
 export const StoryPlayer: React.FC = () => {
 	const { storyId } = useParams<{ storyId: string }>();
 
-	// Konvertere streng til tall
+	// Convert string to number
 	const storyIdNumber = parseInt(storyId || "0", 10);
 
 	// Initial validitetssjekk
 	if (!storyIdNumber) {
-		return <div>Feil: Story ID missing or invalid.</div>;
+		return <div>Error: Story ID missing or invalid.</div>;
 	}
 
-	// 1. Game State (keys for API-call)
+	// Game State (keys for API-call)
 	const [session, setSession] = useState<ISessionState>({
 		sessionId: null,
 		currentSceneId: null,
@@ -31,27 +35,27 @@ export const StoryPlayer: React.FC = () => {
 		level: 3,
 	});
 
-	// 2. Data for the current scene (the content to be displayed)
+	// Data for the current scene (the content to be displayed)
 	const [currentSceneData, setCurrentSceneData] = useState<IPlayScene | null>(
 		null
 	);
 
-	// 3. Loading and Error Condition
+	// Loading and Error Condition
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
 
-	// 4. User's chosen AnswerOption
+	// User's chosen AnswerOption
 	const [selectedOption, setSelectedOption] = useState<IAnswerOption | null>(
 		null
 	);
 
-	// 5. Temporary state to display the feedback text after user has chosen an AnswerOption
+	// Temporary state to display the feedback text after user has chosen an AnswerOption
 	const [feedbackText, setFeedbackText] = useState<string | null>(null);
 
-	// 6. Condition to mark that the game is finished
+	// Condition to mark that the game is finished
 	const [isGameOver, setIsGameOver] = useState<boolean>(false);
 
-	// 7. Ref to prevent double calls in Strict Mode
+	// Ref to prevent double calls in Strict Mode
 	const sessionStarted = useRef(false);
 
 	const [nextSceneKeys, setNextSceneKeys] = useState<{
@@ -291,22 +295,24 @@ export const StoryPlayer: React.FC = () => {
 	return (
 		<div className="pixel-bg">
 			<div className="story-player">
-		
 				{isLoading && <p>Loading...</p>}
 				{error && <p className="error-msg">Error: {error}</p>}
-		
-				{/* =========================
-					GAME OVER / ENDING
-				========================= */}
+
+				{/* GAME OVER / ENDING */}
 				{isGameOver && (
 					<div className="end-box">
 						{/* LOSS */}
 						{!currentSceneData ? (
 							<>
-								<h2 className="game-over-text">Game Over — You Lost!</h2>
+								<h2 className="game-over-text">
+									Game Over — You Lost!
+								</h2>
 								<p>Your final score: {session.score}</p>
-		
-								<button className="pixel-btn back" onClick={() => navigate("/")}>
+
+								<button
+									className="pixel-btn back"
+									onClick={() => navigate("/")}
+								>
 									Return Home
 								</button>
 							</>
@@ -314,60 +320,68 @@ export const StoryPlayer: React.FC = () => {
 							/* WIN / ENDING */
 							<>
 								<h2>Ending</h2>
-								<p className="scene-text">{currentSceneData.sceneText}</p>
-		
-								<p className="score-text">Your final score: {session.score} of {currentSceneData.maxScore}</p>
-		
-								<button className="pixel-btn back" onClick={() => navigate("/")}>
+								<p className="scene-text">
+									{currentSceneData.sceneText}
+								</p>
+
+								<p className="score-text">
+									Your final score: {session.score} of{" "}
+									{currentSceneData.maxScore}
+								</p>
+
+								<button
+									className="pixel-btn back"
+									onClick={() => navigate("/")}
+								>
 									Return Home
 								</button>
 							</>
 						)}
 					</div>
 				)}
-		
-				{/* =========================
-					MAIN GAME VIEW
-				========================= */}
+
+				{/* MAIN GAME VIEW */}
 				{!isLoading && !error && !isGameOver && currentSceneData && (
 					<div className="scene-box">
-		
 						{/* Level + Score */}
 						<p className="top-info">
-							Level: {session.level} | Score: {session.score} / {currentSceneData.maxScore}
+							Level: {session.level} | Score: {session.score} /{" "}
+							{currentSceneData.maxScore}
 						</p>
-		
-						{/* =========================
-							INTRO SCENE
-						========================= */}
+
+						{/* INTRO SCENE */}
 						{currentSceneData.sceneType === SceneType.Intro && (
 							<>
 								<h3 className="intro-text">Introduction</h3>
-								<p className="scene-text">{currentSceneData.sceneText}</p>
-		
+								<p className="scene-text">
+									{currentSceneData.sceneText}
+								</p>
+
 								<button
 									className="pixel-btn next"
 									onClick={startFirstQuestion}
-									disabled={isLoading || !currentSceneData.nextSceneAfterIntroId}
+									disabled={
+										isLoading ||
+										!currentSceneData.nextSceneAfterIntroId
+									}
 								>
 									Next
 								</button>
 							</>
 						)}
-		
-						{/* =========================
-							QUESTION SCENE
-						========================= */}
+
+						{/* QUESTION SCENE */}
 						{currentSceneData.sceneType === SceneType.Question && (
 							<div className="question-scene-container">
-		
 								{/* FEEDBACK MODE */}
 								{feedbackText ? (
 									<>
 										<div className="feedback-box">
-											<p className="feedback-text">{feedbackText}</p>
+											<p className="feedback-text">
+												{feedbackText}
+											</p>
 										</div>
-		
+
 										<button
 											className="pixel-btn next"
 											onClick={goToNextScene}
@@ -379,37 +393,54 @@ export const StoryPlayer: React.FC = () => {
 								) : (
 									/* QUESTION MODE */
 									<>
-										<p className="scene-text">{currentSceneData.sceneText}</p>
-										<p className="question-text">{currentSceneData.question}</p>
-		
+										<p className="scene-text">
+											{currentSceneData.sceneText}
+										</p>
+										<p className="question-text">
+											{currentSceneData.question}
+										</p>
+
 										{/* ANSWER BUTTONS */}
 										<div className="answer-options">
-											{currentSceneData.answerOptions?.map((option) => (
-												<button
-													key={option.answerOptionId}
-													onClick={() => setSelectedOption(option)}
-													className={`answer-btn ${
-														selectedOption?.answerOptionId === option.answerOptionId
-															? "selected-answer"
-															: ""
-													}`}
-													disabled={isLoading}
-												>
-													{option.answer}
-												</button>
-											))}
+											{currentSceneData.answerOptions?.map(
+												(option) => (
+													<button
+														key={
+															option.answerOptionId
+														}
+														onClick={() =>
+															setSelectedOption(
+																option
+															)
+														}
+														className={`answer-btn ${
+															selectedOption?.answerOptionId ===
+															option.answerOptionId
+																? "selected-answer"
+																: ""
+														}`}
+														disabled={isLoading}
+													>
+														{option.answer}
+													</button>
+												)
+											)}
 										</div>
-		
+
 										{/* SUBMIT BUTTON */}
 										<button
 											className="pixel-btn next"
 											onClick={() => {
 												if (selectedOption) {
-													handleAnswer(selectedOption);
+													handleAnswer(
+														selectedOption
+													);
 													setSelectedOption(null);
 												}
 											}}
-											disabled={!selectedOption || isLoading}
+											disabled={
+												!selectedOption || isLoading
+											}
 										>
 											Send Answer
 										</button>
@@ -420,7 +451,6 @@ export const StoryPlayer: React.FC = () => {
 					</div>
 				)}
 			</div>
-	</div>
+		</div>
 	);
-}
-	
+};

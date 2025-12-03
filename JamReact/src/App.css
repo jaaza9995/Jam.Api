@@ -1,29 +1,29 @@
 :root {
 	--primary-color: #646cff;
 	--secondary-color: #c084fc;
-	--bg-color: #140c1c; 
+	--bg-color: #140c1c;
 	--box-color: #130631;
 	--text-color: #f0f0f0;
 	--card-bg: #1a1a3d;
 	--accent-color: #61dafb;
-  }
-  
-  body {
+}
+
+body {
 	background-color: var(--bg-color);
 	color: var(--text-color);
 	margin: 0;
 	padding: 0;
 	cursor: default;
-  }
-  
-  #root {
+}
+
+#root {
 	max-width: 100%;
 	margin: 0;
-	padding: 0;   
-  }
-  
-  /* background container with shadow */
-  .pixel-bg {
+	padding: 0;
+}
+
+/* background container with shadow */
+.pixel-bg {
 	background: var(--box-color);
 	box-shadow: 0 0 12px rgba(138, 43, 226, 0.5);
 	min-height: 100vh;
@@ -32,66 +32,83 @@
 	text-align: center;
 	border-radius: 10px;
 	border: none;
-  }
-  
-  .title {
+}
+
+.title {
 	color: #7ad3ff;
 	font-size: 50px;
 	margin-top: 40px;
 	margin-bottom: 40px;
 	text-shadow: 0 0 4px #7ad3ff;
-  }
+}
 
-  .section-title {
-    color: #ffc24f;
-    font-size: 22px;
-    margin-bottom: 15px;
-	}
+.section-title {
+	color: #ffc24f;
+	font-size: 22px;
+	margin-bottom: 15px;
+}
 
-	h1, h2, h3 {
+h1,
+h2,
+h3 {
 	color: var(--primary-color);
-	}
-  
-  /* Buttons */
-  .pixel-btn {
+}
+
+/* Buttons */
+.pixel-btn {
 	font-size: 0.9rem;
 	color: var(--text-color);
 	cursor: pointer;
 	transition: all 0.2s;
 	border-radius: 10px;
 	border: none;
-	display: flex;          
-	align-items: center;      
+	display: flex;
+	align-items: center;
 	justify-content: center;
 	height: 35px;
-	padding: 0 15px;  
+	padding: 0 15px;
 	box-sizing: border-box;
-  }
-  
-  .delete { background: #c00202c2; }
-  .back { background: #6b6b97; }
-  .play { background: #ba1ddd; }
-  .edit { background: #00e257; }
-  .next { background: #a502c6; }
-  .save { background: #00ff2aa0; }
-  .addQuestion{ background: #6b50c4;}
-  
-  .pixel-btn:hover {
+}
+
+.delete {
+	background: #c00202c2;
+}
+.back {
+	background: #6b6b97;
+}
+.play {
+	background: #ba1ddd;
+}
+.edit {
+	background: #00e257;
+}
+.next {
+	background: #a502c6;
+}
+.save {
+	background: #00ff2aa0;
+}
+.addQuestion {
+	background: #6b50c4;
+}
+
+.pixel-btn:hover {
 	filter: drop-shadow(0 0 0.8rem var(--secondary-color));
 	transform: scale(1.05);
-  }
-  
-  /* FORMS:*/
-  
-  /* Inputs, textareas, selects */
-  .input-area, .select-dropdown {
+}
+
+/* FORMS:*/
+
+/* Inputs, textareas, selects */
+.input-area,
+.select-dropdown {
 	width: 100%;
 	background-color: var(--card-bg);
 	border: 2px solid white;
 	padding: 14px;
 	border-radius: 10px;
 	color: var(--text-color);
-	font-family: 'Press Start 2P', monospace;
+	font-family: "Press Start 2P", monospace;
 	font-size: 12px;
 	resize: vertical;
 	white-space: pre-wrap;
@@ -100,34 +117,36 @@
 	max-height: 200px;
 	overflow-y: auto;
 	scrollbar-width: none;
-  }
-  
-  .longer-box { min-height: 110px; }
-  
-  .input-label {
+}
+
+.longer-box {
+	min-height: 110px;
+}
+
+.input-label {
 	color: var(--secondary-color);
 	margin-bottom: 10px;
 	margin-top: 20px;
 	font-size: 20px;
 	display: block;
-  }
-  
-  .dropdown-wrapper {
+}
+
+.dropdown-wrapper {
 	position: relative;
-  }
-  
-  .select-dropdown {
-	appearance: none;           /* fjerner default pil */
+}
+
+.select-dropdown {
+	appearance: none; /* fjerner default pil */
 	-webkit-appearance: none;
 	-moz-appearance: none;
-  
+
 	position: relative;
 	background-color: var(--card-bg);
 	border: 2px solid var(--primary-color);
-	padding-right: 40px;        /* plass til egen pil */
-  }
-  
-  .dropdown-wrapper::after {
+	padding-right: 40px; /* plass til egen pil */
+}
+
+.dropdown-wrapper::after {
 	content: "▼";
 	color: var(--primary-color);
 	position: absolute;
@@ -135,9 +154,9 @@
 	top: 50%;
 	transform: translateY(-50%);
 	pointer-events: none;
-  }
-  
-  .error-msg {
+}
+
+.error-msg {
 	color: #ff4f79;
 	background: rgba(255, 79, 121, 0.15);
 	font-size: 15px;
@@ -149,7 +168,4 @@
 	margin-bottom: 12px;
 	line-height: 1.4;
 	max-width: 500px;
-  
-  }
-  
-  
+}

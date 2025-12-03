@@ -1,62 +1,60 @@
 .create-form {
-  margin-inline: 15%;
-  max-width: none;
-  min-width: none;
+	margin-inline: 15%;
+	max-width: none;
+	min-width: none;
 }
 
 /* ADD QUESTION */
-
-.question-box{
-  border: 2px solid #cdc5f244;
-  border-radius: 12px;
-  padding: 25px;
-  padding-bottom: 45px;
-  margin-bottom: 40px;
-  background-color: #180a42;
+.question-box {
+	border: 2px solid #cdc5f244;
+	border-radius: 12px;
+	padding: 25px;
+	padding-bottom: 45px;
+	margin-bottom: 40px;
+	background-color: #180a42;
 }
 
 .correct-btn {
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  background: #444444;
-  border: 2px solid white;
-  border-radius: 6px;
-  cursor: pointer;
+	width: 40px;
+	height: 40px;
+	min-width: 40px;
+	background: #444444;
+	border: 2px solid white;
+	border-radius: 6px;
+	cursor: pointer;
 }
 
 .correct-btn.selected {
-  background: var(--secondary-color);
+	background: var(--secondary-color);
 }
 
-
 .answer-row {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 20px;
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	margin-bottom: 20px;
 }
 
 .nav-buttons {
-  display: flex;
-  justify-content:center;
-  gap: 50%;
-  margin-top: 50px;
+	display: flex;
+	justify-content: center;
+	gap: 50%;
+	margin-top: 50px;
 }
 
 .delete-q-button {
-  font-size: 10px;
-  padding: 0.5rem 1rem;
-  color: var(--text-color);
-  cursor: pointer;
-  transition: all 0.2s;
-  border-radius: 10px;
-  border: none;
-  background: #d40f0f;
-  float: right;
+	font-size: 10px;
+	padding: 0.5rem 1rem;
+	color: var(--text-color);
+	cursor: pointer;
+	transition: all 0.2s;
+	border-radius: 10px;
+	border: none;
+	background: #d40f0f;
+	float: right;
 }
 
 .delete-q-button:hover {
-  filter: drop-shadow(0 0 4px var(--secondary-color));
-  transform: scale(1.03);
+	filter: drop-shadow(0 0 4px var(--secondary-color));
+	transform: scale(1.03);
 }

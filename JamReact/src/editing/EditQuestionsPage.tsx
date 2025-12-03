@@ -7,8 +7,6 @@ import {
 	QuestionSceneDto as QuestionScene,
 	AnswerOptionDto as AnswerOption,
 } from "../types/editStory";
-
-
 import "../create/Create.css";
 
 type QuestionErrors = {
@@ -28,7 +26,7 @@ const mapParsedErrors = (
 
 	entries.forEach(([key]) => {
 		const match =
-			key.match(/questionScenes\[(\d+)\]/i) || key.match(/^\[(\d+)\]/); // backend uses "[0].field" for List<UpdateQuestionSceneDto>
+			key.match(/questionScenes\[(\d+)\]/i) || key.match(/^\[(\d+)\]/);
 
 		if (!match) return;
 
@@ -73,17 +71,17 @@ const normalizeAnswers = (
 			{ answerOptionId: 0, answerText: "", contextText: "" },
 			{ answerOptionId: 0, answerText: "", contextText: "" },
 		];
-	} //returnerer fire answer option?
+	}
 
 	const list = answers
 		.map((a) => ({
-			// Bruk en sjekk for å sikre at selv om AnswerOptionDto i teorien har valgfrie felter,
-			// så har vi alltid gyldige standarder i UI-tilstanden
+			// Using check to ensure that even though AnswerOptionDto theoretically
+			// has optional fields, we always have valid defaults in the UI state
 			answerOptionId: a.answerOptionId || 0,
 			answerText: a.answerText || "",
 			contextText: a.contextText || "",
 		}))
-		.slice(0, 4); // Trim til maks 4
+		.slice(0, 4);
 
 	while (list.length < 4) {
 		list.push({ answerOptionId: 0, answerText: "", contextText: "" });
@@ -93,7 +91,6 @@ const normalizeAnswers = (
 };
 
 const emptyQuestion = (): QuestionScene => ({
-	//add question knappen
 	questionSceneId: 0,
 	storyText: "",
 	questionText: "",
@@ -182,16 +179,16 @@ const EditQuestionsPage: React.FC = () => {
 				answers: normalizeAnswers(q.answers),
 			}));
 
-			// 1. Dyp kloning for å sette original tilstand
+			// 1. Deep cloning to set original state
 			const deepClone = JSON.parse(JSON.stringify(normalized));
 
-			// 2. Initialiser tilstandene
+			// 2. Initialize the states
 			setQuestions(normalized);
 			setOriginalQuestions(deepClone);
 			setErrors(normalized.map(() => ({})));
 
-			// 3. Avslutt lasting
-			setLoading(false); // <--- Denne manglet også ved suksess
+			// 3. Finish loading
+			setLoading(false);
 		};
 
 		load();
@@ -211,12 +208,12 @@ const EditQuestionsPage: React.FC = () => {
 
 			// --- STORY TEXT ---
 			if (!q.storyText.trim()) {
-				err.storyText = "Story context is required.";
+				err.storyText = "Scene text is required.";
 			}
 
 			// --- QUESTION TEXT ---
 			if (!q.questionText.trim()) {
-				err.questionText = "Question text is required.";
+				err.questionText = "Question is required.";
 			}
 
 			// --- ANSWERS (4 EXACT) ---
@@ -249,7 +246,6 @@ const EditQuestionsPage: React.FC = () => {
 	// -------------------------------
 	// SAVE
 	// -------------------------------
-
 	const handleSave = async () => {
 		setBackendError("");
 
@@ -289,7 +285,7 @@ const EditQuestionsPage: React.FC = () => {
 
 			const parsed = parseBackendErrors(body);
 
-			// ModelState errors per spørsmål
+			// ModelState errors per question
 			if (Object.keys(parsed).length > 0) {
 				const newErrors = mapParsedErrors(parsed, questions.length);
 				setErrors(newErrors);
@@ -311,7 +307,7 @@ const EditQuestionsPage: React.FC = () => {
 		}
 
 		// ----------------------------
-		// SUCCESS → reload
+		// SUCCESS -> reload
 		// ----------------------------
 		const reloadRes = await getQuestions(Number(storyId));
 		if (!reloadRes.ok) {
@@ -347,7 +343,8 @@ const EditQuestionsPage: React.FC = () => {
 			return;
 		}
 
-		// Bare fjern fra frontend-state – slettingen skjer når vi trykker Save
+		// Just remove from frontend-state
+		// The deletion happens when user press Save
 		setQuestions((prev) => prev.filter((_, i) => i !== index));
 		setErrors((prev) => prev.filter((_, i) => i !== index));
 	};
@@ -382,16 +379,23 @@ const EditQuestionsPage: React.FC = () => {
 
 			<div className="questions-wrapper">
 				{questions.map((q, i) => (
-					// if QuestionSceneId is 0 (new question) use the index so keys are unique
-					<div className="question-box" key={q.questionSceneId !== 0 ? q.questionSceneId : i}>
-
-						{/* LEAD-UP TO QUESTION*/}
-						<h3 className="input-label">LEAD-UP</h3>
-						<textarea className="input-area longer-box"
+					// if QuestionSceneId is 0 (new question)
+					// use the index so keys are unique
+					<div
+						className="question-box"
+						key={q.questionSceneId !== 0 ? q.questionSceneId : i}
+					>
+						{/* SCENE TEXT */}
+						<h3 className="input-label">QUESTION TEXT</h3>
+						<textarea
+							className="input-area longer-box"
 							value={q.storyText}
 							onChange={(e) => {
 								const updated = [...questions];
-								updated[i] = { ...updated[i], storyText: e.target.value };
+								updated[i] = {
+									...updated[i],
+									storyText: e.target.value,
+								};
 								setQuestions(updated);
 								const copy = [...errors];
 								copy[i] = { ...copy[i], storyText: "" };
@@ -404,11 +408,15 @@ const EditQuestionsPage: React.FC = () => {
 
 						{/* QUESTION */}
 						<h3 className="input-label">QUESTION</h3>
-						<textarea className="input-area longer-box"
+						<textarea
+							className="input-area longer-box"
 							value={q.questionText}
 							onChange={(e) => {
 								const updated = [...questions];
-								updated[i] = { ...updated[i], questionText: e.target.value };
+								updated[i] = {
+									...updated[i],
+									questionText: e.target.value,
+								};
 								setQuestions(updated);
 
 								const copy = [...errors];
@@ -417,20 +425,26 @@ const EditQuestionsPage: React.FC = () => {
 							}}
 						/>
 						{errors[i]?.questionText && (
-							<p className="error-msg">{errors[i]?.questionText}</p>
+							<p className="error-msg">
+								{errors[i]?.questionText}
+							</p>
 						)}
 
 						{/* ANSWERS */}
 						<h3 className="input-label">ANSWER OPTIONS</h3>
 
 						{q.answers.map((a, idx) => (
-							<div className="answer-row"key={idx}>
-								<input className="input-area"
+							<div className="answer-row" key={idx}>
+								<input
+									className="input-area"
 									value={a.answerText}
 									onChange={(e) => {
 										const updated = [...questions];
 										const answers = [...updated[i].answers];
-										answers[idx] = { ...answers[idx], answerText: e.target.value };
+										answers[idx] = {
+											...answers[idx],
+											answerText: e.target.value,
+										};
 										updated[i] = { ...updated[i], answers };
 										setQuestions(updated);
 
@@ -440,96 +454,103 @@ const EditQuestionsPage: React.FC = () => {
 									}}
 								/>
 
+								{/* Answer outcome */}
+								<textarea
+									className="input-area longer-box"
+									key={idx}
+									value={a.contextText}
+									onChange={(e) => {
+										const updated = [...questions];
+										const answers = [...updated[i].answers];
+										answers[idx] = {
+											...answers[idx],
+											contextText: e.target.value,
+										};
+										updated[i] = { ...updated[i], answers };
+										setQuestions(updated);
 
-						{/* Answer outcome */}
-						<textarea className="input-area longer-box"
-							key={idx}
-							
-							value={a.contextText}
-							onChange={(e) => {
-								const updated = [...questions];
-								const answers = [...updated[i].answers];
-								answers[idx] = { ...answers[idx], contextText: e.target.value };
-								updated[i] = { ...updated[i], answers };
-								setQuestions(updated);
+										const copy = [...errors];
+										copy[i] = {
+											...copy[i],
+											contextTexts: "",
+										};
+										setErrors(copy);
+									}}
+								/>
 
-								const copy = [...errors];
-								copy[i] = { ...copy[i], contextTexts: "" };
-								setErrors(copy);
-						}}
-						/>
-								
-						{/* Correct button */}
+								{/* Correct button */}
+								<button
+									className={`correct-btn ${
+										q.correctAnswerIndex === idx
+											? "selected"
+											: ""
+									}`}
+									onClick={() => {
+										const updated = [...questions];
+										updated[i] = {
+											...updated[i],
+											correctAnswerIndex: idx,
+										};
+										setQuestions(updated);
+
+										const copy = [...errors];
+										copy[i] = { ...copy[i], correct: "" };
+										setErrors(copy);
+									}}
+								>
+									✔
+								</button>
+							</div>
+						))}
+
+						{/* ERRORS for answer list */}
+						{errors[i]?.answers && (
+							<p className="error-msg">{errors[i]?.answers}</p>
+						)}
+						{errors[i]?.correct && (
+							<p className="error-msg">{errors[i]?.correct}</p>
+						)}
+
+						{/* ERROR for context texts */}
+						{errors[i]?.contextTexts && (
+							<p className="error-msg">
+								{errors[i]?.contextTexts}
+							</p>
+						)}
+
 						<button
-							className={`correct-btn ${
-								q.correctAnswerIndex === idx
-									? "selected"
-									: ""
-							}`}
-
-							onClick={() => {
-								const updated = [...questions];
-								updated[i] = {
-									...updated[i],
-									correctAnswerIndex: idx,
-								};	
-								setQuestions(updated);
-
-								const copy = [...errors];
-								copy[i] = { ...copy[i], correct: "" };
-								setErrors(copy);
-							}}
+							className="delete-q-button"
+							onClick={() =>
+								handleDeleteScene(q.questionSceneId, i)
+							}
 						>
-							✔
+							DELETE QUESTION
 						</button>
 					</div>
 				))}
-
-				{/* ERRORS for answer list */}
-				{errors[i]?.answers && (
-					<p className="error-msg">{errors[i]?.answers}</p>
-				)}
-				{errors[i]?.correct && (
-					<p className="error-msg">{errors[i]?.correct}</p>
-				)}
-
-				{/* ERROR for context texts */}
-				{errors[i]?.contextTexts && (
-					<p className="error-msg">{errors[i]?.contextTexts}</p>
-				)}
-
-				<button
-					className="delete-q-button"
-					onClick={() => handleDeleteScene(q.questionSceneId, i)}
-				>
-					DELETE QUESTION
-				</button>
-			
 			</div>
-			))}
-		</div>
 
-		<div className="nav-buttons">
-			<button className="pixel-btn addQuestion" onClick={handleAdd}>
-				ADD QUESTION
-			</button>
-		</div>
-		
-		{/* SUCCESS TOAST */}
-		{showSavedMsg && <div className="saved-toast">Saved Changes</div>}
-		
-		{showNoChangesMsg && (
+			<div className="nav-buttons">
+				<button className="pixel-btn addQuestion" onClick={handleAdd}>
+					ADD QUESTION
+				</button>
+			</div>
+
+			{/* SUCCESS TOAST */}
+			{showSavedMsg && <div className="saved-toast">Saved Changes</div>}
+
+			{showNoChangesMsg && (
 				<div className="nochanges-toast">No changes have been done</div>
 			)}
 
-		<div className="nav-buttons">
-			<button className="pixel-btn back" onClick={handleBack}>
-				BACK
-			</button>
-			<button className="pixel-btn save" onClick={handleSave}>
-				SAVE CHANGES
-			</button>
-		</div>
+			<div className="nav-buttons">
+				<button className="pixel-btn back" onClick={handleBack}>
+					BACK
+				</button>
+				<button className="pixel-btn save" onClick={handleSave}>
+					SAVE CHANGES
+				</button>
+			</div>
 		</div>
 	);
 };

@@ -1,5 +1,8 @@
 import { createContext, useContext, useState } from "react";
-import { StoryCreationData, StoryCreationContextType } from "../types/createStory";
+import {
+	StoryCreationData,
+	StoryCreationContextType,
+} from "../types/createStory";
 
 const defaultData: StoryCreationData = {
 	intro: {

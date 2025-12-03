@@ -30,7 +30,7 @@ import ProtectedRoute from "./auth/ProtectedRoute";
 import { AuthProvider } from "./auth/AuthContext";
 
 // PLAY
-import { StoryPlayer } from "./StoryPlaying/StoryPlayer";
+import { StoryPlayer } from "./play/StoryPlayer";
 
 // --- Admin ---
 import { useAuth } from "./auth/AuthContext";

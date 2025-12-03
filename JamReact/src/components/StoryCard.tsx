@@ -3,73 +3,81 @@ import { Story as StoryCardType } from "../types/storyCard";
 import { useNavigate } from "react-router-dom";
 
 interface Props {
-  story: Partial<StoryCardType>;
-  showEditButton?: boolean; // valgfri EDIT-knapp
-  showPlayButton?: boolean;
-  onClick?: () => void; // Gjør onClick valgfri
-  isClickable?: boolean;
+	story: Partial<StoryCardType>;
+	showEditButton?: boolean;
+	showPlayButton?: boolean;
+	onClick?: () => void;
+	isClickable?: boolean;
 }
 
-const StoryCard: React.FC<Props> = ({ story, onClick, showEditButton = false, showPlayButton = true, isClickable = false }) => {
-  const navigate = useNavigate();
+const StoryCard: React.FC<Props> = ({
+	story,
+	onClick,
+	showEditButton = false,
+	showPlayButton = true,
+	isClickable = false,
+}) => {
+	const navigate = useNavigate();
 
-  return (
-    <div 
-    className={`story-card ${isClickable ? "clickable" : ""}`}
-    onClick={isClickable ? onClick : undefined}
-    >
-      {/* Story content */}
-      <div className="story-content">
-        <h3>{story.title}</h3>
-        <p className="story-description">{story.description}</p>
-      </div>
+	return (
+		<div
+			className={`story-card ${isClickable ? "clickable" : ""}`}
+			onClick={isClickable ? onClick : undefined}
+		>
+			{/* Story content */}
+			<div className="story-content">
+				<h3>{story.title}</h3>
+				<p className="story-description">{story.description}</p>
+			</div>
 
-      {/* Bottom info: question count, difficulty, private code */}
-      <div className="bottom-info">
-        <div className="diff-qc-row">
-          <span className="question-count">
-            <p>Questions: {story.questionCount}</p>
-          </span>
+			{/* Bottom info: question count, difficulty, private code */}
+			<div className="bottom-info">
+				<div className="diff-qc-row">
+					<span className="question-count">
+						<p>Questions: {story.questionCount}</p>
+					</span>
 
-          <span className="difficulty">
-            {story.difficultyLevel === 0 && (
-              <button className="difficulty easy">Easy</button>
-            )}
-            {story.difficultyLevel === 1 && (
-              <button className="difficulty medium">Medium</button>
-            )}
-            {story.difficultyLevel === 2 && (
-              <button className="difficulty hard">Hard</button>
-            )}
-          </span>
-        </div>
+					<span className="difficulty">
+						{story.difficultyLevel === 0 && (
+							<button className="difficulty easy">Easy</button>
+						)}
+						{story.difficultyLevel === 1 && (
+							<button className="difficulty medium">
+								Medium
+							</button>
+						)}
+						{story.difficultyLevel === 2 && (
+							<button className="difficulty hard">Hard</button>
+						)}
+					</span>
+				</div>
 
-        {story.accessibility === 1 && (
-          <p className="private-code">Game Code: {story.code}</p>
-        )}
-      </div>
+				{story.accessibility === 1 && (
+					<p className="private-code">Game Code: {story.code}</p>
+				)}
+			</div>
 
-      {/* Buttons */}
-      <div className="story-buttons">
-        {showEditButton && (
-          <button
-            className="pixel-btn edit"
-            onClick={() => navigate(`/edit/${story.storyId}`)}
-          >
-            EDIT
-          </button>
-        )}
-        {showPlayButton && (
-          <button
-            className="pixel-btn play"
-            onClick={() => navigate(`/play/${story.storyId}`)}
-          >
-            PLAY
-          </button>
-        )}
-      </div>
-    </div>
-  );
+			{/* Buttons */}
+			<div className="story-buttons">
+				{showEditButton && (
+					<button
+						className="pixel-btn edit"
+						onClick={() => navigate(`/edit/${story.storyId}`)}
+					>
+						EDIT
+					</button>
+				)}
+				{showPlayButton && (
+					<button
+						className="pixel-btn play"
+						onClick={() => navigate(`/play/${story.storyId}`)}
+					>
+						PLAY
+					</button>
+				)}
+			</div>
+		</div>
+	);
 };
 
 export default StoryCard;

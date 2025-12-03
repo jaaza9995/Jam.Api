@@ -1,17 +1,6 @@
-import { Story } from "../types/storyCard";
+import { HomePageResult } from "../types/home";
 
 const API_URL = import.meta.env.VITE_API_URL;
-
-export interface HomePageResponse {
-	firstName: string;
-	yourStories: Story[];
-	recentlyPlayed: Story[];
-}
-
-export interface HomePageResult {
-	data: HomePageResponse | null;
-	error: string | null;
-}
 
 export class UnauthorizedError extends Error {
 	constructor(message: string = "Unauthorized") {

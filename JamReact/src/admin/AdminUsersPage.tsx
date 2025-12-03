@@ -89,7 +89,7 @@ const AdminUsersPage: React.FC = () => {
 								<Button
 									variant="danger"
 									size="sm"
-									// So the admin cannot delete themselves
+									// So the admin cannot delete themselves!!
 									disabled={!!(user && user.sub === u.id)}
 									onClick={() => {
 										setSelectedUser(u);

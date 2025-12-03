@@ -1,0 +1,154 @@
+/* Wrapper that centers the entire game area */
+.story-player {
+	display: flex;
+	justify-content: center;
+	padding: 20px;
+}
+
+/* Main box matching pixel-bg */
+.scene-box {
+	background: var(--card-bg);
+	border: 3px solid var(--primary-color);
+	color: var(--text-color);
+	width: 100%;
+	max-width: 750px;
+	padding: 30px;
+	border-radius: 12px;
+	text-align: left;
+	animation: fadeIn 0.2s ease-out;
+}
+
+/* Header text */
+.scene-box h3,
+.scene-box h2 {
+	margin-top: 0;
+	margin-bottom: 15px;
+	color: var(--secondary-color);
+}
+
+/* Level + score */
+.scene-box .top-info {
+	margin-bottom: 25px;
+	font-size: 0.9rem;
+	opacity: 0.85;
+	color: #b376ad;
+}
+
+
+/* FOR ANSWERS */
+
+.answer-options {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin: 20px 0 25px;
+}
+
+.answer-btn {
+	background: #1e1e3d;
+	border: 2px solid #ffffff33;
+	padding: 14px;
+	border-radius: 8px;
+	color: var(--text-color);
+	font-size: 0.95rem;
+	cursor: pointer;
+	text-align: left;
+	transition: 0.15s;
+}
+
+.answer-btn:hover {
+	border-color: var(--primary-color);
+	transform: scale(1.02);
+}
+
+.answer-btn.selected,
+.selected-answer {
+	background: #2b1766;
+	border-color: var(--secondary-color);
+	box-shadow: 0 0 6px var(--secondary-color);
+}
+
+/* FOR FEEDBACK BOX */
+
+.feedback-box {
+	background: #5145ac;
+	border-left: 4px solid #f02d29;
+	padding: 18px 20px;
+	margin-bottom: 22px;
+	border-radius: 6px;
+}
+
+/* FOR ENDINGS AND GAME OVER */
+
+.end-box {
+	background: var(--card-bg);
+	border: 3px solid var(--secondary-color);
+	border-radius: 12px;
+	padding: 30px;
+	text-align: center;
+	animation: fadeIn 0.25s ease-out;
+}
+
+.end-box h2 {
+	color: var(--secondary-color);
+	margin-bottom: 10px;
+}
+
+.end-box p {
+	margin-bottom: 20px;
+}
+
+/* ANIMATIONS */
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* RESPONSIVE */
+@media (max-width: 500px) {
+	.scene-box {
+		padding: 20px;
+	}
+	.answer-btn {
+		padding: 12px;
+	}
+}
+
+/*texts*/
+
+.game-over-text {
+	margin-bottom: 15px;
+	color: #d03f3d !important;
+}
+
+.intro-text {
+	font-size: 16px;
+	margin-bottom: 20px;
+	color: var(--text-color);
+}
+
+.scene-text {
+	font-size: 14px;
+	margin-bottom: 25px;
+	font-weight: lighter;
+	color: var(--text-color);
+	line-height: 1.8;
+	text-align: center;
+}
+
+.question-text,
+.score-text {
+	font-size: 18px;
+	margin-bottom: 15px;
+	color: var(--text-color);
+	color: #ffc24f;
+	line-height: 1.6;
+	text-align: center;
+}

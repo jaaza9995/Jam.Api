@@ -7,7 +7,6 @@ interface Props {
 const FormErrorMessage: React.FC<Props> = ({ message }) => {
 	if (!message) return null;
 
-	// normalize to array
 	const messages = Array.isArray(message) ? message : [message];
 
 	return (

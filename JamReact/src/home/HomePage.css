@@ -1,12 +1,11 @@
-/* bigger buttons on top of homepage */
 .homepage-buttons {
 	display: flex;
 	justify-content: center;
 	gap: 30px;
 	margin-bottom: 60px;
-  }
-  
-  .btn-bigHome {
+}
+
+.btn-bigHome {
 	color: #000;
 	padding: 15px 30px;
 	border-radius: 10px;
@@ -15,12 +14,16 @@
 	box-shadow: 3px 4px 0px #000;
 	cursor: pointer;
 	transition: all 0.2s;
-  }
-  
-  .make { background: #4cf1c0; }
-  .add { background: #ff9bd5; }
-  
-  .btn-bigHome:hover {
+}
+
+.make {
+	background: #4cf1c0;
+}
+.add {
+	background: #ff9bd5;
+}
+
+.btn-bigHome:hover {
 	filter: drop-shadow(0 0 0.8rem var(--secondary-color));
 	transform: scale(1.05);
-  }
+}

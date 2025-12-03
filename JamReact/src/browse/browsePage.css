@@ -1,82 +1,74 @@
-/* Wrapper som holder alt pent i midten */
+/* Wrapper that keeps everything neat in the middle */
 .search-wrapper {
-    width: 100%;
-    max-width: 850px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 10px; /* mindre avstand */
+	width: 100%;
+	max-width: 850px;
+	margin: 0 auto;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
 }
 
 /* ----------------------- */
-/* HEADER ROW — 2 kolonner */
+/* HEADER ROW — 2 columns */
 /* ----------------------- */
 
 .header-row {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    text-align: left;       /* overskriftene starter på venstre side */
-    margin-bottom: 4px;     /* liten avstand til input */
+	width: 100%;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	text-align: left;
+	margin-bottom: 4px;
 }
 
-
-
 /* ---------------------------- */
-/* SØKERAD — 2 identiske inputs */
+/* SEARCH QUERY — 2 identical inputs */
 /* ---------------------------- */
 
 .browse-block {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;  /* alltid 2 like store felter */
-    gap: 20px;
-    align-items: center;
-    position: relative; /* vi bruker dette for å plassere knappen */
+	width: 100%;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 20px;
+	align-items: center;
+	position: relative;
 }
 
-
-
 /* --------------------------- */
-/* PRIVATE SEARCH som ett felt */
+/* PRIVATE SEARCH as one field */
 /* --------------------------- */
 
 .private-search {
-    width: 100%;
-    position: relative; /* for absolutt plassering av knappen */
+	width: 100%;
+	position: relative;
 }
 
-
-
-/* INPUTS — like store */
+/* INPUTS — equal size */
 .browse-block .input-area,
 .private-search .input-area {
-    width: 100%;
-    box-sizing: border-box;
+	width: 100%;
+	box-sizing: border-box;
 }
 
-
-
 /* --------------------------- */
-/* SEARCH BUTTON til høyre,     */
-/* men tar *ingen* layoutplass */
+/* SEARCH BUTTON on the right, */
+/* but takes up no layout space */
 /* --------------------------- */
 
 .private-search .search-btn {
 	background-color: var(--primary-color);
-    position: absolute;
-	right: 10px; 
-    top: 50%;
-    transform: translateY(-50%);
-    margin-left: 10px;
+	position: absolute;
+	right: 10px;
+	top: 50%;
+	transform: translateY(-50%);
+	margin-left: 10px;
 	cursor: pointer;
 	border-radius: 10px;
 	border: none;
 
-    height: 32px;       /* gjør knappen smalere i høyden */
-    padding: 0 10px;    /* gjør den smalere i bredden */
-    font-size: 0.8rem;  /* mindre tekst */
-    border-radius: 8px; /* valgfritt */
+	height: 32px;
+	padding: 0 10px;
+	font-size: 0.8rem;
+	border-radius: 8px;
 }
 
 .browse-back-btn {

@@ -4,9 +4,9 @@ import { useNavigate } from "react-router-dom";
 import PlayConfirmModal from "../shared/PlayConfirmModal";
 import "./BrowsePage.css";
 
-import { StoryCard as BrowseStoryCard} from "../types/storyCard";
+import { StoryCard as BrowseStoryCard } from "../types/storyCard";
 import { fetchPublicStories, fetchPrivateStory } from "./BrowsePageService";
-import StoryCard  from "../components/StoryCard";
+import StoryCard from "../components/StoryCard";
 import "../components/StoryCard.css";
 
 const BrowsePage: React.FC = () => {
@@ -19,11 +19,15 @@ const BrowsePage: React.FC = () => {
 	const [publicSearch, setPublicSearch] = useState("");
 
 	const [privateCode, setPrivateCode] = useState("");
-	const [privateMatch, setPrivateMatch] = useState<BrowseStoryCard | null>(null);
+	const [privateMatch, setPrivateMatch] = useState<BrowseStoryCard | null>(
+		null
+	);
 	const [error, setError] = useState<string | null>(null);
 
 	const [showModal, setShowModal] = useState(false);
-	const [selectedGame, setSelectedGame] = useState<BrowseStoryCard | null>(null);
+	const [selectedGame, setSelectedGame] = useState<BrowseStoryCard | null>(
+		null
+	);
 
 	const openModal = (game: any) => {
 		setSelectedGame(game);
@@ -94,22 +98,22 @@ const BrowsePage: React.FC = () => {
 				{error && <p className="error-msg">{error}</p>}
 
 				<div className="header-row">
-					<h3 className="input-label">Public Games </h3>
-					<h3 className="input-label">Public Games </h3>	
+					<h3 className="input-label">Public Games</h3>
+					<h3 className="input-label">Private Games</h3>
 				</div>
 
 				<div className="browse-block">
-
 					{/* PUBLIC SEARCH */}
-
-					<input className="input-area"
+					<input
+						className="input-area"
 						placeholder="Search by title..."
 						value={publicSearch}
 						onChange={(e) => setPublicSearch(e.target.value)}
 					/>
 					<div className="private-search">
 						{/* PRIVATE GAMES */}
-						<input className="input-area"
+						<input
+							className="input-area"
 							placeholder="Enter game code..."
 							value={privateCode}
 							onChange={(e) => setPrivateCode(e.target.value)}
@@ -123,26 +127,24 @@ const BrowsePage: React.FC = () => {
 					</div>
 				</div>
 			</div>
-	
-			{/* PUBLIC GAMES LIST */}
 
+			{/* PUBLIC GAMES LIST */}
 			<section className="section-block">
 				{filtered.length === 0 ? (
-				<p className="empty-text">No stories found.</p>
+					<p className="empty-text">No stories found.</p>
 				) : (
-				<div className="story-card-container">
-					{filtered.map((story) => (
-					<StoryCard
-						key={story.storyId}
-						story={story}
-						showPlayButton={true}
-					/>
-					))}
-				</div>
+					<div className="story-card-container">
+						{filtered.map((story) => (
+							<StoryCard
+								key={story.storyId}
+								story={story}
+								showPlayButton={true}
+							/>
+						))}
+					</div>
 				)}
 			</section>
-		
-		
+
 			{/* MODAL */}
 			<PlayConfirmModal
 				title={selectedGame?.title || ""}
@@ -150,7 +152,8 @@ const BrowsePage: React.FC = () => {
 				onConfirm={confirmPlay}
 				onCancel={closeModal}
 			/>
-			{/* BACK KNAPP HELT NEDERST VENSTRE */}
+
+			{/* BACK BUTTON AT THE VERY BOTTOM LEFT */}
 			<div className="browse-back-btn">
 				<button
 					className="pixel-btn back"

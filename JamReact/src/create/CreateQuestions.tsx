@@ -4,7 +4,6 @@ import useStoryCreation from "./StoryCreationContext";
 import { saveQuestions } from "./StoryCreationService";
 import { parseBackendErrors } from "../utils/parseBackendErrors";
 import "./Create.css";
-
 import {
 	QuestionSceneDto,
 	QuestionErrors,
@@ -56,8 +55,10 @@ const CreateQuestions = () => {
 		const errList: QuestionErrors[] = questions.map((q) => {
 			const e: QuestionErrors = {};
 
-      if (!q.storyText.trim()) e.storyText = "Option outcome is required.";
-      if (!q.questionText.trim()) e.questionText = "Question text is required.";
+			if (!q.storyText.trim())
+				e.storyText = "Option outcome is required.";
+			if (!q.questionText.trim())
+				e.questionText = "Question text is required.";
 
 			if (q.answers.some((a) => !a.answerText.trim()))
 				e.answers = "All 4 answer options must be filled.";
@@ -99,10 +100,10 @@ const CreateQuestions = () => {
 		if (!res.ok) {
 			const backendJson = await res.json().catch(() => null);
 
-			// Backend errors = ModelState → MÅ parses
+			// Backend errors 
 			const parsed = parseBackendErrors(backendJson);
 
-			// apply SAME error to ALL questions (backend gir ikke per index validering)
+			// Apply same error to tall questions 
 			const backendErrorObject: QuestionErrors = {
 				storyText: parsed.storyText || "",
 				questionText: parsed.questionText || "",
@@ -130,7 +131,7 @@ const CreateQuestions = () => {
 		setQuestions(copy);
 
 		const newErrors = [...errors];
-		newErrors[index] = {}; // clear errors for that question only
+		newErrors[index] = {}; 
 		setErrors(newErrors);
 	};
 
@@ -155,96 +156,116 @@ const CreateQuestions = () => {
 
 			<div className="questions-wrapper">
 				{questions.map((q, i) => (
-				<div className="question-box" key={i}>
-					
-					{/* LEAD-UP TO QUESTION */}
-					<h3 className="input-label">LEAD-UP</h3>
-					<textarea className="input-area"
-						value={q.storyText}
-						placeholder={`Write Some Lead-up to Your Question Here...`}
-						onChange={(e) => update(i, { ...q, storyText: e.target.value })}
-					/>
-					{errors[i]?.storyText && <p className="error-msg">{errors[i].storyText}</p>}
+					<div className="question-box" key={i}>
 
-					{/* QUESTION TEXT */}
-					<h3 className="input-label">QUESTION</h3>
-					<textarea className="input-area"
-						value={q.questionText}
-						placeholder={`Write Your Question here...`}
-						onChange={(e) => update(i, { ...q, questionText: e.target.value })}
-					/>
-					{errors[i]?.questionText && <p className="error-msg">{errors[i].questionText}</p>}
+						{/* SCENE TEXT */}
+						<h3 className="input-label">QUESTION TEXT</h3>
+						<textarea
+							className="input-area"
+							value={q.storyText}
+							placeholder={`Write the Scene Text Here...`}
+							onChange={(e) =>
+								update(i, { ...q, storyText: e.target.value })
+							}
+						/>
+						{errors[i]?.storyText && (
+							<p className="error-msg">{errors[i].storyText}</p>
+						)}
 
-					{/* ANSWERS */}
-					<h3 className="input-label">ANSWER OPTIONS</h3>
+						{/* QUESTION TEXT */}
+						<h3 className="input-label">QUESTION</h3>
+						<textarea
+							className="input-area"
+							value={q.questionText}
+							placeholder={`Write Your Question here...`}
+							onChange={(e) =>
+								update(i, {
+									...q,
+									questionText: e.target.value,
+								})
+							}
+						/>
+						{errors[i]?.questionText && (
+							<p className="error-msg">
+								{errors[i].questionText}
+							</p>
+						)}
 
-					{q.answers.map((a, ai) => (
-						<div className="answer-row" key={ai}>
+						{/* ANSWERS */}
+						<h3 className="input-label">ANSWER OPTIONS</h3>
 
-							{/* Answer text */}
-							<input className="input-area"
-								placeholder={`Write Answer ${ai + 1}...`}
-								value={a.answerText}
-								onChange={(e) => {
-									const list = [...q.answers];
-									list[ai].answerText = e.target.value;
-									update(i, { ...q, answers: list });
-								}}
-							/>
+						{q.answers.map((a, ai) => (
+							<div className="answer-row" key={ai}>
+								{/* Answer text */}
+								<input
+									className="input-area"
+									placeholder={`Write Answer ${ai + 1}...`}
+									value={a.answerText}
+									onChange={(e) => {
+										const list = [...q.answers];
+										list[ai].answerText = e.target.value;
+										update(i, { ...q, answers: list });
+									}}
+								/>
 
-							{/* Answer outcome */}
-							<input className="input-area"
-								placeholder={`Outcome of Option ${ai + 1}...`}
-								value={a.contextText}
-								onChange={(e) => {
-									const list = [...q.answers];
-									list[ai].contextText = e.target.value;
-									update(i, { ...q, answers: list });
-								}}
-							/>
+								{/* Option outcome */}
+								<input
+									className="input-area"
+									placeholder={`Outcome of Option ${
+										ai + 1
+									}...`}
+									value={a.contextText}
+									onChange={(e) => {
+										const list = [...q.answers];
+										list[ai].contextText = e.target.value;
+										update(i, { ...q, answers: list });
+									}}
+								/>
 
-							{/* Correct button */}
-							<button
-								className={`correct-btn ${
-									q.correctAnswerIndex === ai
-										? "selected"
-										: ""
-								}`}
-								onClick={() =>
-									update(i, { ...q, correctAnswerIndex: ai,
-									})
-								}
-							>
-								✔
-							</button>
-						</div>
-					))}
+								{/* Correct button */}
+								<button
+									className={`correct-btn ${
+										q.correctAnswerIndex === ai
+											? "selected"
+											: ""
+									}`}
+									onClick={() =>
+										update(i, {
+											...q,
+											correctAnswerIndex: ai,
+										})
+									}
+								>
+									✔
+								</button>
+							</div>
+						))}
 
-					{/* ERRORS for answer list */}
-					{errors[i]?.answers && (
-						<p className="error-msg">{errors[i].answers}</p>
-					)}
-					{errors[i]?.correct && (
-						<p className="error-msg">{errors[i].correct}</p>
-					)}
+						{/* ERRORS for answer list */}
+						{errors[i]?.answers && (
+							<p className="error-msg">{errors[i].answers}</p>
+						)}
+						{errors[i]?.correct && (
+							<p className="error-msg">{errors[i].correct}</p>
+						)}
 
-					{/* ERROR for context texts */}
-					{errors[i]?.contextTexts && (
-						<p className="error-msg">
-							{errors[i].contextTexts}
-						</p>
-					)}
+						{/* ERROR for context texts */}
+						{errors[i]?.contextTexts && (
+							<p className="error-msg">
+								{errors[i].contextTexts}
+							</p>
+						)}
 
-					<button
-					className="delete-q-button"
-					onClick={() => remove(i)}
-					>
-						DELETE QUESTION
-					</button>
-				</div>
+						<button
+							className="delete-q-button"
+							onClick={() => remove(i)}
+						>
+							DELETE QUESTION
+						</button>
+					</div>
 				))}
 			</div>
-			
+
 			<div className="nav-buttons">
 				<button className="pixel-btn addQuestion" onClick={add}>
 					+ ADD QUESTION
@@ -252,22 +273,22 @@ const CreateQuestions = () => {
 			</div>
 
 			<div className="nav-buttons">
-				<button className="pixel-btn back"
+				<button
+					className="pixel-btn back"
 					onClick={() => {
-					setData(prev => ({ ...prev, questions }));
-					navigate("/create/intro");
+						setData((prev) => ({ ...prev, questions }));
+						navigate("/create/intro");
 					}}
 				>
 					BACK
 				</button>
-			
+
 				<button className="pixel-btn next" onClick={handleNext}>
 					NEXT
 				</button>
-
 			</div>
-    	</div>
-  	);
+		</div>
+	);
 };
 
 export default CreateQuestions;

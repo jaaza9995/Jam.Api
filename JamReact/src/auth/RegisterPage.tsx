@@ -45,7 +45,7 @@ const RegisterPage: React.FC = () => {
 					<Form.Label>Username</Form.Label>
 					<Form.Control
 						type="text"
-                        placeholder="Choose a username"
+						placeholder="Choose a username"
 						name="username"
 						value={formData.username}
 						onChange={handleChange}
@@ -57,7 +57,7 @@ const RegisterPage: React.FC = () => {
 					<Form.Label>Email</Form.Label>
 					<Form.Control
 						type="email"
-                        placeholder="Enter your school email"
+						placeholder="Enter your school email"
 						name="email"
 						value={formData.email}
 						onChange={handleChange}
@@ -69,7 +69,7 @@ const RegisterPage: React.FC = () => {
 					<Form.Label>Password</Form.Label>
 					<Form.Control
 						type="password"
-                        placeholder="Choose a password"
+						placeholder="Choose a password"
 						name="password"
 						value={formData.password}
 						onChange={handleChange}
