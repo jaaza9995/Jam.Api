@@ -3,7 +3,7 @@ import { Story as StoryCardType } from "../types/storyCard";
 import { useNavigate } from "react-router-dom";
 
 interface Props {
-  story: StoryCardType;
+  story: Partial<StoryCardType>;
   showEditButton?: boolean; // valgfri EDIT-knapp
   showPlayButton?: boolean;
   onClick?: () => void; // Gjør onClick valgfri

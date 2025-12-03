@@ -378,11 +378,6 @@ const EditQuestionsPage: React.FC = () => {
 
 			{backendError && <p className="error-msg">{backendError}</p>}
 
-			{showSavedMsg && <div className="saved-toast">Saved Changes</div>}
-			{showNoChangesMsg && (
-				<div className="nochanges-toast">No changes have been done</div>
-			)}
-
 			<h1 className="edit-title">EDIT QUESTIONS</h1>
 
 			<div className="questions-wrapper">
@@ -519,6 +514,13 @@ const EditQuestionsPage: React.FC = () => {
 				ADD QUESTION
 			</button>
 		</div>
+		
+		{/* SUCCESS TOAST */}
+		{showSavedMsg && <div className="saved-toast">Saved Changes</div>}
+		
+		{showNoChangesMsg && (
+				<div className="nochanges-toast">No changes have been done</div>
+			)}
 
 		<div className="nav-buttons">
 			<button className="pixel-btn back" onClick={handleBack}>

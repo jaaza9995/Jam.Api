@@ -144,7 +144,7 @@ const EditStoryPage: React.FC = () => {
 				</div>
 			</div>
 
-			{/* BACK BUTTON AT THE VERY BOTTOM LEFT */}
+			{/* BACK BUTTON */}
 			<button
 				className="pixel-btn back"
 				onClick={() => navigate("/")}

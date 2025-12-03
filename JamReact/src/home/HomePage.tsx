@@ -84,8 +84,8 @@ const HomePage: React.FC = () => {
 				/>
 			)}
 
-      <h1 className="title">WELCOME TO MATH UNIVERSE</h1>
-      {error && <p className="error-text">{error}</p>}
+      		<h1 className="title">WELCOME TO MATH UNIVERSE</h1>
+      		{error && <p className="error-text">{error}</p>}
 
 			<div className="homepage-buttons">
 				<button

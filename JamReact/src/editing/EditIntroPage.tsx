@@ -395,6 +395,13 @@ const EditIntroPage: React.FC = () => {
 					<p className="error-msg">{errors.accessibility}</p>
 				)}
 
+				{/* SUCCESS TOAST */}
+				{showSavedMsg && <div className="saved-toast">Saved Changes</div>}
+		
+				{showNoChangesMsg && (
+				<div className="nochanges-toast">No changes have been done</div>
+				)}
+
 				<div className="nav-buttons">
 					<button
 						className="pixel-btn back"

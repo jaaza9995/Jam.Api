@@ -9,6 +9,7 @@ import {
 	submitAnswer as submitAnswerService,
 	AnswerResult,
 } from "./StoryPlayingService";
+import "./StoryPlayer.css";
 
 export const StoryPlayer: React.FC = () => {
 	const { storyId } = useParams<{ storyId: string }>();
@@ -288,130 +289,138 @@ export const StoryPlayer: React.FC = () => {
 
 	// --- Return ---
 	return (
-		<div className="story-player">
-			{isLoading && <p>Loading...</p>}
-			{error && <p className="error">Error: {error}</p>}
-
-			{isGameOver && (
-				<div className="game-status-container">
-					{/* If currentSceneData IS NULL (at Level 1 loss), show loss */}
-					{!currentSceneData ? (
-						<div className="game-over-loss">
-							<h2>Game Over, You Lost!</h2>
-							<p>Your final score: {session.score}</p>
-							<button onClick={() => navigate("/")}>
-								Return Home
-							</button>
-						</div>
-					) : (
-						// If currentSceneData is set (this is EndingScene), show ending
-						<div className="game-finished">
-							<h2>Ending</h2>{" "}
-							<p className="ending-text">
-								{currentSceneData.sceneText}
-							</p>
-							<p>
-								Your final score: {session.score} of{" "}
-								{currentSceneData.maxScore || "N/A"}
-							</p>
-							<button onClick={() => navigate("/")}>
-								Return Home
-							</button>
-						</div>
-					)}
-				</div>
-			)}
-
-			{/* Show scne if not Game Over */}
-			{!isLoading && !error && !isGameOver && currentSceneData && (
-				<div className="scene-container">
-					<p>
-						Level: {session.level} | Score: {session.score} /{" "}
-						{currentSceneData.maxScore}
-					</p>
-
-					{currentSceneData.sceneType === SceneType.Intro && (
-						<div>
-							<h3>Introduction</h3>
-							<p>{currentSceneData.sceneText}</p>
-
-							<button
-								onClick={startFirstQuestion}
-								disabled={
-									isLoading ||
-									!currentSceneData.nextSceneAfterIntroId
-								}
-							>
-								Next
-							</button>
-						</div>
-					)}
-
-					{currentSceneData.sceneType === SceneType.Question && (
-						<div className="question-scene-container">
-							{/* Check if we should show the 'feedback window' or the 'question window' */}
-							{feedbackText ? (
-								// --- 1. SHOW FEEDBACK AND CONTINUE BUTTON ---
-								<div className="feedback-view">
-									<p className="feedback-text">
-										{feedbackText}
-									</p>
-
-									<button
-										onClick={goToNextScene}
-										disabled={isLoading}
-									>
-										Next
-									</button>
-								</div>
-							) : (
-								// --- 2. SHOW QUESTION, ANSWER OPTIONS AND SEND BUTTON ---
-								<div>
-									<h3>{currentSceneData.sceneText}</h3>
-									<p>{currentSceneData.question}</p>
-
-									<div className="answer-options">
-										{currentSceneData.answerOptions?.map(
-											(option) => (
+		<div className="pixel-bg">
+			<div className="story-player">
+		
+				{isLoading && <p>Loading...</p>}
+				{error && <p className="error">Error: {error}</p>}
+		
+				{/* =========================
+					GAME OVER / ENDING
+				========================= */}
+				{isGameOver && (
+					<div className="end-box">
+						{/* LOSS */}
+						{!currentSceneData ? (
+							<>
+								<h2 className="game-over-text">Game Over — You Lost!</h2>
+								<p>Your final score: {session.score}</p>
+		
+								<button className="pixel-btn back" onClick={() => navigate("/")}>
+									Return Home
+								</button>
+							</>
+						) : (
+							/* WIN / ENDING */
+							<>
+								<h2>Ending</h2>
+								<p className="scene-text">{currentSceneData.sceneText}</p>
+		
+								<p className="score-text">Your final score: {session.score} of {currentSceneData.maxScore}</p>
+		
+								<button className="pixel-btn back" onClick={() => navigate("/")}>
+									Return Home
+								</button>
+							</>
+						)}
+					</div>
+				)}
+		
+				{/* =========================
+					MAIN GAME VIEW
+				========================= */}
+				{!isLoading && !error && !isGameOver && currentSceneData && (
+					<div className="scene-box">
+		
+						{/* Level + Score */}
+						<p className="top-info">
+							Level: {session.level} | Score: {session.score} / {currentSceneData.maxScore}
+						</p>
+		
+						{/* =========================
+							INTRO SCENE
+						========================= */}
+						{currentSceneData.sceneType === SceneType.Intro && (
+							<>
+								<h3 className="intro-text">Introduction</h3>
+								<p className="scene-text">{currentSceneData.sceneText}</p>
+		
+								<button
+									className="pixel-btn next"
+									onClick={startFirstQuestion}
+									disabled={isLoading || !currentSceneData.nextSceneAfterIntroId}
+								>
+									Next
+								</button>
+							</>
+						)}
+		
+						{/* =========================
+							QUESTION SCENE
+						========================= */}
+						{currentSceneData.sceneType === SceneType.Question && (
+							<div className="question-scene-container">
+		
+								{/* FEEDBACK MODE */}
+								{feedbackText ? (
+									<>
+										<div className="feedback-box">
+											<p className="feedback-text">{feedbackText}</p>
+										</div>
+		
+										<button
+											className="pixel-btn next"
+											onClick={goToNextScene}
+											disabled={isLoading}
+										>
+											Next
+										</button>
+									</>
+								) : (
+									/* QUESTION MODE */
+									<>
+										<p className="scene-text">{currentSceneData.sceneText}</p>
+										<p className="question-text">{currentSceneData.question}</p>
+		
+										{/* ANSWER BUTTONS */}
+										<div className="answer-options">
+											{currentSceneData.answerOptions?.map((option) => (
 												<button
 													key={option.answerOptionId}
-													onClick={() =>
-														setSelectedOption(
-															option
-														)
-													}
-													className={
-														selectedOption?.answerOptionId ===
-														option.answerOptionId
+													onClick={() => setSelectedOption(option)}
+													className={`answer-btn ${
+														selectedOption?.answerOptionId === option.answerOptionId
 															? "selected-answer"
 															: ""
-													}
+													}`}
 													disabled={isLoading}
 												>
 													{option.answer}
 												</button>
-											)
-										)}
-									</div>
-
-									{/* Send Reply button calls handleAnswer */}
-									<button
-										onClick={() => {
-											if (selectedOption) {
-												handleAnswer(selectedOption);
-												setSelectedOption(null);
-											}
-										}}
-										disabled={!selectedOption || isLoading}
-									>
-										Send Answer
-									</button>
-								</div>
-							)}
-						</div>
-					)}
-				</div>
-			)}
-		</div>
+											))}
+										</div>
+		
+										{/* SUBMIT BUTTON */}
+										<button
+											className="pixel-btn next"
+											onClick={() => {
+												if (selectedOption) {
+													handleAnswer(selectedOption);
+													setSelectedOption(null);
+												}
+											}}
+											disabled={!selectedOption || isLoading}
+										>
+											Send Answer
+										</button>
+									</>
+								)}
+							</div>
+						)}
+					</div>
+				)}
+			</div>
+	</div>
 	);
-};
+}
+	

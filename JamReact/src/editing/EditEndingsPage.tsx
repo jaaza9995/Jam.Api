@@ -109,7 +109,7 @@ const EditEndingsPage: React.FC = () => {
 
 		if (!storyId) return;
 
-		// 🔥 NEW: No changes toast
+		// No changes toast
 		if (!hasChanges()) {
 			setShowNoChangesMsg(true);
 			setTimeout(() => setShowNoChangesMsg(false), 4000);
@@ -214,6 +214,12 @@ const EditEndingsPage: React.FC = () => {
 				/>
 				{errors.bad && <p className="error-msg">{errors.bad}</p>}
 			
+				{/* SUCCESS TOAST */}
+				{showSavedMsg && <div className="saved-toast">Saved Changes</div>}
+		
+				{showNoChangesMsg && (
+					<div className="nochanges-toast">No changes have been done</div>
+				)}
 
 				<div className="nav-buttons">
 					<button className="pixel-btn back" onClick={handleBack}>

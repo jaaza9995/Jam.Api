@@ -43,6 +43,12 @@
 	margin-bottom: 40px;
 	text-shadow: 0 0 4px #7ad3ff;
   }
+
+  .section-title {
+    color: #ffc24f;
+    font-size: 22px;
+    margin-bottom: 15px;
+	}
   
   /* Buttons */
   .pixel-btn {
