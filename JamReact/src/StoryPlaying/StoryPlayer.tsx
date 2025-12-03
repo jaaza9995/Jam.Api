@@ -293,7 +293,7 @@ export const StoryPlayer: React.FC = () => {
 			<div className="story-player">
 		
 				{isLoading && <p>Loading...</p>}
-				{error && <p className="error">Error: {error}</p>}
+				{error && <p className="error-msg">Error: {error}</p>}
 		
 				{/* =========================
 					GAME OVER / ENDING

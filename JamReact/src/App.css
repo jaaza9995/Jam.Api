@@ -1,14 +1,13 @@
 :root {
 	--primary-color: #646cff;
 	--secondary-color: #c084fc;
-	--bg-color: #140c1c;        /* SAMME som index.css */
+	--bg-color: #140c1c; 
 	--box-color: #130631;
 	--text-color: #f0f0f0;
 	--card-bg: #1a1a3d;
 	--accent-color: #61dafb;
   }
   
-  /* GLOBAL APP */
   body {
 	background-color: var(--bg-color);
 	color: var(--text-color);
@@ -17,14 +16,13 @@
 	cursor: default;
   }
   
-  /*fjern padding som lager hvite felt */
   #root {
 	max-width: 100%;
 	margin: 0;
 	padding: 0;   
   }
   
-  /* Pixel wrapper */
+  /* background container with shadow */
   .pixel-bg {
 	background: var(--box-color);
 	box-shadow: 0 0 12px rgba(138, 43, 226, 0.5);
@@ -49,21 +47,22 @@
     font-size: 22px;
     margin-bottom: 15px;
 	}
+
+	h1, h2, h3 {
+	color: var(--primary-color);
+	}
   
   /* Buttons */
   .pixel-btn {
 	font-size: 0.9rem;
-	padding: 0.5rem 1rem;
 	color: var(--text-color);
 	cursor: pointer;
 	transition: all 0.2s;
 	border-radius: 10px;
 	border: none;
-
-	display: flex;            /* gjør knappen flex */
-	align-items: center;      /* sentrerer vertikalt */
+	display: flex;          
+	align-items: center;      
 	justify-content: center;
-
 	height: 35px;
 	padding: 0 15px;  
 	box-sizing: border-box;
@@ -77,40 +76,12 @@
   .save { background: #00ff2aa0; }
   .addQuestion{ background: #6b50c4;}
   
-  
-  /* usikker på om dette brukes:*/
-  .wide-btn { width: 300px; }
-  .small-btn { width: 170px; }
-  
   .pixel-btn:hover {
 	filter: drop-shadow(0 0 0.8rem var(--secondary-color));
 	transform: scale(1.05);
   }
   
-  /* Titles */
-  h1, h2, h3 {
-	color: var(--primary-color);
-  }
-  
-  /* Navbar overrides */
-  .navbar {
-	background-color: #1a1a3d;
-	border-bottom: 2px solid var(--primary-color);
-  }
-  
-  .navbar-brand {
-	color: var(--primary-color) !important;
-  }
-  
-  .navbar-nav .nav-link {
-	color: var(--text-color) !important;
-  }
-  
-  .navbar-nav .nav-link:hover {
-	color: var(--secondary-color) !important;
-  }
-  
-  /* CREATE:*/
+  /* FORMS:*/
   
   /* Inputs, textareas, selects */
   .input-area, .select-dropdown {
@@ -125,7 +96,6 @@
 	resize: vertical;
 	white-space: pre-wrap;
 	word-wrap: break-word;
-
 	min-height: 50px;
 	max-height: 200px;
 	overflow-y: auto;
@@ -133,7 +103,6 @@
   }
   
   .longer-box { min-height: 110px; }
-  .smaller-box { width: 70%;}
   
   .input-label {
 	color: var(--secondary-color);

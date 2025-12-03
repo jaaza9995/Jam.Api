@@ -91,7 +91,7 @@ const BrowsePage: React.FC = () => {
 			<h1 className="title">Find a Game</h1>
 
 			<div className="search-wrapper">
-				{error && <p className="error-text">{error}</p>}
+				{error && <p className="error-msg">{error}</p>}
 
 				<div className="header-row">
 					<h3 className="input-label">Public Games </h3>
